@@ -1,0 +1,46 @@
+PostgreSQL path : C:\Program Files\PostgreSQL\17
+password : password
+port : 5432
+
+Locations : 
+
+DROP TABLE IF EXISTS public.locations2023;
+
+CREATE TABLE IF NOT EXISTS public.locations2023
+(
+	location_id integer GENERATED ALWAYS AS IDENTITY,
+    article_id character varying COLLATE pg_catalog."default",
+    paragraph_id character varying COLLATE pg_catalog."default",
+    char_location character varying COLLATE pg_catalog."default",
+    latitude real,
+    longitude real,
+	rang integer,
+    min_lat real,
+    max_lat real,
+    min_lon real,
+    max_lon real,
+    squared_distance real
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.locations2023
+    OWNER to postgres;
+
+COPY locations2023(article_id, paragraph_id, char_location, latitude, longitude, rang, min_lat, max_lat, min_lon, max_lon, squared_distance)
+FROM 'C:/Mailys/data/S20230101000000_E20240101000000_GDELT_Locations_v2.csv'
+DELIMITER ',' 
+CSV HEADER
+QUOTE '"';
+
+create extension POSTGIS;
+
+ALTER TABLE IF EXISTS public.locations2023
+    ADD COLUMN wkt4326 character varying COLLATE pg_catalog."default";
+update locations2023 set wkt4326=concat('POINT(',longitude,' ',latitude,')');
+
+select AddGeometryColumn( 'locations2023','geom', 4326, 'POINT', 2);
+update locations2023 set geom = ST_GeomFromText(wkt4326);
+
+
+SELECT * FROM public.locations2023
