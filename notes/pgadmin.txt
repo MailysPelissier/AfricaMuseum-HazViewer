@@ -188,3 +188,40 @@ QUOTE '"';
 
 SELECT * FROM public.events2021_22_23
 LIMIT 100
+
+
+Articles : 
+
+DROP TABLE IF EXISTS public.articles2023;
+
+CREATE TABLE IF NOT EXISTS public.articles2023
+(
+	id1 integer,
+	id2 integer,
+	article_url character varying COLLATE pg_catalog."default",
+	title character varying COLLATE pg_catalog."default",
+	article_domain character varying COLLATE pg_catalog."default",
+	article_language character varying COLLATE pg_catalog."default",
+	source_country character varying COLLATE pg_catalog."default",
+	article_time timestamp without time zone,
+	article_id character varying COLLATE pg_catalog."default",
+	article_text character varying COLLATE pg_catalog."default",
+	error_code integer,
+	text_extracted character varying COLLATE pg_catalog."default",
+	char_location character varying COLLATE pg_catalog."default",
+	ner_score character varying COLLATE pg_catalog."default"
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.articles2023
+    OWNER to postgres;
+
+COPY articles2023(id1,id2,article_url,title,article_domain,article_language,source_country,article_time,article_id,article_text,error_code,text_extracted,char_location,ner_score)
+FROM 'C:/Mailys/data/S20230101000000_E20240101000000_GDELT_Articles_v2.csv'
+DELIMITER ',' 
+CSV HEADER
+QUOTE '"';
+
+SELECT * FROM public.articles2023
+LIMIT 100
