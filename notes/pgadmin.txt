@@ -36,15 +36,6 @@ DELIMITER ','
 CSV HEADER
 QUOTE '"';
 
-
-ALTER TABLE IF EXISTS public.locations2023
-    ADD COLUMN wkt4326 character varying COLLATE pg_catalog."default";
-update locations2023 set wkt4326=concat('POINT(',longitude,' ',latitude,')');
-
-select AddGeometryColumn( 'locations2023','geom', 4326, 'POINT', 2);
-update locations2023 set geom = ST_GeomFromText(wkt4326);
-
-
 SELECT * FROM public.locations2023
 
 
