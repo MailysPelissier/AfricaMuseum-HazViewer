@@ -1,5 +1,34 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#vue_map {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    grid-template-rows: 1fr;
+    background-color: rgba(247, 223, 157, 0.89);
+}
+
+
 #map { 
-    height: 80vh;
-    width: 80vw;
+    grid-column: 1;
+    grid-row: 1;
+    width: 1fr;
+    height: 1fr;
     margin: 10px;
+}
+
+#event_data_scroll_box {
+    grid-column: 2;
+    grid-row: 1;
+    width: 1fr;
+    height: 1fr;
+    margin: 10px;
+    padding: 10px;
+    overflow: scroll;
 }

@@ -11,12 +11,13 @@
 
 <body>
 
-    <div id="entete"><h1>Page de la carte</h1></div>
-    <div id="contenu">
-        <div id="vue_map">
-            <div id="map"></div>
-        </div>  
-    </div>
+    <div id="vue_map">
+        <div id="map"></div>
+        <div id=event_data_scroll_box class="scroll-box">
+            <div id=event_data v-html="event_text"></div>
+            <button id=more_info_button v-if="info_button">More information</button>
+        </div>
+    </div>  
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script src="assets/map.js"></script> 
