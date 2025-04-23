@@ -60,7 +60,8 @@ Flight::route('GET /postgres/events', function () {
         n_mostfreq_missing,time_mostfreq_missing,max_missing,n_max_missing,time_max_missing,median_missing,mostfreq_evacuated,
         n_mostfreq_evacuated,time_mostfreq_evacuated,max_evacuated,n_max_evacuated,time_max_evacuated,median_evacuated,
         ipcc_region,ipcc_continent
-        FROM events2021_22_23 WHERE $min_lon<longitude and longitude<$max_lon and $min_lat<latitude and latitude<$max_lat");
+        FROM events2021_22_23 WHERE $min_lon<longitude and longitude<$max_lon and $min_lat<latitude and latitude<$max_lat
+        and event_time > '01/01/2023'");
         $resultats = pg_fetch_all($reponse, PGSQL_ASSOC);
         $events = [];
         if ($resultats !== false) {
@@ -71,6 +72,34 @@ Flight::route('GET /postgres/events', function () {
     };
 
     Flight::json($events);
+});
+
+// Accès aux données paragraphs de Postgres
+Flight::route('GET /postgres/paragraphs', function () {
+
+    // Connection à la bdd webGIS (Postgres)
+    $link = pg_connect("host=localhost port=5432 dbname=webGIS user=postgres password=password");
+
+    // Renvoie les informations des paragraphs dans la bbox
+    if (isset($_GET['paragraphs_list']) and !empty($_GET['paragraphs_list'])) {
+        $paragraphs_list = $_GET['paragraphs_list'];
+        $reponse = pg_query($link, "SELECT article_id, title, extracted_text, event_time, char_language, source_country, 
+        site_domain, paragraph_id, disaster_label, disaster_score, hasard_type, hasard_type_score, nb_death, score_death, 
+        answer_death, nb_homeless, score_homeless, answer_homeless, nb_injured, score_injured, answer_injured, nb_affected, 
+        score_affected, answer_affected, nb_missing, score_missing, answer_missing, nb_evacuated, score_evacuated, answer_evacuated, 
+        char_location, ner_score, latitude, longitude, std_dev, min_lat, max_lat, min_lon, max_lon, n_locations, publication_time, 
+        original_text 
+        FROM paragraphs2023 WHERE paragraph_id IN $paragraphs_list");
+        $resultats = pg_fetch_all($reponse, PGSQL_ASSOC);
+        $paragraphs = [];
+        if ($resultats !== false) {
+            foreach($resultats as $r) {
+                $paragraphs[] = $r;
+            };
+        }
+    };
+
+    Flight::json($paragraphs);
 });
 
 Flight::start();
