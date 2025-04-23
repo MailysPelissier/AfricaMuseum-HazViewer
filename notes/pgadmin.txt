@@ -47,8 +47,8 @@ CREATE TABLE IF NOT EXISTS public.paragraphs2023
 (
     article_id character varying COLLATE pg_catalog."default",
     title character varying COLLATE pg_catalog."default",
-    text character varying COLLATE pg_catalog."default",
-    "time" timestamp without time zone,
+    extracted_text character varying COLLATE pg_catalog."default",
+    event_time timestamp without time zone,
     char_language character varying COLLATE pg_catalog."default",
     source_country character varying COLLATE pg_catalog."default",
     site_domain character varying COLLATE pg_catalog."default",
@@ -95,7 +95,7 @@ ALTER TABLE IF EXISTS public.paragraphs2023
     OWNER to postgres;
 
 
-COPY paragraphs2023(article_id,title,text,time,char_language,source_country,site_domain,paragraph_id,disaster_label,disaster_score,hasard_type,hasard_type_score,nb_death,score_death,answer_death,nb_homeless,score_homeless,answer_homeless,nb_injured,score_injured,answer_injured,nb_affected,score_affected,answer_affected,nb_missing,score_missing,answer_missing,nb_evacuated,score_evacuated,answer_evacuated,char_location,ner_score,latitude,longitude,std_dev,min_lat,max_lat,min_lon,max_lon,n_locations,publication_time,original_text)
+COPY paragraphs2023(article_id,title,extracted_text,event_time,char_language,source_country,site_domain,paragraph_id,disaster_label,disaster_score,hasard_type,hasard_type_score,nb_death,score_death,answer_death,nb_homeless,score_homeless,answer_homeless,nb_injured,score_injured,answer_injured,nb_affected,score_affected,answer_affected,nb_missing,score_missing,answer_missing,nb_evacuated,score_evacuated,answer_evacuated,char_location,ner_score,latitude,longitude,std_dev,min_lat,max_lat,min_lon,max_lon,n_locations,publication_time,original_text)
 FROM 'C:/Mailys/data/S20230101000000_E20240101000000_GDELT_Paragraphs_v2.csv'
 DELIMITER ',' 
 CSV HEADER
