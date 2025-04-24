@@ -15,6 +15,9 @@
         <div id="map"></div>
         <div id=event_data_scroll_box class="scroll-box">
             <button id=more_info_button v-if="more_info_button" @click="more_infos_page">More information</button>
+            <div id="zoom_auto_checkbox" v-if="more_info_button">
+                <label>Zoom sur l'emprise<input  @input="change_zoom_auto" type="checkbox" v-model="zoom_auto"></label>
+            </div>
             <button id=back_to_map_button v-if="back_to_map_button" @click="back_to_map">Back to map</button>
             <div id=event_data v-html="event_text"></div>
         </div>

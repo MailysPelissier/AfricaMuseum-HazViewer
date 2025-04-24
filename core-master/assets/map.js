@@ -14,7 +14,7 @@ Vue.createApp({
             selected_event: null, // Permet de conserver l'event sélectionné
             more_info_button: false, // Permet de faire apparaitre le bouton plus d'infos quand un event est sélectionné
             back_to_map_button: false, // Permet de faire apparaitre le bouton pour retourner à la carte
-
+            zoom_auto: true, // Zoom auto activé ou non (actif par défaut)
         };
     },
 
@@ -261,9 +261,24 @@ Vue.createApp({
             // Ajout à la couche bbox_events
             this.bbox_events.getSource().addFeature(new_event);
 
-            // Zoom sur la bbox
-            this.map.getView().fit([min_lon, min_lat, max_lon, max_lat], this.map.getSize());
-            this.map.getView().setZoom(this.map.getView().getZoom() - 0.5);
+            // Zoom sur la bbox si zoom_auto activé
+            if (this.zoom_auto) {
+                this.map.getView().fit([min_lon, min_lat, max_lon, max_lat], this.map.getSize());
+                this.map.getView().setZoom(this.map.getView().getZoom() - 0.5);
+            }
+
+        },
+
+        // Change la variable zoom auto selon si la chechbox zoom auto est cochée ou non
+        // L'utilisateur peut choisir s'il veut zoomer automatiquement sur l'emprise de l'event, son choix est conservé
+        change_zoom_auto () {
+
+            if (this.zoom_auto) {
+                this.zoom_auto = false;
+            }
+            else {
+                this.zoom_auto = true;
+            };
 
         },
 
