@@ -8,13 +8,28 @@ Vue.createApp({
             events: null, // Initialisation de la couche events
             selected_event_layer: null, // Initialisation de la couche selected events
             paragraphs: null, // Initialisation de la couche paragraphs
-            event_property: [], // Liste des propriétés pour les events
-            paragraph_property: [], // Liste des propriétés pour les paragraphs
+            event_all_property: [], // Liste de toutes les propriétés pour les events
+            // Propriétés principales des events
+            event_main_property: ["hazard_type", "disaster_score", "hasard_type_score", "event_time", "n_languages", "n_source_countries",
+                 "n_paragraphs", "n_articles", "start_time", "end_time", "duration", "ipcc_region", "ipcc_continent"],
+            // Propriétés locations des events
+            event_location_property: ["latitude", "longitude", "bbox"],
+            // Propriétés chiffrées des events (souvent null)
+            event_number_property: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
+                "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
+                "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", 
+                "n_max_injured", "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", 
+                "max_affected", "n_max_affected", "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", 
+                "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", 
+                "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated"],
+            paragraph_all_property: [], // Liste de toutes les propriétés pour les paragraphs
             event_text: 'Select an event to get more information!', // Texte sur les events (droite de l'écran)
+            event_location_text: '', // Texte sur les events, partie optionnelle locations (droite de l'écran)
             selected_event: null, // Permet de conserver l'event sélectionné
             more_info_button: false, // Permet de faire apparaitre le bouton plus d'infos quand un event est sélectionné
             back_to_map_button: false, // Permet de faire apparaitre le bouton pour retourner à la carte
             zoom_auto: true, // Zoom auto activé ou non (actif par défaut)
+            location_information: false, // Affichage des informations de location ou non (inactif par défaut)
         };
     },
 
@@ -111,10 +126,10 @@ Vue.createApp({
                         if (this.events.getSource().getFeatures().length == 0) {
                             for (const key in json[i]) {
                                 if (json[i].hasOwnProperty(key)) {
-                                    this.event_property.push(key);
+                                    this.event_all_property.push(key);
                                 }
-                            }
-                        }
+                            }                           
+                        }   
 
                         // Création de la feature à l'aide de ses coordonnées (projection en 3857)
                         let new_event = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([json[i].longitude,json[i].latitude])));
@@ -143,10 +158,22 @@ Vue.createApp({
         // Crée le texte en récupérant les infos sur l'event, change le style de l'event
         affichage_selection_event (feature) {
 
-            // Affichage du texte sur l'event
+            // Chargement et affichage du texte sur l'event
             this.event_text = '';
-            for (let property of this.event_property) {
+            this.event_location_text = '';
+            // Les propriétés principales s'affichent tout le temps
+            for (let property of this.event_main_property) {
                 this.event_text += property + ' : ' + feature.get(property) + '<br>';
+            }
+            // Les propriétés chiffrées s'affichent si elles existent
+            for (let property of this.event_number_property) {
+                if (feature.get(property) != null) {
+                    this.event_text += property + ' : ' + feature.get(property) + '<br>';
+                }
+            }
+            // Les propriétés de location se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
+            for (let property of this.event_location_property) {
+                this.event_location_text += property + ' : ' + feature.get(property) + '<br>';
             }
 
             // Affichage contours scrollbox
@@ -177,6 +204,19 @@ Vue.createApp({
                     }),
                 }),
             })) 
+
+        },
+
+        // Change la variable location information selon si la chechbox location information est cochée ou non
+        // L'utilisateur peut choisir s'il veut afficher les informations sur la location ou non, son choix est conservé
+        change_locations_information () {
+
+            if (this.location_information) {
+                this.location_information = false;
+            }
+            else {
+                this.location_information = true;
+            };
 
         },
 
@@ -323,7 +363,7 @@ Vue.createApp({
                             if (this.paragraphs.getSource().getFeatures().length == 0) {
                                 for (const key in json[i]) {
                                     if (json[i].hasOwnProperty(key)) {
-                                        this.paragraph_property.push(key);
+                                        this.paragraph_all_property.push(key);
                                     }
                                 }
                             }

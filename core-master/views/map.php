@@ -13,13 +13,17 @@
 
     <div id="vue_map">
         <div id="map"></div>
-        <div id=event_data_scroll_box class="scroll-box">
+        <div id=event_data_scroll_box>
             <button id=more_info_button v-if="more_info_button" @click="more_infos_page">More information</button>
             <div id="zoom_auto_checkbox" v-if="more_info_button">
-                <label>Zoom sur l'emprise<input  @input="change_zoom_auto" type="checkbox" v-model="zoom_auto"></label>
+                <label>Automatic zoom<input  @input="change_zoom_auto" type="checkbox" v-model="zoom_auto"></label>
             </div>
             <button id=back_to_map_button v-if="back_to_map_button" @click="back_to_map">Back to map</button>
             <div id=event_data v-html="event_text"></div>
+            <div id="location_data_checkbox" v-if="selected_event">
+                <label>Show location information<input @input="change_locations_information" type="checkbox" v-model="location_information"></label>
+            </div>
+            <div id=event_location_data v-html="event_location_text" v-if="location_information"></div>
         </div>
     </div>  
 
