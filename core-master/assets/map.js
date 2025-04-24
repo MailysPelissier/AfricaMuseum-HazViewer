@@ -23,9 +23,11 @@ Vue.createApp({
                 "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", 
                 "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated"],
             paragraph_all_property: [], // Liste de toutes les propriétés pour les paragraphs
-            event_text: 'Select an event to get more information!', // Texte sur les events (droite de l'écran)
-            event_location_text: '', // Texte sur les events, partie optionnelle locations (droite de l'écran)
+            event_text: 'Select an event to get more information!', // Texte sur les events (haut droite de l'écran)
+            event_location_text: '', // Texte sur les events, partie optionnelle locations (haut droite de l'écran)
+            paragraph_text: '', // Texte sur les pargraphs (bas droite de l'écran)
             selected_event: null, // Permet de conserver l'event sélectionné
+            selected_paragraph: null, // Permet de conserver le paragraph sélectionné
             more_info_button: false, // Permet de faire apparaitre le bouton plus d'infos quand un event est sélectionné
             back_to_map_button: false, // Permet de faire apparaitre le bouton pour retourner à la carte
             zoom_auto: true, // Zoom auto activé ou non (actif par défaut)
@@ -159,22 +161,24 @@ Vue.createApp({
         affichage_selection_event (feature) {
 
             // Chargement et affichage du texte sur l'event
-            this.event_text = '';
-            this.event_location_text = '';
+            this.event_text = '<ul>';
+            this.event_location_text = '<ul>';
             // Les propriétés principales s'affichent tout le temps
             for (let property of this.event_main_property) {
-                this.event_text += property + ' : ' + feature.get(property) + '<br>';
+                this.event_text += '<li>' + property + ' : ' + feature.get(property) + '</li>';
             }
             // Les propriétés chiffrées s'affichent si elles existent
             for (let property of this.event_number_property) {
                 if (feature.get(property) != null) {
-                    this.event_text += property + ' : ' + feature.get(property) + '<br>';
+                    this.event_text += '<li>' + property + ' : ' + feature.get(property) + '</li>';
                 }
             }
             // Les propriétés de location se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
             for (let property of this.event_location_property) {
-                this.event_location_text += property + ' : ' + feature.get(property) + '<br>';
+                this.event_location_text += '<li>' + property + ' : ' + feature.get(property) + '</li>';
             }
+            this.event_text += '</ul>';
+            this.event_location_text += '</ul>';
 
             // Affichage contours scrollbox
             document.getElementById('event_data_scroll_box').style.border = "1px solid #ccc";
@@ -269,6 +273,12 @@ Vue.createApp({
 
             // Couche paragraphs vidée
             this.paragraphs.getSource().clear();
+
+            // Déselection du paragraph
+            this.selected_paragraph = null;
+
+            // Suppression du paragraph_text
+            this.paragraph_text = '';
 
         },
 
@@ -392,6 +402,46 @@ Vue.createApp({
 
             }
         
+        },
+
+        affichage_selection_paragraph (feature) {
+            console.log(this.paragraph_text)
+            // Chargement et affichage du texte sur le paragraph
+            this.paragraph_text = '<ul>';
+            console.log(this.paragraph_text)
+            // Toutes les propriétés
+            for (let property of this.paragraph_all_property) {
+                this.paragraph_text += '<li>' + property + ' : ' + feature.get(property) + '</li>';
+            }       
+            this.paragraph_text += '</ul>';
+            console.log(this.paragraph_text)
+
+            // Affichage contours scrollbox
+            document.getElementById('paragraph_data_scroll_box').style.border = "1px solid #ccc";
+
+            // Retour au style normal de la feature précédente
+            if (this.selected_paragraph != null) {
+                this.selected_paragraph.setStyle(new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 5,
+                        fill: new ol.style.Fill({
+                            color: 'rgba(0, 0, 0, 1)',
+                        }),
+                    }),
+                }))
+            }
+            // Garder le paragraph actuel
+            this.selected_paragraph = feature;
+            // Changer le style du paragraph sélectionné
+            this.selected_paragraph.setStyle(new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 5,
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 255, 0, 1)',
+                    }),
+                }),
+            })) 
+
         },
 
 
@@ -518,9 +568,14 @@ Vue.createApp({
                     }
                 });
 
-                // Si la feature est bien un event, le texte contenant les infos sur les events s'affiche à droite de l'écran
+                // Si la feature est un event, le texte contenant les infos sur les events s'affiche en haut à droite de l'écran
                 if (foundLayer && foundLayer === this.events) {
                     this.affichage_selection_event(feature);
+                }
+
+                // Si la feature est un paragraph, le texte contenant les infos sur les paragraphs s'affiche en bas à droite de l'écran
+                if (foundLayer && foundLayer === this.paragraphs) {
+                    this.affichage_selection_paragraph(feature);
                 }
 
             }

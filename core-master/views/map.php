@@ -14,16 +14,23 @@
     <div id="vue_map">
         <div id="map"></div>
         <div id=event_data_scroll_box>
-            <button id=more_info_button v-if="more_info_button" @click="more_infos_page">More information</button>
-            <div id="zoom_auto_checkbox" v-if="more_info_button">
-                <label>Automatic zoom<input  @input="change_zoom_auto" type="checkbox" v-model="zoom_auto"></label>
-            </div>
-            <button id=back_to_map_button v-if="back_to_map_button" @click="back_to_map">Back to map</button>
+            <div id=event_title v-if="selected_event">Event data :</div>
             <div id=event_data v-html="event_text"></div>
             <div id="location_data_checkbox" v-if="selected_event">
                 <label>Show location information<input @input="change_locations_information" type="checkbox" v-model="location_information"></label>
             </div>
             <div id=event_location_data v-html="event_location_text" v-if="location_information"></div>
+            <div id=top_buttons>
+                <button id=more_info_button v-if="more_info_button" @click="more_infos_page">More information</button>
+                <div id="zoom_auto_checkbox" v-if="more_info_button">
+                    <label>Automatic zoom<input @input="change_zoom_auto" type="checkbox" v-model="zoom_auto"></label>
+                </div>
+                <button id=back_to_map_button v-if="back_to_map_button" @click="back_to_map">Back to map</button>
+            </div>
+        </div>
+        <div id=paragraph_data_scroll_box>
+            <div id=paragraph_title v-if="selected_paragraph">Paragraph data :</div>
+            <div id=paragraph_data v-html="paragraph_text" ></div>
         </div>
     </div>  
 
