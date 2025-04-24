@@ -212,11 +212,8 @@ Vue.createApp({
         // Réinitialise la carte à l'état précédent
         back_to_map () {
 
-            // Texte des events réinitialisé
-            this.event_text = 'Select an event to get more information!';
-
-            // Suppression contours scrollbox
-            document.getElementById('event_data_scroll_box').style.border = 'none';
+            // Apparition du bouton More infos
+            this.more_info_button = true;
 
             // Disparition du bouton Back to map
             this.back_to_map_button = false;
@@ -277,60 +274,68 @@ Vue.createApp({
             let paragraphs_list = feature.get('paragraphs_list');
             // Nettoyage de la chaîne pour enlever les parenthèses extérieures
             paragraphs_list = paragraphs_list.replace(/^\(|\)$/g, '');
-            // Transformation en tableau en séparant par virgule
+            // Transformation en tableau
             paragraphs_list = paragraphs_list.split(',').map(e => e.trim().replace(/^'|'$/g, ''));
-            // Reformater proprement
-            paragraphs_list = `(${paragraphs_list.map(e => `'${e}'`).join(',')})`;
 
-            // Requête vers la bdd, on récupère seulement les paragraphs de l'event
-            url = "/postgres/paragraphs?paragraphs_list=" + paragraphs_list;
-            console.log(url)
-            fetch(url)
-            .then( (result) => {
-                return result.json();
-            })
-            .then( (json) => {
+            // Création de listes de 50 paragraph_id (url peut être trop longue si on ne fait qu'une liste)
+            let nb_boucles = Math.ceil(paragraphs_list.length/50)
+            for(let i = 0; i < nb_boucles; i++) {
 
-                // Pour chaque paragraph récupéré :
-                for (let i = 0; i < json.length; i++) {
+                // Tableaux de 50 paragraph_id
+                let paragraphs_list_50 = paragraphs_list.slice(50*i,50*(i+1));
+                // Liste de 50 paragraph_id reformatée pour la requête
+                paragraphs_list_50 = `(${paragraphs_list_50.map(e => `'${e}'`).join(',')})`;
 
-                    // Récupération de l'identifiant
-                    let paragraph_id = json[i].paragraph_id;
+                // Requête vers la bdd, on récupère seulement les paragraphs de l'event, par groupe de 50
+                url = "/postgres/paragraphs?paragraphs_list=" + paragraphs_list_50;
+                fetch(url)
+                .then( (result) => {
+                    return result.json();
+                })
+                .then( (json) => {
 
-                    // Si le paragraph n'est pas déjà dans la couche :
-                    let exists = this.paragraphs.getSource().getFeatureById(paragraph_id);
-                    if (!exists) {
+                    // Pour chaque paragraph récupéré :
+                    for (let i = 0; i < json.length; i++) {
 
-                        // Création de la liste des propriétés (une seule fois)
-                        if (this.paragraphs.getSource().getFeatures().length == 0) {
-                            for (const key in json[i]) {
-                                if (json[i].hasOwnProperty(key)) {
-                                    this.paragraph_property.push(key);
+                        // Récupération de l'identifiant
+                        let paragraph_id = json[i].paragraph_id;
+
+                        // Si le paragraph n'est pas déjà dans la couche :
+                        let exists = this.paragraphs.getSource().getFeatureById(paragraph_id);
+                        if (!exists) {
+
+                            // Création de la liste des propriétés (une seule fois)
+                            if (this.paragraphs.getSource().getFeatures().length == 0) {
+                                for (const key in json[i]) {
+                                    if (json[i].hasOwnProperty(key)) {
+                                        this.paragraph_property.push(key);
+                                    }
                                 }
                             }
-                        }
 
-                        // Création de la feature à l'aide de ses coordonnées (projection en 3857)
-                        let new_paragraph = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([json[i].longitude,json[i].latitude])));
+                            // Création de la feature à l'aide de ses coordonnées (projection en 3857)
+                            let new_paragraph = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([json[i].longitude,json[i].latitude])));
 
-                        // Stockage de l'identifiant
-                        new_paragraph.setId(paragraph_id);
+                            // Stockage de l'identifiant
+                            new_paragraph.setId(paragraph_id);
 
-                        // Récupération et stockage des propriétés
-                        for (const key in json[i]) {
-                            if (json[i].hasOwnProperty(key)) {
-                                new_paragraph.set(key, json[i][key]);
+                            // Récupération et stockage des propriétés
+                            for (const key in json[i]) {
+                                if (json[i].hasOwnProperty(key)) {
+                                    new_paragraph.set(key, json[i][key]);
+                                }
                             }
-                        }
 
-                        // Ajout à la couche paragraphs
-                        this.paragraphs.getSource().addFeature(new_paragraph);                   
+                            // Ajout à la couche paragraphs
+                            this.paragraphs.getSource().addFeature(new_paragraph);                   
+                        
+                        }
                     
-                    }      
+                    };
                 
-                };
-            
-            });
+                });
+
+            }
         
         },
 
