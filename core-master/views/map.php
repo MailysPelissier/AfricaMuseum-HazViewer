@@ -30,7 +30,7 @@
         </div>
         <div id=paragraph_data_scroll_box>
             <div id=paragraph_title v-if="selected_paragraph">Paragraph data :</div>
-            <div id=paragraph_data v-html="paragraph_text" ></div>
+            <div id=paragraph_data v-html="paragraph_text" v-if="selected_paragraph"></div>
         </div>
     </div>  
 

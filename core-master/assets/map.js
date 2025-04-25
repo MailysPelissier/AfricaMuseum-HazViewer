@@ -125,7 +125,7 @@ Vue.createApp({
                     if (!exists) {
 
                         // Création de la liste des propriétés (une seule fois)
-                        if (this.events.getSource().getFeatures().length == 0) {
+                        if (this.event_all_property.length == 0) {
                             for (const key in json[i]) {
                                 if (json[i].hasOwnProperty(key)) {
                                     this.event_all_property.push(key);
@@ -370,7 +370,7 @@ Vue.createApp({
                         if (!exists) {
 
                             // Création de la liste des propriétés (une seule fois)
-                            if (this.paragraphs.getSource().getFeatures().length == 0) {
+                            if (this.paragraph_all_property.length == 0) {
                                 for (const key in json[i]) {
                                     if (json[i].hasOwnProperty(key)) {
                                         this.paragraph_all_property.push(key);
@@ -404,17 +404,16 @@ Vue.createApp({
         
         },
 
+        // Crée le texte en récupérant les infos sur le paragraph, change le style du paragraph
         affichage_selection_paragraph (feature) {
-            console.log(this.paragraph_text)
+
             // Chargement et affichage du texte sur le paragraph
             this.paragraph_text = '<ul>';
-            console.log(this.paragraph_text)
             // Toutes les propriétés
             for (let property of this.paragraph_all_property) {
                 this.paragraph_text += '<li>' + property + ' : ' + feature.get(property) + '</li>';
             }       
             this.paragraph_text += '</ul>';
-            console.log(this.paragraph_text)
 
             // Affichage contours scrollbox
             document.getElementById('paragraph_data_scroll_box').style.border = "1px solid #ccc";
