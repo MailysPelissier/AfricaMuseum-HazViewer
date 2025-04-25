@@ -165,17 +165,17 @@ Vue.createApp({
             this.event_location_text = '<ul>';
             // Les propriétés principales s'affichent tout le temps
             for (let property of this.event_main_property) {
-                this.event_text += '<li>' + property + ' : ' + feature.get(property) + '</li>';
+                this.event_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
             // Les propriétés chiffrées s'affichent si elles existent
             for (let property of this.event_number_property) {
                 if (feature.get(property) != null) {
-                    this.event_text += '<li>' + property + ' : ' + feature.get(property) + '</li>';
+                    this.event_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
                 }
             }
             // Les propriétés de location se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
             for (let property of this.event_location_property) {
-                this.event_location_text += '<li>' + property + ' : ' + feature.get(property) + '</li>';
+                this.event_location_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
             this.event_text += '</ul>';
             this.event_location_text += '</ul>';
@@ -411,7 +411,7 @@ Vue.createApp({
             this.paragraph_text = '<ul>';
             // Toutes les propriétés
             for (let property of this.paragraph_all_property) {
-                this.paragraph_text += '<li>' + property + ' : ' + feature.get(property) + '</li>';
+                this.paragraph_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }       
             this.paragraph_text += '</ul>';
 
@@ -542,6 +542,20 @@ Vue.createApp({
         });
         this.map.addLayer(this.paragraphs);
 
+        // Création du popup vide pour le pointermove
+        let var_popup_pointermove = new ol.Overlay({
+            element: document.getElementById("popup_pointermove"),
+            positioning: "bottom-center"
+        });
+        this.map.addOverlay(var_popup_pointermove);
+
+        // Création du popup vide pour le clic
+        let var_popup_clic = new ol.Overlay({
+            element: document.getElementById("popup_clic"),
+            positioning: "bottom-center"
+        });
+        this.map.addOverlay(var_popup_clic);
+
         // A chaque déplacement/zoom, ajout des events à la couche events selon la bbox
         this.map.on('moveend', () => {
             // this.ajout_locations();
@@ -551,32 +565,82 @@ Vue.createApp({
         // Quand on clique sur une feature :
         this.map.on('click', evt => {
 
-            let feature = this.map.forEachFeatureAtPixel(evt.pixel, feature => feature);
-
-            if (feature) {
-
-                // Parcours des couches pour trouver celle qui contient la feature
-                this.map.getLayers().forEach(layer => {
-                    const source = layer.getSource();
-                    // Vérifier si la source est une source vectorielle
-                    if (source instanceof ol.source.Vector) {
-                        // Vérifier si la feature fait partie de cette source
-                        if (source.getFeatures().includes(feature)) {
-                            foundLayer = layer;
-                        }
-                    }
+            let event_features = [];
+            let paragraph_features = [];
+        
+            // Récupérer les features à partir des différentes couches
+            this.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+                if (layer === this.events) {
+                    event_features.push(feature);
+                }
+                if (layer === this.paragraphs) {
+                    paragraph_features.push(feature);
+                }
+            });
+    
+            // Si la feature est un event, le texte contenant les infos sur les events s'affiche en haut à droite de l'écran
+            if (event_features.length == 1) {
+                this.affichage_selection_event(event_features[0]);
+            }
+            else if (event_features.length > 1) {
+                document.getElementById("popup_clic").innerHTML = '';
+                var_popup_pointermove.setPosition(evt.coordinate);
+                document.getElementById("popup_clic").style.display = "block";
+                event_features.forEach(event_feature => {
+                    document.getElementById("popup_clic").innerHTML += '1' + '<br>';
                 });
+            }
+        
+            // Si la feature est un paragraph, le texte contenant les infos sur les paragraphs s'affiche en bas à droite de l'écran
+            else if (paragraph_features.length == 1) {
+                this.affichage_selection_paragraph(paragraph_features[0]);
+            }
+            else if (paragraph_features.length > 1) {
+                document.getElementById("popup").innerHTML = paragraph_features.length + " paragraphs";
+                varPopup.setPosition(evt.coordinate);
+                document.getElementById("popup").style.display = "block";
+                // paragraph_features.forEach(paragraph_feature => {
+                //     this.affichage_selection_paragraph(paragraph_feature);
+                // });
+            }
 
-                // Si la feature est un event, le texte contenant les infos sur les events s'affiche en haut à droite de l'écran
-                if (foundLayer && foundLayer === this.events) {
-                    this.affichage_selection_event(feature);
+            else {
+                document.getElementById("popup").style.display = "none";
+            }
+
+        });
+
+        this.map.on("pointermove", evt => {
+
+            let event_features = [];
+            let paragraph_features = [];
+        
+            // Récupérer les features à partir des différentes couches
+            this.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+                if (layer === this.events) {
+                    event_features.push(feature);
                 }
-
-                // Si la feature est un paragraph, le texte contenant les infos sur les paragraphs s'affiche en bas à droite de l'écran
-                if (foundLayer && foundLayer === this.paragraphs) {
-                    this.affichage_selection_paragraph(feature);
+                if (layer === this.paragraphs) {
+                    paragraph_features.push(feature);
                 }
+            });
+    
+            // Si la feature est un event, le texte contenant les infos sur les events s'affiche en haut à droite de l'écran
+            if (event_features.length > 1) {
+                document.getElementById("popup_pointermove").innerHTML = event_features.length + " events";
+                var_popup_pointermove.setPosition(evt.coordinate);
+                document.getElementById("popup_pointermove").style.display = "block";
+            }
+        
+            // Si la feature est un paragraph, le texte contenant les infos sur les paragraphs s'affiche en bas à droite de l'écran
+            else if (paragraph_features.length > 1) {
+                document.getElementById("popup_pointermove").innerHTML = paragraph_features.length + " paragraphs";
+                var_popup_pointermove.setPosition(evt.coordinate);
+                document.getElementById("popup_pointermove").style.display = "block";
+            }
 
+            else {
+                document.getElementById("popup_pointermove").style.display = "none";
             }
 
         });

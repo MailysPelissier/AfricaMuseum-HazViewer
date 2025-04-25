@@ -44,9 +44,18 @@ html, body {
 }
 
 #event_title {
-    font-weight:bold;
+    font-weight: bold;
 }
 
 #paragraph_title {
-    font-weight:bold;
+    font-weight: bold;
+}
+
+.popup {
+    display: none; 
+    position: absolute; 
+    background: white; 
+    padding: 5px; 
+    border: 1px solid black; 
+    border-radius: 5px;
 }
