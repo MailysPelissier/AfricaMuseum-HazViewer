@@ -15,9 +15,12 @@ html, body {
 }
 
 #map { 
+    width: 100%;
+    height: 100%;
     grid-column: 1;
     grid-row: 1/3;
     margin: 10px;
+    position: relative;
 }
 
 #event_data_scroll_box {
@@ -61,4 +64,14 @@ html, body {
 ul {
     margin: 5px;
     padding-left: 10px;
+}
+
+.changer_style_div {
+    bottom: .5em;
+    left: .5em;
+}
+
+.changer_style_button {
+    height: 2em !important;
+    width: 8em !important;
 }

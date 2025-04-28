@@ -551,6 +551,11 @@ Vue.createApp({
 
         },
 
+        form_changer_style() {
+            // Affiche le popup pour entrer les détails (récupérer thème et comment)
+            document.getElementById("entrerInfosSignalement").style.display = "block";
+        }
+
 
     },
 
@@ -694,6 +699,11 @@ Vue.createApp({
             positioning: "bottom-center"
         });
         this.map.addOverlay(var_popup_clic);
+
+        var change_style_control = new ol.control.Control({
+            element: document.getElementById("changer_style_div"),
+        });
+        this.map.addControl(change_style_control);
 
         // A chaque déplacement/zoom, ajout des events à la couche events selon la bbox
         // Suppression du popup clic

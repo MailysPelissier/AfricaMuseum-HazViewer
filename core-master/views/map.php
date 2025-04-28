@@ -12,7 +12,24 @@
 <body>
 
     <div id="vue_map">
-        <div id="map"></div>
+        <div id="map">
+            <!-- Boîte de dialogue pour entrer les infos du signalement -->
+        <div id="entrerInfosSignalement" style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); background:white; padding:15px; border-radius:8px; box-shadow:0px 0px 10px rgba(0,0,0,0.3); z-index: 1000;;">
+            <h3>Créer un signalement</h3>
+            <label for="theme">Thème :</label>
+            <select id="theme">
+                <option value="Erreur itinéraire bois ronds">Erreur Itinéraire Bois Rond</option>
+                <option value="Erreur desserte forestière">Erreur Desserte Forestière</option>
+                <option value="Autres">Autres</option>
+            </select>
+            <br><br>
+            <label for="comment">Commentaire :</label>
+            <textarea id="comment" rows="3" cols="30"></textarea>
+            <br><br>
+            <button id="envoyerSignalement">Envoyer</button>
+            <button id="annulerSignalement">Annuler</button>
+        </div>
+        </div>
         <div id=event_data_scroll_box>
             <div id=event_title class=title v-if="selected_event">Event:</div>
             <div id=event_data v-html="event_text"></div>
@@ -34,6 +51,9 @@
         </div>
         <div id=popup_pointermove class=popup></div>
         <div id=popup_clic class=popup></div>
+        <div id=changer_style_div class='changer_style_div ol-unselectable ol-control'>
+            <button id=changer_style_button class='changer_style_button' @click="form_changer_style">Change style</button>
+        </div>
     </div>  
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
