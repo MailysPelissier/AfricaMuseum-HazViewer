@@ -5,6 +5,7 @@ Vue.createApp({
             map: null, // Initialisation de la map
             // locations: null, // Initialisation de la couche locations
             bbox_events: null, // Initialisation de la couche bbox events
+            bbox_paragraphs: null, // Initialisation de la couche bbox paragraphs
             events: null, // Initialisation de la couche events
             selected_event_layer: null, // Initialisation de la couche selected events
             paragraphs: null, // Initialisation de la couche paragraphs
@@ -61,7 +62,7 @@ Vue.createApp({
         // // Ajout des locations à la couche locations, selon la bbox
         // ajout_locations () {
 
-        //     const { min_lon, min_lat, max_lon, max_lat } = this.emprise_ecran();
+        //     let { min_lon, min_lat, max_lon, max_lat } = this.emprise_ecran();
 
         //     // Requête vers la bdd, on récupère seulement les locations dans la bbox
         //     url = "/postgres/locations?min_lon=" + min_lon + '&min_lat=' + min_lat + '&max_lon=' + max_lon + '&max_lat=' + max_lat;
@@ -88,7 +89,7 @@ Vue.createApp({
         //                 new_location.setId(location_id);
 
         //                 // Récupération et stockage des propriétés
-        //                 for (const key in json[i]) {
+        //                 for (let key in json[i]) {
         //                     if (json[i].hasOwnProperty(key)) {
         //                         new_location.set(key, json[i][key]);
         //                     }
@@ -104,7 +105,7 @@ Vue.createApp({
         // Ajout des events à la couche events, selon la bbox
         ajout_events () {
 
-            const { min_lon, min_lat, max_lon, max_lat } = this.emprise_ecran();
+            let { min_lon, min_lat, max_lon, max_lat } = this.emprise_ecran();
 
             // Requête vers la bdd, on récupère seulement les events dans la bbox
             url = "/postgres/events?min_lon=" + min_lon + '&min_lat=' + min_lat + '&max_lon=' + max_lon + '&max_lat=' + max_lat;
@@ -126,7 +127,7 @@ Vue.createApp({
 
                         // Création de la liste des propriétés (une seule fois)
                         if (this.event_all_property.length == 0) {
-                            for (const key in json[i]) {
+                            for (let key in json[i]) {
                                 if (json[i].hasOwnProperty(key)) {
                                     this.event_all_property.push(key);
                                 }
@@ -140,7 +141,7 @@ Vue.createApp({
                         new_event.setId(event_id);
 
                         // Récupération et stockage des propriétés
-                        for (const key in json[i]) {
+                        for (let key in json[i]) {
                             if (json[i].hasOwnProperty(key)) {
                                 new_event.set(key, json[i][key]);
                             }
@@ -248,7 +249,7 @@ Vue.createApp({
             this.selected_event_layer.getSource().addFeature(feature_geometry);
 
             // Afficher bbox
-            this.affichage_bbox(feature);
+            this.affichage_bbox_event(feature);
 
             // Afficher paragraphs
             this.affichage_paragraphs(feature);
@@ -280,6 +281,9 @@ Vue.createApp({
             // Couche paragraphs vidée
             this.paragraphs.getSource().clear();
 
+            // Couche bbox_paragraphs vidée
+            this.bbox_paragraphs.getSource().clear();
+
             // Déselection du paragraph
             this.selected_paragraph = null;
 
@@ -289,7 +293,7 @@ Vue.createApp({
         },
 
         // Affichage de la bbox de l'event et zoom sur cette emprise
-        affichage_bbox (feature) {
+        affichage_bbox_event (feature) {
 
             // Récupérer les valeurs de la bbox (en 4326)
             let bbox = feature.get('bbox').replace(/\s+/g, '').replace('{', '').replace('}', '').split(',');
@@ -377,7 +381,7 @@ Vue.createApp({
 
                             // Création de la liste des propriétés (une seule fois)
                             if (this.paragraph_all_property.length == 0) {
-                                for (const key in json[i]) {
+                                for (let key in json[i]) {
                                     if (json[i].hasOwnProperty(key)) {
                                         this.paragraph_all_property.push(key);
                                     }
@@ -391,7 +395,7 @@ Vue.createApp({
                             new_paragraph.setId(paragraph_id);
 
                             // Récupération et stockage des propriétés
-                            for (const key in json[i]) {
+                            for (let key in json[i]) {
                                 if (json[i].hasOwnProperty(key)) {
                                     new_paragraph.set(key, json[i][key]);
                                 }
@@ -447,6 +451,133 @@ Vue.createApp({
                 }),
             })) 
 
+            // Affichage bbox et standard deviation du paragraph
+            this.affichage_bbox_paragraph(feature)
+
+        },
+
+        // Affichage bbox et standard deviation du paragraph
+        affichage_bbox_paragraph (feature) {
+
+            // Couche bbox_paragraphs vidée
+            this.bbox_paragraphs.getSource().clear();
+
+            // Récupérer les valeurs de la bbox (en 4326)
+            let min_lat_4326 = feature.get('min_lat');
+            let max_lat_4326 = feature.get('max_lat');
+            let min_lon_4326 = feature.get('min_lon');
+            let max_lon_4326 = feature.get('max_lon');
+
+            // Projection en 3857
+            let coord_transfo = [
+                ol.proj.fromLonLat([min_lon_4326, min_lat_4326]),
+                ol.proj.fromLonLat([max_lon_4326, max_lat_4326]),
+            ];
+            let extent3857 = [].concat(...coord_transfo);
+            let min_lon = extent3857[0];
+            let min_lat = extent3857[1];
+            let max_lon = extent3857[2];
+            let max_lat = extent3857[3];
+            
+            // Création de la feature à l'aide de ses coordonnées
+            let new_paragraph = new ol.Feature(
+                ol.geom.Polygon.fromExtent([min_lon, min_lat, max_lon, max_lat])
+            );
+
+            // Ajout à la couche bbox_paragraphs
+            this.bbox_paragraphs.getSource().addFeature(new_paragraph);
+
+            // Affichage de l'écart-type s'il existe
+            if (feature.get('std_dev') != null) {
+                std_dev = feature.get('std_dev') * 1000;
+
+                // Calcul des milieux de chaque côté
+                let centerTop = [(min_lon + max_lon) / 2, max_lat];
+                let centerBottom = [(min_lon + max_lon) / 2, min_lat];
+                let centerLeft = [min_lon, (min_lat + max_lat) / 2];
+                let centerRight = [max_lon, (min_lat + max_lat) / 2];
+
+                // Création des segments (écart-type)
+                let lineTop = new ol.Feature(new ol.geom.LineString([
+                    [centerTop[0], centerTop[1] - std_dev/2],
+                    [centerTop[0], centerTop[1] + std_dev/2]
+                ]));
+                  
+                let lineBottom = new ol.Feature(new ol.geom.LineString([
+                    [centerBottom[0], centerBottom[1] + std_dev/2],
+                    [centerBottom[0], centerBottom[1] - std_dev/2]
+                ]));
+                  
+                let lineLeft = new ol.Feature(new ol.geom.LineString([
+                    [centerLeft[0] + std_dev/2, centerLeft[1]],
+                    [centerLeft[0] - std_dev/2, centerLeft[1]]
+                ]));
+                  
+                let lineRight = new ol.Feature(new ol.geom.LineString([
+                    [centerRight[0] - std_dev/2, centerRight[1]],
+                    [centerRight[0] + std_dev/2, centerRight[1]]
+                ]));
+
+                // Calcul des bouts des segments
+                let TopBottom = [centerTop[0], centerTop[1] - std_dev/2];
+                let TopTop = [centerTop[0], centerTop[1] + std_dev/2];
+                let BottomTop = [centerBottom[0], centerBottom[1] + std_dev/2];
+                let BottomBottom = [centerBottom[0], centerBottom[1] - std_dev/2];
+                let LeftRight = [centerLeft[0] + std_dev/2, centerLeft[1]];
+                let LeftLeft = [centerLeft[0] - std_dev/2, centerLeft[1]];
+                let RightLeft = [centerRight[0] - std_dev/2, centerRight[1]];
+                let RightRight = [centerRight[0] + std_dev/2, centerRight[1]]
+
+                // Création des sous segments
+                let lineTopBottom = new ol.Feature(new ol.geom.LineString([
+                    [TopBottom[0] - std_dev/10, TopBottom[1]],
+                    [TopBottom[0] + std_dev/10, TopBottom[1]]
+                ]));
+                let lineTopTop = new ol.Feature(new ol.geom.LineString([
+                    [TopTop[0] - std_dev/10, TopTop[1]],
+                    [TopTop[0] + std_dev/10, TopTop[1]]
+                ]));
+                let lineBottomTop = new ol.Feature(new ol.geom.LineString([
+                    [BottomTop[0] - std_dev/10, BottomTop[1]],
+                    [BottomTop[0] + std_dev/10, BottomTop[1]]
+                ]));
+                let lineBottomBottom = new ol.Feature(new ol.geom.LineString([
+                    [BottomBottom[0] - std_dev/10, BottomBottom[1]],
+                    [BottomBottom[0] + std_dev/10, BottomBottom[1]]
+                ]));
+                let lineLeftRight = new ol.Feature(new ol.geom.LineString([
+                    [LeftRight[0], LeftRight[1] - std_dev/10],
+                    [LeftRight[0], LeftRight[1] + std_dev/10]
+                ]));
+                let lineLeftLeft = new ol.Feature(new ol.geom.LineString([
+                    [LeftLeft[0], LeftLeft[1] - std_dev/10],
+                    [LeftLeft[0], LeftLeft[1] + std_dev/10]
+                ]));
+                let lineRightLeft = new ol.Feature(new ol.geom.LineString([
+                    [RightLeft[0], RightLeft[1] - std_dev/10],
+                    [RightLeft[0], RightLeft[1] + std_dev/10]
+                ]));
+                let lineRightRight = new ol.Feature(new ol.geom.LineString([
+                    [RightRight[0], RightRight[1] - std_dev/10],
+                    [RightRight[0], RightRight[1] + std_dev/10]
+                ]));
+                
+                // Ajout à la couche bbox_paragraphs
+                this.bbox_paragraphs.getSource().addFeature(lineTop);
+                this.bbox_paragraphs.getSource().addFeature(lineBottom);
+                this.bbox_paragraphs.getSource().addFeature(lineLeft);
+                this.bbox_paragraphs.getSource().addFeature(lineRight);
+                this.bbox_paragraphs.getSource().addFeature(lineTopBottom);
+                this.bbox_paragraphs.getSource().addFeature(lineTopTop);
+                this.bbox_paragraphs.getSource().addFeature(lineBottomTop);
+                this.bbox_paragraphs.getSource().addFeature(lineBottomBottom);
+                this.bbox_paragraphs.getSource().addFeature(lineLeftRight);
+                this.bbox_paragraphs.getSource().addFeature(lineLeftLeft);
+                this.bbox_paragraphs.getSource().addFeature(lineRightLeft);
+                this.bbox_paragraphs.getSource().addFeature(lineRightRight);
+
+            }
+
         },
 
 
@@ -495,13 +626,29 @@ Vue.createApp({
                     color: 'rgba(255, 255, 255, 0.2)'
                 }),
                 stroke: new ol.style.Stroke({
-                    color: '#ffcc33',
+                    color: 'rgb(216, 231, 81)',
                     width: 2
                 })
             }),
             zIndex: 2,
         });
         this.map.addLayer(this.bbox_events);
+
+        // Création de la couche bbox paragraphs (vide)
+        this.bbox_paragraphs = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            style: new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 255, 255, 0.2)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(0, 0, 0, 1)',
+                    width: 1
+                })
+            }),
+            zIndex: 3,
+        });
+        this.map.addLayer(this.bbox_paragraphs);
 
         // Création de la couche events (vide)
         this.events = new ol.layer.Vector({
@@ -514,7 +661,7 @@ Vue.createApp({
                     }),
                 }),
             }),
-            zIndex: 3,
+            zIndex: 4,
         });
         this.map.addLayer(this.events);
 
@@ -529,7 +676,7 @@ Vue.createApp({
                     }),
                 }),
             }),
-            zIndex: 4,
+            zIndex: 5,
         });
         this.map.addLayer(this.selected_event_layer);
 
@@ -544,7 +691,7 @@ Vue.createApp({
                     }),
                 }),
             }),
-            zIndex: 5,
+            zIndex: 6,
         });
         this.map.addLayer(this.paragraphs);
 
