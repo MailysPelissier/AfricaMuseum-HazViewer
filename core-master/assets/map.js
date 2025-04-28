@@ -237,6 +237,9 @@ Vue.createApp({
             // Apparition du bouton Back to map
             this.back_to_map_button = true;
 
+            // Disparition du popup clic
+            document.getElementById("popup_clic").style.display = "none";
+
             // Couche events invisible
             this.events.setVisible(false);
 
@@ -261,6 +264,9 @@ Vue.createApp({
 
             // Disparition du bouton Back to map
             this.back_to_map_button = false;
+
+            // Disparition du popup clic
+            document.getElementById("popup_clic").style.display = "none";
 
             // Couche events visible
             this.events.setVisible(true);
@@ -557,59 +563,15 @@ Vue.createApp({
         this.map.addOverlay(var_popup_clic);
 
         // A chaque déplacement/zoom, ajout des events à la couche events selon la bbox
+        // Suppression du popup clic
         this.map.on('moveend', () => {
             // this.ajout_locations();
             this.ajout_events();
+            document.getElementById("popup_clic").style.display = "none";
         });
 
-        // Quand on clique sur une feature :
-        this.map.on('click', evt => {
-
-            let event_features = [];
-            let paragraph_features = [];
-        
-            // Récupérer les features à partir des différentes couches
-            this.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-                if (layer === this.events) {
-                    event_features.push(feature);
-                }
-                if (layer === this.paragraphs) {
-                    paragraph_features.push(feature);
-                }
-            });
-    
-            // Si la feature est un event, le texte contenant les infos sur les events s'affiche en haut à droite de l'écran
-            if (event_features.length == 1) {
-                this.affichage_selection_event(event_features[0]);
-            }
-            else if (event_features.length > 1) {
-                document.getElementById("popup_clic").innerHTML = '';
-                var_popup_pointermove.setPosition(evt.coordinate);
-                document.getElementById("popup_clic").style.display = "block";
-                event_features.forEach(event_feature => {
-                    document.getElementById("popup_clic").innerHTML += '1' + '<br>';
-                });
-            }
-        
-            // Si la feature est un paragraph, le texte contenant les infos sur les paragraphs s'affiche en bas à droite de l'écran
-            else if (paragraph_features.length == 1) {
-                this.affichage_selection_paragraph(paragraph_features[0]);
-            }
-            else if (paragraph_features.length > 1) {
-                document.getElementById("popup").innerHTML = paragraph_features.length + " paragraphs";
-                varPopup.setPosition(evt.coordinate);
-                document.getElementById("popup").style.display = "block";
-                // paragraph_features.forEach(paragraph_feature => {
-                //     this.affichage_selection_paragraph(paragraph_feature);
-                // });
-            }
-
-            else {
-                document.getElementById("popup").style.display = "none";
-            }
-
-        });
-
+        // A chaque déplacement du pointer, si plusieurs features (events ou paragraphs) sont superposées au niveu du pointer,
+        // on affiche leur nombre
         this.map.on("pointermove", evt => {
 
             let event_features = [];
@@ -625,14 +587,14 @@ Vue.createApp({
                 }
             });
     
-            // Si la feature est un event, le texte contenant les infos sur les events s'affiche en haut à droite de l'écran
+            // Si il y a plusieurs events, le popup affiche "n events"
             if (event_features.length > 1) {
                 document.getElementById("popup_pointermove").innerHTML = event_features.length + " events";
                 var_popup_pointermove.setPosition(evt.coordinate);
                 document.getElementById("popup_pointermove").style.display = "block";
             }
         
-            // Si la feature est un paragraph, le texte contenant les infos sur les paragraphs s'affiche en bas à droite de l'écran
+            // Si il y a plusieurs paragraphs, le popup affiche "n paragraphs"
             else if (paragraph_features.length > 1) {
                 document.getElementById("popup_pointermove").innerHTML = paragraph_features.length + " paragraphs";
                 var_popup_pointermove.setPosition(evt.coordinate);
@@ -644,6 +606,82 @@ Vue.createApp({
             }
 
         });
+
+        // Quand on clique sur une ou plusieurs features :
+        this.map.on('click', evt => {
+
+            let event_features = [];
+            let paragraph_features = [];
+        
+            // Récupérer les features à partir des différentes couches
+            this.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
+                if (layer === this.events) {
+                    event_features.push(feature);
+                }
+                if (layer === this.paragraphs) {
+                    paragraph_features.push(feature);
+                }
+            });
+    
+            // Si la feature est un seul event, le texte contenant les infos sur cet event s'affiche en haut à droite de l'écran
+            if (event_features.length == 1) {
+                document.getElementById("popup_clic").style.display = "none";
+                this.affichage_selection_event(event_features[0]);
+            }
+
+            // Si plusieurs events sont sélectionnés, on affiche la liste sous forme de liens cliquables
+            // Cliquer sur un lien affiche le texte contenant les infos sur l'event sélectionné en haut à droite de l'écran
+            else if (event_features.length > 1) {
+                let html_popup = 'Choose the event:<ul>'
+                event_features.forEach((event_feature, index) => {
+                    let ligne = event_feature.get('hazard_type') + ' - ' + event_feature.get('event_time').substring(0,10);
+                    html_popup += `<li><a href="#" id="event_link_${index}">${ligne}</a></li>`;
+                });
+                html_popup += '</ul>'
+                document.getElementById("popup_clic").innerHTML = html_popup;
+                event_features.forEach((event_feature, index) => {
+                    document.getElementById(`event_link_${index}`).addEventListener('click', (e) => {
+                        e.preventDefault(); // empêcher le scroll en haut de page
+                        this.affichage_selection_event(event_feature);
+                    });
+                });
+                var_popup_clic.setPosition(evt.coordinate);
+                document.getElementById("popup_clic").style.display = "block";
+            }
+        
+            // Si la feature est un seul paragraph, le texte contenant les infos sur ce paragraph s'affiche en bas à droite de l'écran
+            else if (paragraph_features.length == 1) {
+                document.getElementById("popup_clic").style.display = "none";
+                this.affichage_selection_paragraph(paragraph_features[0]);
+            }
+
+            // Si plusieurs paragraphs sont sélectionnés, on affiche la liste sous forme de liens cliquables
+            // Cliquer sur un lien affiche le texte contenant les infos sur le paragraph sélectionné en bas à droite de l'écran
+            else if (paragraph_features.length > 1) {
+                let html_popup = 'Choose the paragraph:<ul>'
+                paragraph_features.forEach((paragraph_feature, index) => {
+                    let ligne = paragraph_feature.get('article_id');
+                    html_popup += `<li><a href="#" id="paragraph_link_${index}">${ligne}</a></li>`;
+                });
+                html_popup += '</ul>'
+                document.getElementById("popup_clic").innerHTML = html_popup;
+                paragraph_features.forEach((paragraph_feature, index) => {
+                    document.getElementById(`paragraph_link_${index}`).addEventListener('click', (e) => {
+                        e.preventDefault(); // empêcher le scroll en haut de page
+                        this.affichage_selection_paragraph(paragraph_feature);
+                    });
+                });
+                var_popup_clic.setPosition(evt.coordinate);
+                document.getElementById("popup_clic").style.display = "block";
+            }
+
+            else {
+                document.getElementById("popup_clic").style.display = "none";
+            }
+
+        });
+
+       
 
     },
 

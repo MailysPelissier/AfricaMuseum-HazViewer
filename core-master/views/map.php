@@ -14,7 +14,7 @@
     <div id="vue_map">
         <div id="map"></div>
         <div id=event_data_scroll_box>
-            <div id=event_title v-if="selected_event">Event:</div>
+            <div id=event_title class=title v-if="selected_event">Event:</div>
             <div id=event_data v-html="event_text"></div>
             <div id="location_data_checkbox" v-if="selected_event">
                 <label>Show location information<input @input="change_locations_information" type="checkbox" v-model="location_information"></label>
@@ -29,7 +29,7 @@
             </div>
         </div>
         <div id=paragraph_data_scroll_box>
-            <div id=paragraph_title v-if="selected_paragraph">Paragraph:</div>
+            <div id=paragraph_title  class=title v-if="selected_paragraph">Paragraph:</div>
             <div id=paragraph_data v-html="paragraph_text" v-if="selected_paragraph"></div>
         </div>
         <div id=popup_pointermove class=popup></div>

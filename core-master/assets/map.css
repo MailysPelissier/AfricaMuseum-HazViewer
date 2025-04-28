@@ -43,11 +43,7 @@ html, body {
     margin: 10px;
 }
 
-#event_title {
-    font-weight: bold;
-}
-
-#paragraph_title {
+.title {
     font-weight: bold;
 }
 
@@ -58,4 +54,11 @@ html, body {
     padding: 5px; 
     border: 1px solid black; 
     border-radius: 5px;
+    white-space: nowrap;
+    overflow: scroll;
+}
+
+ul {
+    margin: 5px;
+    padding-left: 10px;
 }
