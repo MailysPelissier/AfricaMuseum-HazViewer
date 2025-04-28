@@ -4,11 +4,12 @@ Vue.createApp({
         return {
             map: null, // Initialisation de la map
             // locations: null, // Initialisation de la couche locations
-            bbox_events: null, // Initialisation de la couche bbox events
-            bbox_paragraphs: null, // Initialisation de la couche bbox paragraphs
-            events: null, // Initialisation de la couche events
-            selected_event_layer: null, // Initialisation de la couche selected events
-            paragraphs: null, // Initialisation de la couche paragraphs
+            bbox_events_layer: null, // Initialisation de la couche bbox events
+            bbox_paragraphs_layer: null, // Initialisation de la couche bbox paragraphs
+            events_layer: null, // Initialisation de la couche events
+            selected_event_layer: null, // Initialisation de la couche selected event
+            paragraphs_layer: null, // Initialisation de la couche paragraphs
+            selected_paragraph_layer: null, // Initialisation de la couche selected paragraph
             event_all_property: [], // Liste de toutes les propriétés pour les events
             // Propriétés principales des events
             event_main_property: ["hazard_type", "disaster_score", "hasard_type_score", "event_time", "n_languages", "n_source_countries",
@@ -122,7 +123,7 @@ Vue.createApp({
                     let event_id = json[i].event_id;
 
                     // Si l'event n'est pas déjà dans la couche :
-                    let exists = this.events.getSource().getFeatureById(event_id);
+                    let exists = this.events_layer.getSource().getFeatureById(event_id);
                     if (!exists) {
 
                         // Création de la liste des propriétés (une seule fois)
@@ -148,7 +149,7 @@ Vue.createApp({
                         }
 
                         // Ajout à la couche events
-                        this.events.getSource().addFeature(new_event); 
+                        this.events_layer.getSource().addFeature(new_event); 
 
                     }      
                 
@@ -187,28 +188,15 @@ Vue.createApp({
             // Apparition du bouton More infos
             this.more_info_button = true;
 
-            // Retour au style normal de la feature précédente
-            if (this.selected_event != null) {
-                this.selected_event.setStyle(new ol.style.Style({
-                    image: new ol.style.Circle({
-                        radius: 10,
-                        fill: new ol.style.Fill({
-                            color: 'rgba(255, 0, 0, 1)',
-                        }),
-                    }),
-                }))
-            }
             // Garder l'event actuel
             this.selected_event = feature;
-            // Changer le style de l'event sélectionné
-            this.selected_event.setStyle(new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 10,
-                    fill: new ol.style.Fill({
-                        color: 'rgba(0, 255, 0, 1)',
-                    }),
-                }),
-            })) 
+
+            // Couche selected_event vidée
+            this.selected_event_layer.getSource().clear();
+
+            // Couche selected_event contient l'event sélectionné : permet de voir l'event
+            let feature_geometry = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([feature.get('longitude'),feature.get('latitude')])));
+            this.selected_event_layer.getSource().addFeature(feature_geometry);
 
         },
 
@@ -242,11 +230,7 @@ Vue.createApp({
             document.getElementById("popup_clic").style.display = "none";
 
             // Couche events invisible
-            this.events.setVisible(false);
-
-            // Couche selected_event contient l'event sélectionné
-            let feature_geometry = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([feature.get('longitude'),feature.get('latitude')])));
-            this.selected_event_layer.getSource().addFeature(feature_geometry);
+            this.events_layer.setVisible(false);
 
             // Afficher bbox
             this.affichage_bbox_event(feature);
@@ -270,19 +254,19 @@ Vue.createApp({
             document.getElementById("popup_clic").style.display = "none";
 
             // Couche events visible
-            this.events.setVisible(true);
+            this.events_layer.setVisible(true);
 
-            // Couche selected_event vidée
-            this.selected_event_layer.getSource().clear();
-
-            // Couche bbox_events vidée
-            this.bbox_events.getSource().clear();
+            // Couche bbox events vidée
+            this.bbox_events_layer.getSource().clear();
 
             // Couche paragraphs vidée
-            this.paragraphs.getSource().clear();
+            this.paragraphs_layer.getSource().clear();
 
-            // Couche bbox_paragraphs vidée
-            this.bbox_paragraphs.getSource().clear();
+            // Couche selected paragraph vidée
+            this.selected_paragraph_layer.getSource().clear();
+
+            // Couche bbox paragraphs vidée
+            this.bbox_paragraphs_layer.getSource().clear();
 
             // Déselection du paragraph
             this.selected_paragraph = null;
@@ -318,8 +302,8 @@ Vue.createApp({
                 ol.geom.Polygon.fromExtent([min_lon, min_lat, max_lon, max_lat])
             );
 
-            // Ajout à la couche bbox_events
-            this.bbox_events.getSource().addFeature(new_event);
+            // Ajout à la couche bbox events
+            this.bbox_events_layer.getSource().addFeature(new_event);
 
             // Zoom sur la bbox si zoom_auto activé
             if (this.zoom_auto) {
@@ -376,7 +360,7 @@ Vue.createApp({
                         let paragraph_id = json[i].paragraph_id;
 
                         // Si le paragraph n'est pas déjà dans la couche :
-                        let exists = this.paragraphs.getSource().getFeatureById(paragraph_id);
+                        let exists = this.paragraphs_layer.getSource().getFeatureById(paragraph_id);
                         if (!exists) {
 
                             // Création de la liste des propriétés (une seule fois)
@@ -402,7 +386,7 @@ Vue.createApp({
                             }
 
                             // Ajout à la couche paragraphs
-                            this.paragraphs.getSource().addFeature(new_paragraph);                   
+                            this.paragraphs_layer.getSource().addFeature(new_paragraph);                   
                         
                         }
                     
@@ -428,28 +412,15 @@ Vue.createApp({
             // Affichage contours scrollbox
             document.getElementById('paragraph_data_scroll_box').style.border = "1px solid #ccc";
 
-            // Retour au style normal de la feature précédente
-            if (this.selected_paragraph != null) {
-                this.selected_paragraph.setStyle(new ol.style.Style({
-                    image: new ol.style.Circle({
-                        radius: 5,
-                        fill: new ol.style.Fill({
-                            color: 'rgba(0, 0, 0, 1)',
-                        }),
-                    }),
-                }))
-            }
             // Garder le paragraph actuel
             this.selected_paragraph = feature;
-            // Changer le style du paragraph sélectionné
-            this.selected_paragraph.setStyle(new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 5,
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255, 255, 0, 1)',
-                    }),
-                }),
-            })) 
+
+            // Couche selected_paragraph vidée
+            this.selected_paragraph_layer.getSource().clear();
+
+            // Couche selected_paragraph contient le paragraph sélectionné : permet de voir le paragraph
+            let feature_geometry = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([feature.get('longitude'),feature.get('latitude')])));
+            this.selected_paragraph_layer.getSource().addFeature(feature_geometry);
 
             // Affichage bbox et standard deviation du paragraph
             this.affichage_bbox_paragraph(feature)
@@ -459,8 +430,8 @@ Vue.createApp({
         // Affichage bbox et standard deviation du paragraph
         affichage_bbox_paragraph (feature) {
 
-            // Couche bbox_paragraphs vidée
-            this.bbox_paragraphs.getSource().clear();
+            // Couche bbox paragraphs vidée
+            this.bbox_paragraphs_layer.getSource().clear();
 
             // Récupérer les valeurs de la bbox (en 4326)
             let min_lat_4326 = feature.get('min_lat');
@@ -484,8 +455,8 @@ Vue.createApp({
                 ol.geom.Polygon.fromExtent([min_lon, min_lat, max_lon, max_lat])
             );
 
-            // Ajout à la couche bbox_paragraphs
-            this.bbox_paragraphs.getSource().addFeature(new_paragraph);
+            // Ajout à la couche bbox paragraphs
+            this.bbox_paragraphs_layer.getSource().addFeature(new_paragraph);
 
             // Affichage de l'écart-type s'il existe
             if (feature.get('std_dev') != null) {
@@ -562,19 +533,19 @@ Vue.createApp({
                     [RightRight[0], RightRight[1] + std_dev/10]
                 ]));
                 
-                // Ajout à la couche bbox_paragraphs
-                this.bbox_paragraphs.getSource().addFeature(lineTop);
-                this.bbox_paragraphs.getSource().addFeature(lineBottom);
-                this.bbox_paragraphs.getSource().addFeature(lineLeft);
-                this.bbox_paragraphs.getSource().addFeature(lineRight);
-                this.bbox_paragraphs.getSource().addFeature(lineTopBottom);
-                this.bbox_paragraphs.getSource().addFeature(lineTopTop);
-                this.bbox_paragraphs.getSource().addFeature(lineBottomTop);
-                this.bbox_paragraphs.getSource().addFeature(lineBottomBottom);
-                this.bbox_paragraphs.getSource().addFeature(lineLeftRight);
-                this.bbox_paragraphs.getSource().addFeature(lineLeftLeft);
-                this.bbox_paragraphs.getSource().addFeature(lineRightLeft);
-                this.bbox_paragraphs.getSource().addFeature(lineRightRight);
+                // Ajout à la couche bbox paragraphs
+                this.bbox_paragraphs_layer.getSource().addFeature(lineTop);
+                this.bbox_paragraphs_layer.getSource().addFeature(lineBottom);
+                this.bbox_paragraphs_layer.getSource().addFeature(lineLeft);
+                this.bbox_paragraphs_layer.getSource().addFeature(lineRight);
+                this.bbox_paragraphs_layer.getSource().addFeature(lineTopBottom);
+                this.bbox_paragraphs_layer.getSource().addFeature(lineTopTop);
+                this.bbox_paragraphs_layer.getSource().addFeature(lineBottomTop);
+                this.bbox_paragraphs_layer.getSource().addFeature(lineBottomBottom);
+                this.bbox_paragraphs_layer.getSource().addFeature(lineLeftRight);
+                this.bbox_paragraphs_layer.getSource().addFeature(lineLeftLeft);
+                this.bbox_paragraphs_layer.getSource().addFeature(lineRightLeft);
+                this.bbox_paragraphs_layer.getSource().addFeature(lineRightRight);
 
             }
 
@@ -619,7 +590,7 @@ Vue.createApp({
         // this.map.addLayer(this.locations);
 
         // Création de la couche bbox events (vide)
-        this.bbox_events = new ol.layer.Vector({
+        this.bbox_events_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
             style: new ol.style.Style({
                 fill: new ol.style.Fill({
@@ -632,10 +603,10 @@ Vue.createApp({
             }),
             zIndex: 2,
         });
-        this.map.addLayer(this.bbox_events);
+        this.map.addLayer(this.bbox_events_layer);
 
         // Création de la couche bbox paragraphs (vide)
-        this.bbox_paragraphs = new ol.layer.Vector({
+        this.bbox_paragraphs_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
             style: new ol.style.Style({
                 fill: new ol.style.Fill({
@@ -648,10 +619,10 @@ Vue.createApp({
             }),
             zIndex: 3,
         });
-        this.map.addLayer(this.bbox_paragraphs);
+        this.map.addLayer(this.bbox_paragraphs_layer);
 
         // Création de la couche events (vide)
-        this.events = new ol.layer.Vector({
+        this.events_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
             style: new ol.style.Style({
                 image: new ol.style.Circle({
@@ -663,7 +634,7 @@ Vue.createApp({
             }),
             zIndex: 4,
         });
-        this.map.addLayer(this.events);
+        this.map.addLayer(this.events_layer);
 
         // Création de la couche event selectionné (vide)
         this.selected_event_layer = new ol.layer.Vector({
@@ -681,7 +652,7 @@ Vue.createApp({
         this.map.addLayer(this.selected_event_layer);
 
         // Création de la couche paragraphs (vide)
-        this.paragraphs = new ol.layer.Vector({
+        this.paragraphs_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
             style: new ol.style.Style({
                 image: new ol.style.Circle({
@@ -693,7 +664,22 @@ Vue.createApp({
             }),
             zIndex: 6,
         });
-        this.map.addLayer(this.paragraphs);
+        this.map.addLayer(this.paragraphs_layer);
+
+        // Création de la couche paragraph selectionné (vide)
+        this.selected_paragraph_layer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 5,
+                    fill: new ol.style.Fill({
+                        color: 'rgba(0, 0, 255, 1)',
+                    }),
+                }),
+            }),
+            zIndex: 7,
+        });
+        this.map.addLayer(this.selected_paragraph_layer);
 
         // Création du popup vide pour le pointermove
         let var_popup_pointermove = new ol.Overlay({
@@ -726,10 +712,10 @@ Vue.createApp({
         
             // Récupérer les features à partir des différentes couches
             this.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-                if (layer === this.events) {
+                if (layer === this.events_layer) {
                     event_features.push(feature);
                 }
-                if (layer === this.paragraphs) {
+                if (layer === this.paragraphs_layer) {
                     paragraph_features.push(feature);
                 }
             });
@@ -762,10 +748,10 @@ Vue.createApp({
         
             // Récupérer les features à partir des différentes couches
             this.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-                if (layer === this.events) {
+                if (layer === this.events_layer) {
                     event_features.push(feature);
                 }
-                if (layer === this.paragraphs) {
+                if (layer === this.paragraphs_layer) {
                     paragraph_features.push(feature);
                 }
             });
