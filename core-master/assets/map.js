@@ -34,6 +34,23 @@ Vue.createApp({
             back_to_map_button: false, // Permet de faire apparaitre le bouton pour retourner à la carte
             zoom_auto: true, // Zoom auto activé ou non (actif par défaut)
             location_information: false, // Affichage des informations de location ou non (inactif par défaut)
+            // Propriétés par défaut du changement de style
+            color_style: 'Standard',
+            color_standard: '#ff0000',
+            color_flood: '#3252a8',
+            color_flashflood: '#7f14cc',
+            color_landslide: '#4a2c03',
+            size_style: 'Standard',
+            size_standard: 10,
+            size_death: [
+                { label: 'No value', min: null, max: null, size: 2 },
+                { label: '0 - 9', min: 0, max: 9, size: 4 },
+                { label: '10 - 99', min: 10, max: 99, size: 6 },
+                { label: '100 - 999', min: 100, max: 999, size: 8 },
+                { label: '1000 - 9999', min: 1000, max: 9999, size: 10 },
+                { label: '10000 - 99999', min: 10000, max: 99999, size: 12 },
+                { label: '≥ 100000', min: 100000, max: Infinity, size: 15 }
+            ],
         };
     },
 
@@ -195,8 +212,7 @@ Vue.createApp({
             this.selected_event_layer.getSource().clear();
 
             // Couche selected_event contient l'event sélectionné : permet de voir l'event
-            let feature_geometry = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([feature.get('longitude'),feature.get('latitude')])));
-            this.selected_event_layer.getSource().addFeature(feature_geometry);
+            this.selected_event_layer.getSource().addFeature(feature);
 
         },
 
@@ -419,8 +435,7 @@ Vue.createApp({
             this.selected_paragraph_layer.getSource().clear();
 
             // Couche selected_paragraph contient le paragraph sélectionné : permet de voir le paragraph
-            let feature_geometry = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([feature.get('longitude'),feature.get('latitude')])));
-            this.selected_paragraph_layer.getSource().addFeature(feature_geometry);
+            this.selected_paragraph_layer.getSource().addFeature(feature);
 
             // Affichage bbox et standard deviation du paragraph
             this.affichage_bbox_paragraph(feature)
@@ -551,10 +566,80 @@ Vue.createApp({
 
         },
 
-        form_changer_style() {
-            // Affiche le popup pour entrer les détails (récupérer thème et comment)
-            document.getElementById("entrerInfosSignalement").style.display = "block";
-        }
+        // Affiche le popup pour changer le style
+        afficher_form_changer_style() {
+            document.getElementById("form_changer_style").style.display = "block";
+        },
+
+        // Création du style de chaque feature selon ses propriétés et le style choisi
+        creation_style(couleur_fixee = null) {
+            
+            return (feature) => {
+
+                // Définition de la couleur
+                let color;
+                if (couleur_fixee) {
+                    color = couleur_fixee;
+                } else if (this.color_style === 'Standard') {
+                    color = this.color_standard;
+                } else if (this.color_style === 'Event_type') {
+                    let hazardType = feature.get('hazard_type');
+                    switch (hazardType) {
+                    case 'flood':
+                        color = this.color_flood;
+                        break;
+                    case 'flash flood':
+                        color = this.color_flashflood;
+                        break;
+                    case 'landslide':
+                        color = this.color_landslide;
+                        break;
+                    }
+                }
+          
+                // Définition de la taille
+                let size;
+                if (this.size_style === 'Standard') {
+                    size = this.size_standard;
+                } else if (this.size_style === 'Max_death') {
+                    let max_death = feature.get('max_death');
+                    let size_death_f = this.size_death.find(interval => {
+                        if (interval.min === null && interval.max === null) {
+                            return max_death === null;
+                        }
+                        return max_death >= interval.min && max_death <= interval.max;
+                    });          
+                    size = size_death_f.size;
+                }
+          
+                return new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: size,
+                        fill: new ol.style.Fill({
+                            color: color,
+                        }),
+                    })
+                });
+
+            };
+
+        },
+
+        // Change le style quand on appuie sur le bouton Apply
+        change_style() {
+            
+            // Appliquer le style à la couche events
+            this.events_layer.setStyle(this.creation_style());
+
+            // Appliquer le style à la couche selected event (couleur imposée)
+            this.selected_event_layer.setStyle(this.creation_style('rgba(0, 255, 0, 1)'));
+        
+        },
+
+        // Ferme le popup pour changer le style
+        fermer_form_changer_style() {
+            document.getElementById("form_changer_style").style.display = "none";
+        },
 
 
     },
@@ -700,6 +785,7 @@ Vue.createApp({
         });
         this.map.addOverlay(var_popup_clic);
 
+        // Bouton pour changer le style
         var change_style_control = new ol.control.Control({
             element: document.getElementById("changer_style_div"),
         });
