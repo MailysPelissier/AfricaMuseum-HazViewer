@@ -3,19 +3,21 @@ Vue.createApp({
     data() {
         return {
             map: null, // Initialisation de la map
-            // locations: null, // Initialisation de la couche locations
             bbox_events_layer: null, // Initialisation de la couche bbox events
             bbox_paragraphs_layer: null, // Initialisation de la couche bbox paragraphs
             events_layer: null, // Initialisation de la couche events
             selected_event_layer: null, // Initialisation de la couche selected event
             paragraphs_layer: null, // Initialisation de la couche paragraphs
             selected_paragraph_layer: null, // Initialisation de la couche selected paragraph
-            event_all_property: [], // Liste de toutes les propriétés pour les events
+            // Liste de toutes les propriétés pour les events
+            event_all_property: [],
             // Propriétés principales des events
-            event_main_property: ["hazard_type", "disaster_score", "hasard_type_score", "event_time", "n_languages", "n_source_countries",
-                 "n_paragraphs", "n_articles", "start_time", "end_time", "duration", "ipcc_region", "ipcc_continent"],
+            event_main_property: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
+                 "n_paragraphs", "n_articles"],
+            // Autres propriétés des events
+            event_other_property: ["country", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
             // Propriétés locations des events
-            event_location_property: ["latitude", "longitude", "bbox"],
+            event_location_property: ["latitude", "longitude", "bbox_event"],
             // Propriétés chiffrées des events (souvent null)
             event_number_property: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
                 "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
@@ -24,16 +26,35 @@ Vue.createApp({
                 "max_affected", "n_max_affected", "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", 
                 "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", 
                 "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated"],
-            paragraph_all_property: [], // Liste de toutes les propriétés pour les paragraphs
-            event_text: 'Select an event to get more information!', // Texte sur les events (haut droite de l'écran)
+            // Liste de toutes les propriétés pour les paragraphs
+            paragraph_all_property: [],
+            // Propriétés principales des paragraphs
+            paragraph_main_property: ["title", "hasard_type", "publication_time", "paragraph_time", "nb_death", "nb_injured", "nb_affected",
+                "article_language"],
+            // Autres propriétés des paragraphs
+            paragraph_other_property: ["extracted_text", "original_text", "country", "source_country", "domain_url", "extracted_location", 
+                "ner_score", "n_locations", "disaster_label", "disaster_score", "hasard_type_score", "unnamed_column"],
+            // Propriétés locations des events
+            paragraph_location_property: ["latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon"],
+            // Propriétés chiffrées des paragraphs (souvent null)
+            paragraph_number_property: ["nb_death", "score_death", "answer_death", "nb_homeless", "score_homeless", "answer_homeless", 
+                "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", "answer_affected", "nb_missing",
+                "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "nb_death_min",
+                "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min",
+                "nb_affected_max", "nb_missing_min", "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max"],
+            event_main_text: 'Select an event to get more information!', // Texte sur les events (haut droite de l'écran)
+            event_other_text: '', // Texte sur les events, partie optionnelle others (haut droite de l'écran)
             event_location_text: '', // Texte sur les events, partie optionnelle locations (haut droite de l'écran)
+            event_number_text: '', // Texte sur les events, partie optionnelle numbers (haut droite de l'écran)
             paragraph_text: '', // Texte sur les pargraphs (bas droite de l'écran)
             selected_event: null, // Permet de conserver l'event sélectionné
             selected_paragraph: null, // Permet de conserver le paragraph sélectionné
             more_info_button: false, // Permet de faire apparaitre le bouton plus d'infos quand un event est sélectionné
             back_to_map_button: false, // Permet de faire apparaitre le bouton pour retourner à la carte
             zoom_auto: true, // Zoom auto activé ou non (actif par défaut)
+            other_information: false, // Affichage des informations de other ou non (inactif par défaut)
             location_information: false, // Affichage des informations de location ou non (inactif par défaut)
+            number_information: false, // Affichage des informations de number ou non (inactif par défaut)
             // Propriétés par défaut du changement de style
             color_style: 'Standard',
             color_standard: '#ff0000',
@@ -76,49 +97,6 @@ Vue.createApp({
             return { min_lon, min_lat, max_lon, max_lat };
 
         },
-
-        // // Ajout des locations à la couche locations, selon la bbox
-        // ajout_locations () {
-
-        //     let { min_lon, min_lat, max_lon, max_lat } = this.emprise_ecran();
-
-        //     // Requête vers la bdd, on récupère seulement les locations dans la bbox
-        //     url = "/postgres/locations?min_lon=" + min_lon + '&min_lat=' + min_lat + '&max_lon=' + max_lon + '&max_lat=' + max_lat;
-        //     fetch(url)
-        //     .then( (result) => {
-        //         return result.json();
-        //     })
-        //     .then( (json) => {
-
-        //         // Pour chaque location récupérée :
-        //         for (let i = 0; i < json.length; i++) {
-
-        //             // Récupération de l'identifiant
-        //             let location_id = json[i].location_id;
-
-        //             // Si la location n'est pas déjà dans la couche :
-        //             let exists = this.locations.getSource().getFeatureById(location_id);
-        //             if (!exists) {
-
-        //                 // Création de la feature à l'aide de ses coordonnées (projection en 3857)
-        //                 let new_location = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([json[i].longitude,json[i].latitude])));
-
-        //                 // Stockage de l'identifiant
-        //                 new_location.setId(location_id);
-
-        //                 // Récupération et stockage des propriétés
-        //                 for (let key in json[i]) {
-        //                     if (json[i].hasOwnProperty(key)) {
-        //                         new_location.set(key, json[i][key]);
-        //                     }
-        //                 }
-
-        //                 // Ajout à la couche locations
-        //                 this.locations.getSource().addFeature(new_location);
-        //             }     
-        //         };
-        //     });
-        // },
 
         // Ajout des events à la couche events, selon la bbox
         ajout_events () {
@@ -180,24 +158,30 @@ Vue.createApp({
         affichage_selection_event (feature) {
 
             // Chargement et affichage du texte sur l'event
-            this.event_text = '<ul>';
+            this.event_main_text = '<ul>';
+            this.event_other_text = '<ul>';
             this.event_location_text = '<ul>';
+            this.event_number_text = '<ul>';
             // Les propriétés principales s'affichent tout le temps
             for (let property of this.event_main_property) {
-                this.event_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
+                this.event_main_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
-            // Les propriétés chiffrées s'affichent si elles existent
-            for (let property of this.event_number_property) {
-                if (feature.get(property) != null) {
-                    this.event_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
-                }
+            // Les propriétés de other se chargent, mais elles ne s'affichent que si la checkbox Show other information est cochée
+            for (let property of this.event_other_property) {
+                this.event_other_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
             // Les propriétés de location se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
             for (let property of this.event_location_property) {
                 this.event_location_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
-            this.event_text += '</ul>';
+            // Les propriétés de number se chargent, mais elles ne s'affichent que si la checkbox Show number information est cochée
+            for (let property of this.event_number_property) {
+                this.event_number_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
+            }
+            this.event_main_text += '</ul>';
+            this.event_other_text += '</ul>';
             this.event_location_text += '</ul>';
+            this.event_number_text += '</ul>';
 
             // Affichage contours scrollbox
             document.getElementById('event_data_scroll_box').style.border = "1px solid #ccc";
@@ -216,6 +200,19 @@ Vue.createApp({
 
         },
 
+        // Change la variable other information selon si la chechbox other information est cochée ou non
+        // L'utilisateur peut choisir s'il veut afficher les informations supplémentaires ou non, son choix est conservé
+        change_others_information () {
+
+            if (this.other_information) {
+                this.other_information = false;
+            }
+            else {
+                this.other_information = true;
+            };
+
+        },
+
         // Change la variable location information selon si la chechbox location information est cochée ou non
         // L'utilisateur peut choisir s'il veut afficher les informations sur la location ou non, son choix est conservé
         change_locations_information () {
@@ -225,6 +222,19 @@ Vue.createApp({
             }
             else {
                 this.location_information = true;
+            };
+
+        },
+
+        // Change la variable number information selon si la chechbox number information est cochée ou non
+        // L'utilisateur peut choisir s'il veut afficher les informations sur la number ou non, son choix est conservé
+        change_numbers_information () {
+
+            if (this.number_information) {
+                this.number_information = false;
+            }
+            else {
+                this.number_information = true;
             };
 
         },
@@ -296,7 +306,7 @@ Vue.createApp({
         affichage_bbox_event (feature) {
 
             // Récupérer les valeurs de la bbox (en 4326)
-            let bbox = feature.get('bbox').replace(/\s+/g, '').replace('{', '').replace('}', '').split(',');
+            let bbox = feature.get('bbox_event').replace(/\s+/g, '').replace('{', '').replace('}', '').split(',');
             let min_lat_4326 = bbox[0].substring(9);
             let max_lat_4326 = bbox[1].substring(9);
             let min_lon_4326 = bbox[2].substring(9);
@@ -419,10 +429,10 @@ Vue.createApp({
 
             // Chargement et affichage du texte sur le paragraph
             this.paragraph_text = '<ul>';
-            // Toutes les propriétés
-            for (let property of this.paragraph_all_property) {
+            // Les propriétés principales s'affichent tout le temps
+            for (let property of this.paragraph_main_property) {
                 this.paragraph_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
-            }       
+            }     
             this.paragraph_text += '</ul>';
 
             // Affichage contours scrollbox
@@ -665,20 +675,6 @@ Vue.createApp({
             ],
         });
 
-        // // Création de la couche locations (vide)
-        // this.locations = new ol.layer.Vector({
-        //     source: new ol.source.Vector(),
-        //     style: new ol.style.Style({
-        //         image: new ol.style.Circle({
-        //             radius: 10,
-        //             fill: new ol.style.Fill({
-        //                 color: 'rgba(0, 0, 255, 1)',
-        //             }),
-        //         }),
-        //     }),
-        // });
-        // this.map.addLayer(this.locations);
-
         // Création de la couche bbox events (vide)
         this.bbox_events_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
@@ -794,7 +790,6 @@ Vue.createApp({
         // A chaque déplacement/zoom, ajout des events à la couche events selon la bbox
         // Suppression du popup clic
         this.map.on('moveend', () => {
-            // this.ajout_locations();
             this.ajout_events();
             document.getElementById("popup_clic").style.display = "none";
         });
@@ -909,8 +904,6 @@ Vue.createApp({
             }
 
         });
-
-       
 
     },
 
