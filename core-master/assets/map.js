@@ -72,6 +72,13 @@ Vue.createApp({
                 { label: '10000 - 99999', min: 10000, max: 99999, size: 12 },
                 { label: '≥ 100000', min: 100000, max: Infinity, size: 15 }
             ],
+            // Filtre dates
+            min_date: "01-01-2020",
+            max_date: "31-12-2023",
+            start_date: "01-01-2020",
+            end_date: "31-12-2023",
+            flatpickr_start: null,
+            flatpickr_end: null,
         };
     },
 
@@ -651,6 +658,20 @@ Vue.createApp({
             document.getElementById("form_changer_style").style.display = "none";
         },
 
+        // Affiche le popup pour filtrer les évènements
+        afficher_form_filtrage() {
+            document.getElementById("form_filter").style.display = "block";
+        },
+
+        search() {
+            console.log(this.start_date,this.end_date)
+        },
+
+        // Ferme le popup pour filtrer les évènements
+        fermer_form_filtrage() {
+            document.getElementById("form_filter").style.display = "none";
+        }
+
 
     },
 
@@ -780,6 +801,36 @@ Vue.createApp({
             positioning: "bottom-center"
         });
         this.map.addOverlay(var_popup_clic);
+
+        // Bouton pour accéder à l'outil filtrage
+        var filtrage_control = new ol.control.Control({
+            element: document.getElementById("outil_filtrage_div"),
+        });
+        this.map.addControl(filtrage_control);
+
+        // Calandrier pour sélectionner la date de départ
+        let start_date_input = document.querySelector('input[data-id="start_date"]');
+        this.flatpickr_start = flatpickr(start_date_input, {
+            dateFormat: "d-m-Y",
+            minDate: this.min_date,
+            maxDate: this.max_date,
+            defaultDate: this.start_date,
+            onChange: (selectedDates, dateStr) => {
+                this.start_date = dateStr;
+            }
+        });
+
+        // Calandrier pour sélectionner la date de fin
+        let end_date_input = document.querySelector('input[data-id="end_date"]');
+        this.flatpickr_end = flatpickr(end_date_input, {
+            dateFormat: "d-m-Y",
+            minDate: this.min_date,
+            maxDate: this.max_date,
+            defaultDate: this.end_date,
+            onChange: (selectedDates, dateStr) => {
+                this.end_date = dateStr;
+            }
+        });
 
         // Bouton pour changer le style
         var change_style_control = new ol.control.Control({

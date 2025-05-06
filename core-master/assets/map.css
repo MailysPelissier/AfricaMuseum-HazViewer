@@ -64,6 +64,16 @@ ul {
     overflow: scroll;
 }
 
+#outil_filtrage_div {
+    top: .5em;
+    left: .5em;
+}
+
+#outil_filtrage_button {
+    height: 2em !important;
+    width: 8em !important;
+}
+
 #changer_style_div {
     bottom: .5em;
     left: .5em;
@@ -72,6 +82,13 @@ ul {
 #changer_style_button {
     height: 2em !important;
     width: 8em !important;
+}
+
+.ol-zoom {
+    top: unset;
+    left: unset;
+    bottom: .5em;
+    right: .5em;
 }
 
 #form_changer_style {
@@ -98,4 +115,16 @@ ul {
 .color_input::-moz-color-swatch {
     border-radius: 15px;
     border: none;
+}
+
+#form_filter {
+    display: none; 
+    position: absolute; 
+    top: 3em; 
+    left: 0.5em;
+    background: white; 
+    padding: 15px; 
+    border-radius: 8px; 
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.3); 
+    z-index: 1001;
 }

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://unpkg.com/ol/ol.css">
     <link rel="stylesheet" href="assets/map.css">
     <script src="https://unpkg.com/ol/dist/ol.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 
 <body>
@@ -58,6 +59,23 @@
                     <button id="cancel" @click="fermer_form_changer_style">OK</button>
                 </div>
             </div>
+            <div id="form_filter">
+                <h3>Filter</h3>
+                <div id="date_filter">
+                    <div id="start_date">
+                        <label>Start date: </label>
+                        <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date">
+                    </div>
+                    <div id="end_date">
+                        <label>End date: </label>
+                        <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date">
+                    </div>
+                </div>
+                <div class="buttons">
+                    <button id="search" @click="search">Search</button>
+                    <button id="cancel" @click="fermer_form_filtrage">OK</button>
+                </div>
+            </div>
         </div>
         <div id=event_data_scroll_box class="scroll_box">
             <div id=event_title class=title v-if="selected_event">Event:</div>
@@ -71,7 +89,7 @@
             </div>
             <div id=event_location_data v-html="event_location_text" v-if="location_information"></div>
             <div id="number_data_checkbox" v-if="selected_event">
-                <label>Show number information<input @input="change_numbers_information" type="checkbox" v-model="number_information"></label>
+                <label>Show more statistics<input @input="change_numbers_information" type="checkbox" v-model="number_information"></label>
             </div>
             <div id=event_number_data v-html="event_number_text" v-if="number_information"></div>
             <div class="buttons">
@@ -88,12 +106,16 @@
         </div>
         <div id=popup_pointermove class=popup></div>
         <div id=popup_clic class=popup></div>
+        <div id=outil_filtrage_div class='ol-unselectable ol-control'>
+            <button id=outil_filtrage_button @click="afficher_form_filtrage">Filter</button>
+        </div>
         <div id=changer_style_div class='ol-unselectable ol-control'>
             <button id=changer_style_button @click="afficher_form_changer_style">Change style</button>
         </div>
     </div>  
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="assets/map.js"></script> 
     
 </body>
