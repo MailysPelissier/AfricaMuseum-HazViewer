@@ -13,8 +13,8 @@
 <body>
 
     <div id="vue_map">
-        <div id="map">
-            <div id="form_changer_style">
+        <div id="map" class="margin">
+            <div id="form_changer_style" class="popup grand_popup">
                 <h3>Change style</h3>
                 <label>Color style: </label>
                 <select v-model="color_style">
@@ -54,30 +54,37 @@
                     </div>
                 </div>
                 <br><br>
-                <div class="buttons">
+                <div class="flexrow_space_evenly padding">
                     <button id="change_style" @click="change_style">Apply</button>
                     <button id="cancel" @click="fermer_form_changer_style">OK</button>
                 </div>
             </div>
-            <div id="form_filter">
+            <div id="form_filter" class="popup grand_popup">
                 <h3>Filter</h3>
-                <div id="date_filter">
-                    <div id="start_date">
-                        <label>Start date: </label>
-                        <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date">
-                    </div>
-                    <div id="end_date">
-                        <label>End date: </label>
-                        <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date">
-                    </div>
+                <button id="date_button" class="flexrow_space_between largeur_min" @click="display_data_filter" v-if="!show_data_filter">
+                    <h4>Date</h4>
+                    <div class="vertical_center">&#62;</div>
+                </button>
+                <div id="date_filter" class="flexrow_space_between largeur_min padding" v-if="show_data_filter">
+                    <button @click="display_data_filter">&#60;</button>
+                    <div id="date_field">
+                        <div id="start_date">
+                            <label>Start date: </label>
+                            <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date">
+                        </div>
+                        <div id="end_date">
+                            <label>End date: </label>
+                            <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date">
+                        </div>
+                    </div>  
                 </div>
-                <div class="buttons">
+                <div class="flexrow_space_evenly padding">
                     <button id="search" @click="search">Search</button>
                     <button id="cancel" @click="fermer_form_filtrage">OK</button>
                 </div>
             </div>
         </div>
-        <div id=event_data_scroll_box class="scroll_box">
+        <div id=event_data_scroll_box class="scroll_box margin padding">
             <div id=event_title class=title v-if="selected_event">Event:</div>
             <div id=event_data v-html="event_main_text"></div>
             <div id="other_data_checkbox" v-if="selected_event">
@@ -92,7 +99,7 @@
                 <label>Show more statistics<input @input="change_numbers_information" type="checkbox" v-model="number_information"></label>
             </div>
             <div id=event_number_data v-html="event_number_text" v-if="number_information"></div>
-            <div class="buttons">
+            <div class="flexrow_space_evenly padding">
                 <button id=more_info_button v-if="more_info_button" @click="more_infos_page">More information</button>
                 <div id="zoom_auto_checkbox" v-if="more_info_button">
                     <label>Automatic zoom<input @input="change_zoom_auto" type="checkbox" v-model="zoom_auto"></label>
@@ -100,12 +107,12 @@
                 <button id=back_to_map_button v-if="back_to_map_button" @click="back_to_map">Back to map</button>
             </div>
         </div>
-        <div id=paragraph_data_scroll_box class="scroll_box">
+        <div id=paragraph_data_scroll_box class="scroll_box margin padding">
             <div id=paragraph_title  class=title v-if="selected_paragraph">Paragraph:</div>
             <div id=paragraph_data v-html="paragraph_text" v-if="selected_paragraph"></div>
         </div>
-        <div id=popup_pointermove class=popup></div>
-        <div id=popup_clic class=popup></div>
+        <div id=popup_pointermove class="popup petit_popup"></div>
+        <div id=popup_clic class="popup petit_popup"></div>
         <div id=outil_filtrage_div class='ol-unselectable ol-control'>
             <button id=outil_filtrage_button @click="afficher_form_filtrage">Filter</button>
         </div>

@@ -72,6 +72,8 @@ Vue.createApp({
                 { label: '10000 - 99999', min: 10000, max: 99999, size: 12 },
                 { label: '≥ 100000', min: 100000, max: Infinity, size: 15 }
             ],
+            // Affichage choix dates
+            show_data_filter: false,
             // Filtre dates
             min_date: "01-01-2020",
             max_date: "31-12-2023",
@@ -673,6 +675,49 @@ Vue.createApp({
             document.getElementById("form_filter").style.display = "block";
         },
 
+        // Afficher / masquer le choix des dates
+        display_data_filter() {
+
+            if (this.show_data_filter) {
+                this.show_data_filter = false;
+            }
+
+            else {
+
+                this.show_data_filter = true;
+
+                this.$nextTick(() => {
+
+                    // Calandrier pour sélectionner la date de départ
+                    let start_date_input = document.querySelector('input[data-id="start_date"]');
+                    this.flatpickr_start = flatpickr(start_date_input, {
+                        dateFormat: "d-m-Y",
+                        minDate: this.min_date,
+                        maxDate: this.max_date,
+                        defaultDate: this.start_date,
+                        onChange: (selectedDates, dateStr) => {
+                            this.start_date = dateStr;
+                        }
+                    });
+        
+                    // Calandrier pour sélectionner la date de fin
+                    let end_date_input = document.querySelector('input[data-id="end_date"]');
+                    this.flatpickr_end = flatpickr(end_date_input, {
+                        dateFormat: "d-m-Y",
+                        minDate: this.min_date,
+                        maxDate: this.max_date,
+                        defaultDate: this.end_date,
+                        onChange: (selectedDates, dateStr) => {
+                            this.end_date = dateStr;
+                        }
+                    });
+
+                });
+
+            }
+
+        },
+
         // Met à jour la propriété visibilité de la feature selon le filtre
         set_feature_visibility(feature) {
       
@@ -845,30 +890,6 @@ Vue.createApp({
             element: document.getElementById("outil_filtrage_div"),
         });
         this.map.addControl(filtrage_control);
-
-        // Calandrier pour sélectionner la date de départ
-        let start_date_input = document.querySelector('input[data-id="start_date"]');
-        this.flatpickr_start = flatpickr(start_date_input, {
-            dateFormat: "d-m-Y",
-            minDate: this.min_date,
-            maxDate: this.max_date,
-            defaultDate: this.start_date,
-            onChange: (selectedDates, dateStr) => {
-                this.start_date = dateStr;
-            }
-        });
-
-        // Calandrier pour sélectionner la date de fin
-        let end_date_input = document.querySelector('input[data-id="end_date"]');
-        this.flatpickr_end = flatpickr(end_date_input, {
-            dateFormat: "d-m-Y",
-            minDate: this.min_date,
-            maxDate: this.max_date,
-            defaultDate: this.end_date,
-            onChange: (selectedDates, dateStr) => {
-                this.end_date = dateStr;
-            }
-        });
 
         // Bouton pour changer le style
         var change_style_control = new ol.control.Control({

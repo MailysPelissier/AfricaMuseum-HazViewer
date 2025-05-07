@@ -17,7 +17,6 @@ html, body {
 #map { 
     grid-column: 1;
     grid-row: 1/3;
-    margin: 10px;
     position: relative;
 }
 
@@ -29,39 +28,6 @@ html, body {
 #paragraph_data_scroll_box {
     grid-column: 2;
     grid-row: 2;
-}
-
-.scroll_box {
-    margin: 10px;
-    padding: 10px;
-    overflow: scroll;
-}
-
-.title {
-    font-weight: bold;
-}
-
-ul {
-    margin: 5px;
-    padding-left: 10px;
-}
-
-.buttons {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    margin: 10px;
-}
-
-.popup {
-    display: none; 
-    position: absolute; 
-    background: white; 
-    padding: 5px; 
-    border: 1px solid black; 
-    border-radius: 5px;
-    white-space: nowrap;
-    overflow: scroll;
 }
 
 #outil_filtrage_div {
@@ -92,15 +58,75 @@ ul {
 }
 
 #form_changer_style {
-    display: none; 
-    position: absolute; 
     bottom: 3em; 
     left: 0.5em;
-    background: white; 
-    padding: 15px; 
-    border-radius: 8px; 
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.3); 
     z-index: 1000;
+}
+
+#form_filter {
+    top: 3em; 
+    left: 0.5em;
+    z-index: 1001;
+}
+
+ul {
+    margin: 5px;
+    padding-left: 10px;
+}
+
+.title {
+    font-weight: bold;
+}
+
+.margin {
+    margin: 10px;
+}
+
+.padding {
+    padding: 10px;
+}
+
+.largeur_min {
+    min-width: 20em;
+}
+
+.flexrow_space_evenly {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+}
+
+.flexrow_space_between {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.vertical_center {
+    display: grid; 
+    place-items: center; 
+}
+
+.scroll_box {
+    overflow: scroll;
+}
+
+.popup {
+    display: none; 
+    position: absolute; 
+    background: white; 
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.3); 
+    white-space: nowrap;
+}
+
+.petit_popup {
+    padding: 5px; 
+    border-radius: 5px;
+}
+
+.grand_popup {
+    padding: 15px; 
+    border-radius: 8px;
 }
 
 .color_input {
@@ -112,19 +138,8 @@ ul {
     border: none;
     cursor: pointer;
 }
+
 .color_input::-moz-color-swatch {
     border-radius: 15px;
     border: none;
-}
-
-#form_filter {
-    display: none; 
-    position: absolute; 
-    top: 3em; 
-    left: 0.5em;
-    background: white; 
-    padding: 15px; 
-    border-radius: 8px; 
-    box-shadow: 0px 0px 10px rgba(0,0,0,0.3); 
-    z-index: 1001;
 }
