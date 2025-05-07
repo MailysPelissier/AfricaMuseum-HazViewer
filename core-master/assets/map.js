@@ -150,6 +150,9 @@ Vue.createApp({
                             }
                         }
 
+                        // Propriété visibilité dépend des filtres
+                        this.set_feature_visibility(new_event);
+
                         // Ajout à la couche events
                         this.events_layer.getSource().addFeature(new_event); 
 
@@ -162,7 +165,7 @@ Vue.createApp({
         },
 
         // Crée le texte en récupérant les infos sur l'event, change le style de l'event
-        affichage_selection_event (feature) {
+        affichage_selection_event (feature) { 
 
             // Chargement et affichage du texte sur l'event
             this.event_main_text = '<ul>';
@@ -590,59 +593,66 @@ Vue.createApp({
 
         // Création du style de chaque feature selon ses propriétés et le style choisi
         creation_style(couleur_fixee = null) {
-            
+
             return (feature) => {
 
-                // Définition de la couleur
-                let color;
-                if (couleur_fixee) {
-                    color = couleur_fixee;
-                } else if (this.color_style === 'Standard') {
-                    color = this.color_standard;
-                } else if (this.color_style === 'Event_type') {
-                    let hazardType = feature.get('hazard_type');
-                    switch (hazardType) {
-                    case 'flood':
-                        color = this.color_flood;
-                        break;
-                    case 'flash flood':
-                        color = this.color_flashflood;
-                        break;
-                    case 'landslide':
-                        color = this.color_landslide;
-                        break;
-                    }
+                // Feature invisible si elle ne respecte pas les critères de filtrage
+                if (feature.get('visible') === false) {
+                    return new ol.style.Style({});
                 }
-          
-                // Définition de la taille
-                let size;
-                if (this.size_style === 'Standard') {
-                    size = this.size_standard;
-                } else if (this.size_style === 'Max_death') {
-                    let max_death = feature.get('max_death');
-                    let size_death_f = this.size_death.find(interval => {
-                        if (interval.min === null && interval.max === null) {
-                            return max_death === null;
-                        }
-                        return max_death >= interval.min && max_death <= interval.max;
-                    });          
-                    size = size_death_f.size;
-                }
-          
-                return new ol.style.Style({
-                    image: new ol.style.Circle({
-                        radius: size,
-                        fill: new ol.style.Fill({
-                            color: color,
-                        }),
-                    })
-                });
 
+                else {
+                    // Définition de la couleur
+                    let color;
+                    if (couleur_fixee) {
+                        color = couleur_fixee;
+                    } else if (this.color_style === 'Standard') {
+                        color = this.color_standard;
+                    } else if (this.color_style === 'Event_type') {
+                        let hazardType = feature.get('hazard_type');
+                        switch (hazardType) {
+                        case 'flood':
+                            color = this.color_flood;
+                            break;
+                        case 'flash flood':
+                            color = this.color_flashflood;
+                            break;
+                        case 'landslide':
+                            color = this.color_landslide;
+                            break;
+                        }
+                    }
+            
+                    // Définition de la taille
+                    let size;
+                    if (this.size_style === 'Standard') {
+                        size = this.size_standard;
+                    } else if (this.size_style === 'Max_death') {
+                        let max_death = feature.get('max_death');
+                        let size_death_f = this.size_death.find(interval => {
+                            if (interval.min === null && interval.max === null) {
+                                return max_death === null;
+                            }
+                            return max_death >= interval.min && max_death <= interval.max;
+                        });          
+                        size = size_death_f.size;
+                    }
+            
+                    return new ol.style.Style({
+                        image: new ol.style.Circle({
+                            radius: size,
+                            fill: new ol.style.Fill({
+                                color: color,
+                            }),
+                        })
+                    });
+                }
+                
             };
 
         },
 
-        // Change le style quand on appuie sur le bouton Apply
+        // Change le style des évènements
         change_style() {
             
             // Appliquer le style à la couche events
@@ -663,8 +673,36 @@ Vue.createApp({
             document.getElementById("form_filter").style.display = "block";
         },
 
+        // Met à jour la propriété visibilité de la feature selon le filtre
+        set_feature_visibility(feature) {
+      
+            // Dates du filtre en format y-m-d
+            let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
+            let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
+
+            // Feature visible par défaut
+            feature.set('visible',true);
+            // Feature ne doit pas être visible si elle ne respecte pas les critères du filtre
+            if (Date.parse(feature.get('event_time')) < Date.parse(start_date_ymd)) {
+                feature.set('visible',false);
+            }
+            if (Date.parse(feature.get('event_time')) > Date.parse(end_date_ymd)) {
+                feature.set('visible',false);
+            }
+
+        },
+
+        // Application des filtres : seuls les évènements respectant les critères apparaissent
         search() {
-            console.log(this.start_date,this.end_date)
+
+            // Pour chaque feature, sa propriété visibilité est modifiée selon le filtre
+            for (let feature of this.events_layer.getSource().getFeatures()) {
+                this.set_feature_visibility(feature);
+            }
+
+            // Change le style des features : celles dont la visibilité est fausse sont invisibles, les autres gardent leur style actuel
+            this.change_style();
+
         },
 
         // Ferme le popup pour filtrer les évènements
