@@ -55,6 +55,8 @@ Vue.createApp({
             other_information: false, // Affichage des informations de other ou non (inactif par défaut)
             location_information: false, // Affichage des informations de location ou non (inactif par défaut)
             number_information: false, // Affichage des informations de number ou non (inactif par défaut)
+            // Affichage popup changer style
+            show_changer_style_form: false,
             // Propriétés par défaut du changement de style
             color_style: 'Standard',
             color_standard: '#ff0000',
@@ -64,14 +66,16 @@ Vue.createApp({
             size_style: 'Standard',
             size_standard: 10,
             size_death: [
-                { label: 'No value', min: null, max: null, size: 2 },
-                { label: '0 - 9', min: 0, max: 9, size: 4 },
-                { label: '10 - 99', min: 10, max: 99, size: 6 },
-                { label: '100 - 999', min: 100, max: 999, size: 8 },
-                { label: '1000 - 9999', min: 1000, max: 9999, size: 10 },
-                { label: '10000 - 99999', min: 10000, max: 99999, size: 12 },
+                { label: 'No value', min: null, max: null, size: 3 },
+                { label: '0 - 9', min: 0, max: 9, size: 5 },
+                { label: '10 - 99', min: 10, max: 99, size: 7 },
+                { label: '100 - 999', min: 100, max: 999, size: 9 },
+                { label: '1000 - 9999', min: 1000, max: 9999, size: 11 },
+                { label: '10000 - 99999', min: 10000, max: 99999, size: 13 },
                 { label: '≥ 100000', min: 100000, max: Infinity, size: 15 }
             ],
+            // Affichage popup filtres
+            show_filter_form: false,
             // Affichage choix event type
             show_event_type_filter: false,
             // Affichage choix dates
@@ -260,6 +264,9 @@ Vue.createApp({
 
             // Disparition du popup clic
             document.getElementById("popup_clic").style.display = "none";
+
+            // Suppression contours scrollbox
+            document.getElementById('paragraph_data_scroll_box').style.border = "none";
 
             // Couche events visible
             this.events_layer.setVisible(true);
@@ -551,11 +558,6 @@ Vue.createApp({
             this[parameter] = !this[parameter];
         },
 
-        // Affiche le popup pour changer le style
-        afficher_form_changer_style() {
-            document.getElementById("form_changer_style").style.display = "block";
-        },
-
         // Création du style de chaque feature selon ses propriétés et le style choisi
         creation_style(couleur_fixee = null) {
 
@@ -611,6 +613,7 @@ Vue.createApp({
                             }),
                         })
                     });
+
                 }
                 
             };
@@ -628,21 +631,23 @@ Vue.createApp({
         
         },
 
-        // Ferme le popup pour changer le style
-        fermer_form_changer_style() {
-            document.getElementById("form_changer_style").style.display = "none";
+        // Met en forme le formulaire des filtres
+        setup_filter_form() {
+
+            this.show_filter_form = !this.show_filter_form;
+
+            if (this.show_filter_form) {
+                this.show_event_type_filter = false;
+                this.show_date_filter = false;
+            }
+
         },
 
-        // Affiche le popup pour filtrer les évènements
-        afficher_form_filtrage() {
-            document.getElementById("form_filter").style.display = "block";
-        },
-        
         // Afficher / masquer le choix des dates
         // Initialisation des calendriers
         display_date_filter() {
 
-            this.show_date_filter = !this.show_date_filter
+            this.show_date_filter = !this.show_date_filter;
 
             if (this.show_date_filter) {
 
@@ -724,12 +729,6 @@ Vue.createApp({
             this.change_style();
 
         },
-
-        // Ferme le popup pour filtrer les évènements
-        fermer_form_filtrage() {
-            document.getElementById("form_filter").style.display = "none";
-        }
-
 
     },
 

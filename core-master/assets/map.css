@@ -82,6 +82,10 @@ ul {
     margin: 10px;
 }
 
+.margin_left {
+    margin-left: 10px;
+}
+
 .padding {
     padding: 10px;
 }
@@ -90,15 +94,16 @@ ul {
     min-width: 20em;
 }
 
-.flexrow_space_evenly {
+.flexrow {
     display: flex;
     flex-direction: row;
+}
+
+.space_evenly {
     justify-content: space-evenly;
 }
 
-.flexrow_space_between {
-    display: flex;
-    flex-direction: row;
+.space_between {
     justify-content: space-between;
 }
 
@@ -112,7 +117,6 @@ ul {
 }
 
 .popup {
-    display: none; 
     position: absolute; 
     background: white; 
     box-shadow: 0px 0px 10px rgba(0,0,0,0.3); 
@@ -120,11 +124,13 @@ ul {
 }
 
 .petit_popup {
+    display: none; 
     padding: 5px; 
     border-radius: 5px;
 }
 
 .grand_popup {
+    display: block; 
     padding: 15px; 
     border-radius: 8px;
 }
