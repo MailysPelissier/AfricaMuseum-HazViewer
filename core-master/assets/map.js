@@ -72,8 +72,14 @@ Vue.createApp({
                 { label: '10000 - 99999', min: 10000, max: 99999, size: 12 },
                 { label: '≥ 100000', min: 100000, max: Infinity, size: 15 }
             ],
+            // Affichage choix event type
+            show_event_type_filter: false,
             // Affichage choix dates
-            show_data_filter: false,
+            show_date_filter: false,
+            // Filtre event type
+            flood: true,
+            flashflood: true,
+            landslide: true,
             // Filtre dates
             min_date: "01-01-2020",
             max_date: "31-12-2023",
@@ -179,14 +185,17 @@ Vue.createApp({
                 this.event_main_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
             // Les propriétés de other se chargent, mais elles ne s'affichent que si la checkbox Show other information est cochée
+            // L'utilisateur peut choisir s'il veut afficher les informations supplémentaires ou non, son choix est conservé
             for (let property of this.event_other_property) {
                 this.event_other_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
             // Les propriétés de location se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
+            // L'utilisateur peut choisir s'il veut afficher les informations sur la location ou non, son choix est conservé
             for (let property of this.event_location_property) {
                 this.event_location_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
             // Les propriétés de number se chargent, mais elles ne s'affichent que si la checkbox Show number information est cochée
+            // L'utilisateur peut choisir s'il veut afficher les informations statistiques ou non, son choix est conservé
             for (let property of this.event_number_property) {
                 this.event_number_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
@@ -209,45 +218,6 @@ Vue.createApp({
 
             // Couche selected_event contient l'event sélectionné : permet de voir l'event
             this.selected_event_layer.getSource().addFeature(feature);
-
-        },
-
-        // Change la variable other information selon si la chechbox other information est cochée ou non
-        // L'utilisateur peut choisir s'il veut afficher les informations supplémentaires ou non, son choix est conservé
-        change_others_information () {
-
-            if (this.other_information) {
-                this.other_information = false;
-            }
-            else {
-                this.other_information = true;
-            };
-
-        },
-
-        // Change la variable location information selon si la chechbox location information est cochée ou non
-        // L'utilisateur peut choisir s'il veut afficher les informations sur la location ou non, son choix est conservé
-        change_locations_information () {
-
-            if (this.location_information) {
-                this.location_information = false;
-            }
-            else {
-                this.location_information = true;
-            };
-
-        },
-
-        // Change la variable number information selon si la chechbox number information est cochée ou non
-        // L'utilisateur peut choisir s'il veut afficher les informations sur la number ou non, son choix est conservé
-        change_numbers_information () {
-
-            if (this.number_information) {
-                this.number_information = false;
-            }
-            else {
-                this.number_information = true;
-            };
 
         },
 
@@ -344,23 +314,11 @@ Vue.createApp({
             this.bbox_events_layer.getSource().addFeature(new_event);
 
             // Zoom sur la bbox si zoom_auto activé
+            // L'utilisateur peut choisir s'il veut zoomer automatiquement sur l'emprise de l'event, son choix est conservé
             if (this.zoom_auto) {
                 this.map.getView().fit([min_lon, min_lat, max_lon, max_lat], this.map.getSize());
                 this.map.getView().setZoom(this.map.getView().getZoom() - 0.5);
             }
-
-        },
-
-        // Change la variable zoom auto selon si la chechbox zoom auto est cochée ou non
-        // L'utilisateur peut choisir s'il veut zoomer automatiquement sur l'emprise de l'event, son choix est conservé
-        change_zoom_auto () {
-
-            if (this.zoom_auto) {
-                this.zoom_auto = false;
-            }
-            else {
-                this.zoom_auto = true;
-            };
 
         },
 
@@ -588,6 +546,11 @@ Vue.createApp({
 
         },
 
+        // Change la variable passée en paramètre (utilisée avec boutons)
+        change_true_false (parameter) {
+            this[parameter] = !this[parameter];
+        },
+
         // Affiche le popup pour changer le style
         afficher_form_changer_style() {
             document.getElementById("form_changer_style").style.display = "block";
@@ -674,17 +637,14 @@ Vue.createApp({
         afficher_form_filtrage() {
             document.getElementById("form_filter").style.display = "block";
         },
-
+        
         // Afficher / masquer le choix des dates
-        display_data_filter() {
+        // Initialisation des calendriers
+        display_date_filter() {
 
-            if (this.show_data_filter) {
-                this.show_data_filter = false;
-            }
+            this.show_date_filter = !this.show_date_filter
 
-            else {
-
-                this.show_data_filter = true;
+            if (this.show_date_filter) {
 
                 this.$nextTick(() => {
 
@@ -719,30 +679,45 @@ Vue.createApp({
         },
 
         // Met à jour la propriété visibilité de la feature selon le filtre
-        set_feature_visibility(feature) {
+        set_feature_visibility(feature, start_date_ymd, end_date_ymd) {
       
-            // Dates du filtre en format y-m-d
-            let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
-            let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
-
             // Feature visible par défaut
             feature.set('visible',true);
+
             // Feature ne doit pas être visible si elle ne respecte pas les critères du filtre
+            if (!this.flood && feature.get('hazard_type') === 'flood') {
+                feature.set('visible',false);
+                return;
+            }
+            if (!this.flashflood && feature.get('hazard_type') === 'flash flood') {
+                feature.set('visible',false);
+                return;
+            }
+            if (!this.landslide && feature.get('hazard_type') === 'landslide') {
+                feature.set('visible',false);
+                return;
+            }
             if (Date.parse(feature.get('event_time')) < Date.parse(start_date_ymd)) {
                 feature.set('visible',false);
+                return;
             }
             if (Date.parse(feature.get('event_time')) > Date.parse(end_date_ymd)) {
                 feature.set('visible',false);
+                return;
             }
 
         },
 
         // Application des filtres : seuls les évènements respectant les critères apparaissent
-        search() {
+        appliquer_filtres() {
+
+            // Dates du filtre en format y-m-d
+            let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
+            let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
 
             // Pour chaque feature, sa propriété visibilité est modifiée selon le filtre
             for (let feature of this.events_layer.getSource().getFeatures()) {
-                this.set_feature_visibility(feature);
+                this.set_feature_visibility(feature, start_date_ymd, end_date_ymd);
             }
 
             // Change le style des features : celles dont la visibilité est fausse sont invisibles, les autres gardent leur style actuel

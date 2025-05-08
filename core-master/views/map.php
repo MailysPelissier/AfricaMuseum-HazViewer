@@ -61,12 +61,30 @@
             </div>
             <div id="form_filter" class="popup grand_popup">
                 <h3>Filter</h3>
-                <button id="date_button" class="flexrow_space_between largeur_min" @click="display_data_filter" v-if="!show_data_filter">
+                <button id="event_type_button" class="flexrow_space_between largeur_min" @click="change_true_false('show_event_type_filter')" v-if="!show_event_type_filter">
+                    <h4>Hazard type</h4>
+                    <div class="vertical_center">&#62;</div>
+                </button>
+                <div id="event_type_filter" class="flexrow_space_between largeur_min padding" v-if="show_event_type_filter">
+                    <button @click="change_true_false('show_event_type_filter')">&#60;</button>
+                    <div id="event_type_field">
+                        <div id="flood">
+                            <label>Flood: <input type="checkbox" v-model="flood"></label>
+                        </div>  
+                        <div id="flashflood">
+                            <label>Flash flood: <input type="checkbox" v-model="flashflood"></label>
+                        </div>
+                        <div id="landslide">
+                            <label>Landslide: <input type="checkbox" v-model="landslide"></label>
+                        </div>         
+                    </div>  
+                </div>
+                <button id="date_button" class="flexrow_space_between largeur_min" @click="display_date_filter" v-if="!show_date_filter">
                     <h4>Date</h4>
                     <div class="vertical_center">&#62;</div>
                 </button>
-                <div id="date_filter" class="flexrow_space_between largeur_min padding" v-if="show_data_filter">
-                    <button @click="display_data_filter">&#60;</button>
+                <div id="date_filter" class="flexrow_space_between largeur_min padding" v-if="show_date_filter">
+                    <button @click="display_date_filter">&#60;</button>
                     <div id="date_field">
                         <div id="start_date">
                             <label>Start date: </label>
@@ -79,7 +97,7 @@
                     </div>  
                 </div>
                 <div class="flexrow_space_evenly padding">
-                    <button id="search" @click="search">Search</button>
+                    <button id="apply" @click="appliquer_filtres">Apply</button>
                     <button id="cancel" @click="fermer_form_filtrage">OK</button>
                 </div>
             </div>
@@ -88,21 +106,21 @@
             <div id=event_title class=title v-if="selected_event">Event:</div>
             <div id=event_data v-html="event_main_text"></div>
             <div id="other_data_checkbox" v-if="selected_event">
-                <label>Show other information<input @input="change_others_information" type="checkbox" v-model="other_information"></label>
+                <label>Show other information<input type="checkbox" v-model="other_information"></label>
             </div>
             <div id=event_other_data v-html="event_other_text" v-if="other_information"></div>
             <div id="location_data_checkbox" v-if="selected_event">
-                <label>Show location information<input @input="change_locations_information" type="checkbox" v-model="location_information"></label>
+                <label>Show location information<input type="checkbox" v-model="location_information"></label>
             </div>
             <div id=event_location_data v-html="event_location_text" v-if="location_information"></div>
             <div id="number_data_checkbox" v-if="selected_event">
-                <label>Show more statistics<input @input="change_numbers_information" type="checkbox" v-model="number_information"></label>
+                <label>Show more statistics<input type="checkbox" v-model="number_information"></label>
             </div>
             <div id=event_number_data v-html="event_number_text" v-if="number_information"></div>
             <div class="flexrow_space_evenly padding">
                 <button id=more_info_button v-if="more_info_button" @click="more_infos_page">More information</button>
                 <div id="zoom_auto_checkbox" v-if="more_info_button">
-                    <label>Automatic zoom<input @input="change_zoom_auto" type="checkbox" v-model="zoom_auto"></label>
+                    <label>Automatic zoom<input type="checkbox" v-model="zoom_auto"></label>
                 </div>
                 <button id=back_to_map_button v-if="back_to_map_button" @click="back_to_map">Back to map</button>
             </div>
