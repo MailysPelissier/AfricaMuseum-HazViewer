@@ -17,11 +17,11 @@
 
         <div id="map" class="margin">
 
-            <div id="form_changer_style" class="popup grand_popup" v-if="show_changer_style_form">
+            <div id="form_changer_style" class="popup grand_popup hauteur_max scroll_box" v-if="show_changer_style_form">
 
                 <div id="top_form" class="flexrow space_between padding">
                     <h5>Change style</h5>
-                    <button class="vertical_center" @click="change_true_false('show_changer_style_form')">&#215;</button>
+                    <button class="vertical_center" @click="change_true_false(['show_changer_style_form'])">&#215;</button>
                 </div>
 
                 <br>
@@ -84,26 +84,38 @@
 
                 <div class="flexrow space_evenly padding">
                     <button id="change_style" @click="change_style">Apply</button>
-                    <button id="cancel" @click="change_true_false('show_changer_style_form')">Close</button>
+                    <button id="cancel" @click="change_true_false(['show_changer_style_form'])">Close</button>
                 </div>
 
             </div>
 
-            <div id="form_filter" class="popup grand_popup" v-if="show_filter_form">
+            <div id="form_filter" class="popup grand_popup hauteur_max scroll_box" v-if="show_filter_form">
 
                 <div id="top_form" class="flexrow space_between padding">
                     <h5>Filter</h5>
-                    <button class="vertical_center" @click="change_true_false('show_filter_form')">&#215;</button>
+                    <button class="vertical_center" @click="change_true_false(['show_filter_form'])">&#215;</button>
                 </div> 
 
-                <button id="event_type_button" class="flexrow space_between padding largeur_min" @click="change_true_false('show_event_type_filter')" v-if="!show_event_type_filter">
+                <br>
+
+                <button id="event_type_button" class="flexrow space_between padding largeur_min" @click="change_true_false(['show_general_menu','show_event_type_filter'])" v-if="show_general_menu">
                     <h6>Hazard type</h6>
                     <div class="vertical_center">&#62;</div>
                 </button>
 
-                <div id="event_type_filter" class="flexrow space_between padding largeur_min padding" v-if="show_event_type_filter">
-                    <button @click="change_true_false('show_event_type_filter')">&#60;</button>
+                <hr style='margin:0' v-if="show_general_menu" />
+
+                <button id="date_button" class="flexrow space_between padding largeur_min" @click="display_date_filter" v-if="show_general_menu">
+                    <h6>Date</h6>
+                    <div class="vertical_center">&#62;</div>
+                </button>
+
+                <div id="event_type_filter" class="flexrow space_between padding largeur_min" v-if="show_event_type_filter">
+                    <div class="vertical_center">
+                        <button class='back_button' @click="change_true_false(['show_general_menu','show_event_type_filter'])">&#60;</button>
+                    </div>
                     <div id="event_type_field">
+                        <div class="title">Hazard type filter:</div>
                         <div id="flood">
                             <label>Flood: <input type="checkbox" v-model="flood"></label>
                         </div>  
@@ -114,30 +126,30 @@
                             <label>Landslide: <input type="checkbox" v-model="landslide"></label>
                         </div>         
                     </div>  
+                    <div class='back_button'></div>
                 </div>
 
-                <button id="date_button" class="flexrow space_between padding largeur_min" @click="display_date_filter" v-if="!show_date_filter">
-                    <h6>Date</h6>
-                    <div class="vertical_center">&#62;</div>
-                </button>
-
-                <div id="date_filter" class="flexrow space_between padding largeur_min padding" v-if="show_date_filter">
-                    <button @click="display_date_filter">&#60;</button>
+                <div id="date_filter" class="flexrow space_between padding largeur_min" v-if="show_date_filter">
+                    <div class="vertical_center">
+                        <button class='back_button' @click="display_date_filter">&#60;</button>
+                    </div>
                     <div id="date_field">
+                    <div class="title">Date filter:</div>
                         <div id="start_date">
-                            <label>Start date: </label>
-                            <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date">
+                            <label>Start date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date"></label>
                         </div>
                         <div id="end_date">
-                            <label>End date: </label>
-                            <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date">
+                            <label>End date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date"></label>
                         </div>
                     </div>  
+                    <div class='back_button'></div>
                 </div>
+
+                <br>
 
                 <div class="flexrow space_evenly padding">
                     <button id="apply" @click="appliquer_filtres">Apply</button>
-                    <button id="cancel" @click="change_true_false('show_filter_form')">Close</button>
+                    <button id="cancel" @click="change_true_false(['show_filter_form'])">Close</button>
                 </div>
 
             </div>
@@ -151,24 +163,24 @@
             <div id=event_data v-html="event_main_text"></div>
 
             <div id="other_data_checkbox" v-if="selected_event">
-                <label>Show other information<input type="checkbox" v-model="other_information"></label>
+                <label>Show other information: <input type="checkbox" v-model="other_information"></label>
             </div>
             <div id=event_other_data v-html="event_other_text" v-if="other_information"></div>
 
             <div id="location_data_checkbox" v-if="selected_event">
-                <label>Show location information<input type="checkbox" v-model="location_information"></label>
+                <label>Show location information: <input type="checkbox" v-model="location_information"></label>
             </div>
             <div id=event_location_data v-html="event_location_text" v-if="location_information"></div>
 
             <div id="number_data_checkbox" v-if="selected_event">
-                <label>Show more statistics<input type="checkbox" v-model="number_information"></label>
+                <label>Show more statistics: <input type="checkbox" v-model="number_information"></label>
             </div>
             <div id=event_number_data v-html="event_number_text" v-if="number_information"></div>
 
             <div class="flexrow space_evenly padding">
                 <button id=more_info_button v-if="more_info_button" @click="more_infos_page">More information</button>
                 <div id="zoom_auto_checkbox" v-if="more_info_button">
-                    <label>Automatic zoom<input type="checkbox" v-model="zoom_auto"></label>
+                    <label>Automatic zoom: <input type="checkbox" v-model="zoom_auto"></label>
                 </div>
                 <button id=back_to_map_button v-if="back_to_map_button" @click="back_to_map">Back to map</button>
             </div>
@@ -182,16 +194,16 @@
 
         </div>
 
-        <div id=popup_pointermove class="popup petit_popup"></div>
+        <div id=popup_pointermove class="popup petit_popup scroll_box"></div>
 
-        <div id=popup_clic class="popup petit_popup"></div>
+        <div id=popup_clic class="popup petit_popup scroll_box"></div>
 
         <div id=outil_filtrage_div class='ol-unselectable ol-control'>
             <button id=outil_filtrage_button @click="setup_filter_form">Filter</button>
         </div>
 
         <div id=changer_style_div class='ol-unselectable ol-control'>
-            <button id=changer_style_button @click="change_true_false('show_changer_style_form')">Change style</button>
+            <button id=changer_style_button @click="change_true_false(['show_changer_style_form'])">Change style</button>
         </div>
 
     </div>  

@@ -70,8 +70,8 @@ html, body {
 }
 
 ul {
-    margin: 5px;
-    padding-left: 10px;
+    margin: 5px !important;
+    padding-left: 10px !important;
 }
 
 .title {
@@ -92,6 +92,10 @@ ul {
 
 .largeur_min {
     min-width: 20em;
+}
+
+.hauteur_max {
+    max-height: 45%;
 }
 
 .flexrow {
@@ -127,12 +131,22 @@ ul {
     display: none; 
     padding: 5px; 
     border-radius: 5px;
+    max-height: 10em;
 }
 
 .grand_popup {
     display: block; 
     padding: 15px; 
     border-radius: 8px;
+}
+
+.back_button {
+    width: 3em;
+    height: 3em;
+}
+
+.flatpickr-input {
+    width: 6em;
 }
 
 .color_input {

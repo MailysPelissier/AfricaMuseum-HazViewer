@@ -76,6 +76,8 @@ Vue.createApp({
             ],
             // Affichage popup filtres
             show_filter_form: false,
+            // Affichage menu général
+            show_general_menu: true,
             // Affichage choix event type
             show_event_type_filter: false,
             // Affichage choix dates
@@ -554,8 +556,10 @@ Vue.createApp({
         },
 
         // Change la variable passée en paramètre (utilisée avec boutons)
-        change_true_false (parameter) {
-            this[parameter] = !this[parameter];
+        change_true_false (parameters) {
+            for (let parameter of parameters) {
+                this[parameter] = !this[parameter];
+            }
         },
 
         // Création du style de chaque feature selon ses propriétés et le style choisi
@@ -637,6 +641,7 @@ Vue.createApp({
             this.show_filter_form = !this.show_filter_form;
 
             if (this.show_filter_form) {
+                this.show_general_menu = true;
                 this.show_event_type_filter = false;
                 this.show_date_filter = false;
             }
@@ -647,6 +652,7 @@ Vue.createApp({
         // Initialisation des calendriers
         display_date_filter() {
 
+            this.show_general_menu = !this.show_general_menu;
             this.show_date_filter = !this.show_date_filter;
 
             if (this.show_date_filter) {
