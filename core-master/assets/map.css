@@ -149,6 +149,10 @@ ul {
     width: 6em;
 }
 
+.input_number {
+    width: 5em;
+}
+
 .color_input {
     -moz-appearance: none;
     appearance: none;

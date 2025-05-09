@@ -82,6 +82,8 @@ Vue.createApp({
             show_event_type_filter: false,
             // Affichage choix dates
             show_date_filter: false,
+            // Affichage choix popularité
+            show_popularity_filter: false,
             // Filtre event type
             flood: true,
             flashflood: true,
@@ -93,6 +95,15 @@ Vue.createApp({
             end_date: "31-12-2023",
             flatpickr_start: null,
             flatpickr_end: null,
+            // Filtre popularité
+            n_paragraphs_min: 1,
+            n_paragraphs_max: 60000,
+            n_articles_min: 1,
+            n_articles_max: 15000,
+            n_paragraphs_min_depart: 1,
+            n_paragraphs_max_depart: 60000,
+            n_articles_min_depart: 1,
+            n_articles_max_depart: 15000,
         };
     },
 
@@ -736,9 +747,35 @@ Vue.createApp({
 
         },
 
+        input_number_check() {
+            console.log(this.n_articles_min)
+        },
+
     },
 
     mounted() {
+
+        document.querySelectorAll('.input_number').forEach(input => {
+            input.addEventListener('keypress', (e) => {
+              if (!/[0-9]/.test(e.key)) {
+                e.preventDefault();
+              }
+            });
+            input.addEventListener('input', () => {
+                let val = input.value;
+                const min = parseInt(input.min, 10);
+                const max = parseInt(input.max, 10);
+          
+                // Si ce n'est pas un entier ou hors bornes, on corrige
+                if (!/^\d+$/.test(val)) {
+                  input.value = min; // ou "", ou 0 selon besoin
+                } else {
+                  val = parseInt(val, 10);
+                  if (val < min) input.value = min;
+                  if (val > max) input.value = max;
+                }
+            })
+          });
 
         // Initialisation de la carte
         this.map = new ol.Map({

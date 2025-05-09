@@ -30,7 +30,7 @@
                     <label>Color style:
                         <select class="margin_left" v-model="color_style">
                             <option value="Standard">Standard</option>
-                            <option value="Event_type">Event type</option>
+                            <option value="Event_type">Hazard type</option>
                         </select>
                     </label>
                 </div>
@@ -110,6 +110,13 @@
                     <div class="vertical_center">&#62;</div>
                 </button>
 
+                <hr style='margin:0' v-if="show_general_menu" />
+
+                <button id="popularity_button" class="flexrow space_between padding largeur_min" @click="change_true_false(['show_general_menu','show_popularity_filter'])" v-if="show_general_menu">
+                    <h6>Popularity</h6>
+                    <div class="vertical_center">&#62;</div>
+                </button>
+
                 <div id="event_type_filter" class="flexrow space_between padding largeur_min" v-if="show_event_type_filter">
                     <div class="vertical_center">
                         <button class='back_button' @click="change_true_false(['show_general_menu','show_event_type_filter'])">&#60;</button>
@@ -134,12 +141,36 @@
                         <button class='back_button' @click="display_date_filter">&#60;</button>
                     </div>
                     <div id="date_field">
-                    <div class="title">Date filter:</div>
+                        <div class="title">Date filter:</div>
                         <div id="start_date">
                             <label>Start date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date"></label>
                         </div>
                         <div id="end_date">
                             <label>End date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date"></label>
+                        </div>
+                    </div>  
+                    <div class='back_button'></div>
+                </div>
+
+                <div id="popularity_filter" class="flexrow space_between padding largeur_min" v-if="show_popularity_filter">
+                    <div class="vertical_center">
+                        <button class='back_button' @click="change_true_false(['show_general_menu','show_popularity_filter'])">&#60;</button>
+                    </div>
+                    <div id="popularity_field" class="margin">
+                        <div class="title">Popularity filter:</div>
+                        <div id="n_articles">Number of articles:</div>
+                        <div>
+                            <!-- <label>Min: <input class="input_number" type="number" min="n_articles_min_depart" max="n_articles_max_depart" value="n_articles_max"></label>
+                            <label class="margin_left">Max: <input class="input_number" type="number" min="n_articles_min_depart" max="n_articles_max_depart" value="n_articles_min"></label> -->
+                            <label>
+                            Min:
+                            <input class="input_number" type="number" :min="n_articles_min_depart" :max="n_articles_max_depart" v-model="n_articles_min" @input="input_number_check('n_articles_min')">
+                            </label>
+                        </div>
+                        <div id="n_paragraphs">Number of paragraphs:</div>
+                        <div>
+                            <!-- <label>Min: <input class="input_number" type="number" min="n_paragraphs_min_depart" max="n_paragraphs_max_depart" value="n_paragraphs_min"></label>
+                            <label class="margin_left">Max: <input class="input_number" type="number" min="n_paragraphs_min_depart" max="n_paragraphs_max_depart" value="n_paragraphs_max"></label> -->
                         </div>
                     </div>  
                     <div class='back_button'></div>
