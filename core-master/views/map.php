@@ -160,17 +160,13 @@
                         <div class="title">Popularity filter:</div>
                         <div id="n_articles">Number of articles:</div>
                         <div>
-                            <!-- <label>Min: <input class="input_number" type="number" min="n_articles_min_depart" max="n_articles_max_depart" value="n_articles_max"></label>
-                            <label class="margin_left">Max: <input class="input_number" type="number" min="n_articles_min_depart" max="n_articles_max_depart" value="n_articles_min"></label> -->
-                            <label>
-                            Min:
-                            <input class="input_number" type="number" :min="n_articles_min_depart" :max="n_articles_max_depart" v-model="n_articles_min" @input="input_number_check('n_articles_min')">
-                            </label>
+                            <label>Min: <input class="input_number" type="text" :min="n_articles_min_depart" :max="n_articles_max_depart" v-model="n_articles_min" @beforeinput="(event) => validateInput(event, n_articles_min_depart, n_articles_max_depart, 'n_articles_min')"/></label>
+                            <label class="margin_left">Max: <input class="input_number" type="text" :min="n_articles_min_depart" :max="n_articles_max_depart" v-model="n_articles_max" @beforeinput="(event) => validateInput(event, n_articles_min_depart, n_articles_max_depart, 'n_articles_max')"/></label>
                         </div>
                         <div id="n_paragraphs">Number of paragraphs:</div>
                         <div>
-                            <!-- <label>Min: <input class="input_number" type="number" min="n_paragraphs_min_depart" max="n_paragraphs_max_depart" value="n_paragraphs_min"></label>
-                            <label class="margin_left">Max: <input class="input_number" type="number" min="n_paragraphs_min_depart" max="n_paragraphs_max_depart" value="n_paragraphs_max"></label> -->
+                            <label>Min: <input class="input_number" type="text" :min="n_paragraphs_min_depart" :max="n_paragraphs_max_depart" v-model="n_paragraphs_min" @beforeinput="(event) => validateInput(event, n_paragraphs_min_depart, n_paragraphs_max_depart, 'n_paragraphs_min')"/></label>
+                            <label class="margin_left">Max: <input class="input_number" type="text" :min="n_paragraphs_min_depart" :max="n_paragraphs_max_depart" v-model="n_paragraphs_max" @beforeinput="(event) => validateInput(event, n_paragraphs_min_depart, n_paragraphs_max_depart, 'n_paragraphs_max')"/></label>
                         </div>
                     </div>  
                     <div class='back_button'></div>

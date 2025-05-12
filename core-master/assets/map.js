@@ -655,6 +655,7 @@ Vue.createApp({
                 this.show_general_menu = true;
                 this.show_event_type_filter = false;
                 this.show_date_filter = false;
+                this.show_popularity_filter = false;
             }
 
         },
@@ -700,6 +701,31 @@ Vue.createApp({
 
         },
 
+        // Vérifie si la valeur entrée est valide (chiffre entre les valeurs min et max)
+        validateInput(event,n_min_depart,n_max_depart) {
+
+            // Calcule la prochaine valeur
+            let input = event.target;
+            let value = input.value;
+            let selectionStart = input.selectionStart;
+            let selectionEnd = input.selectionEnd;
+            let insertedText = event.data || '';
+            let nextValue = value.slice(0, selectionStart) + insertedText + value.slice(selectionEnd);
+    
+            // Empêche la saisie si ce n’est pas un chiffre
+            if (!/^\d*$/.test(nextValue)) {
+                event.preventDefault();
+                return;
+            }
+
+            // Empêche la saisie si la valeur n'est pas entre les valeurs min et max
+            let intVal = parseInt(nextValue);
+            if (intVal < n_min_depart || intVal > n_max_depart) {
+                event.preventDefault();
+            }
+
+        },
+
         // Met à jour la propriété visibilité de la feature selon le filtre
         set_feature_visibility(feature, start_date_ymd, end_date_ymd) {
       
@@ -707,6 +733,8 @@ Vue.createApp({
             feature.set('visible',true);
 
             // Feature ne doit pas être visible si elle ne respecte pas les critères du filtre
+
+            // Hazard type
             if (!this.flood && feature.get('hazard_type') === 'flood') {
                 feature.set('visible',false);
                 return;
@@ -719,11 +747,31 @@ Vue.createApp({
                 feature.set('visible',false);
                 return;
             }
+
+            // Date
             if (Date.parse(feature.get('event_time')) < Date.parse(start_date_ymd)) {
                 feature.set('visible',false);
                 return;
             }
             if (Date.parse(feature.get('event_time')) > Date.parse(end_date_ymd)) {
+                feature.set('visible',false);
+                return;
+            }
+
+            // Popularity
+            if (parseInt(feature.get('n_paragraphs')) < parseInt(this.n_paragraphs_min)) {
+                feature.set('visible',false);
+                return;
+            }
+            if (parseInt(feature.get('n_paragraphs')) > parseInt(this.n_paragraphs_max)) {
+                feature.set('visible',false);
+                return;
+            }
+            if (parseInt(feature.get('n_articles')) < parseInt(this.n_articles_min)) {
+                feature.set('visible',false);
+                return;
+            }
+            if (parseInt(feature.get('n_articles')) > parseInt(this.n_articles_max)) {
                 feature.set('visible',false);
                 return;
             }
@@ -747,35 +795,10 @@ Vue.createApp({
 
         },
 
-        input_number_check() {
-            console.log(this.n_articles_min)
-        },
 
     },
 
     mounted() {
-
-        document.querySelectorAll('.input_number').forEach(input => {
-            input.addEventListener('keypress', (e) => {
-              if (!/[0-9]/.test(e.key)) {
-                e.preventDefault();
-              }
-            });
-            input.addEventListener('input', () => {
-                let val = input.value;
-                const min = parseInt(input.min, 10);
-                const max = parseInt(input.max, 10);
-          
-                // Si ce n'est pas un entier ou hors bornes, on corrige
-                if (!/^\d+$/.test(val)) {
-                  input.value = min; // ou "", ou 0 selon besoin
-                } else {
-                  val = parseInt(val, 10);
-                  if (val < min) input.value = min;
-                  if (val > max) input.value = max;
-                }
-            })
-          });
 
         // Initialisation de la carte
         this.map = new ol.Map({
