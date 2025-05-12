@@ -82,6 +82,8 @@ Vue.createApp({
             show_event_type_filter: false,
             // Affichage choix dates
             show_date_filter: false,
+            // Affichage choix impact
+            show_casualties_filter: false,
             // Affichage choix popularité
             show_popularity_filter: false,
             // Filtre event type
@@ -95,15 +97,26 @@ Vue.createApp({
             end_date: "31-12-2023",
             flatpickr_start: null,
             flatpickr_end: null,
+            // Filtre impact
+            median_death_null: true,
+            median_death_min: 1,
+            median_death_max: 35000,
+            median_death_min_depart: 1,
+            median_death_max_depart: 35000,
+            median_injured_null: true,
+            median_injured_min: 1,
+            median_injured_max: 900000000,
+            median_injured_min_depart: 1,
+            median_injured_max_depart: 900000000,
             // Filtre popularité
-            n_paragraphs_min: 1,
-            n_paragraphs_max: 60000,
             n_articles_min: 1,
             n_articles_max: 15000,
-            n_paragraphs_min_depart: 1,
-            n_paragraphs_max_depart: 60000,
             n_articles_min_depart: 1,
             n_articles_max_depart: 15000,
+            n_paragraphs_min: 1,
+            n_paragraphs_max: 60000,
+            n_paragraphs_min_depart: 1,
+            n_paragraphs_max_depart: 60000,
         };
     },
 
@@ -191,7 +204,7 @@ Vue.createApp({
 
         // Crée le texte en récupérant les infos sur l'event, change le style de l'event
         affichage_selection_event (feature) { 
-
+console.log(parseInt(feature.get('median_injured')))
             // Chargement et affichage du texte sur l'event
             this.event_main_text = '<ul>';
             this.event_other_text = '<ul>';
@@ -609,13 +622,13 @@ Vue.createApp({
                     let size;
                     if (this.size_style === 'Standard') {
                         size = this.size_standard;
-                    } else if (this.size_style === 'Max_death') {
-                        let max_death = feature.get('max_death');
+                    } else if (this.size_style === 'Median_death') {
+                        let median_death = feature.get('median_death');
                         let size_death_f = this.size_death.find(interval => {
                             if (interval.min === null && interval.max === null) {
-                                return max_death === null;
+                                return median_death === null;
                             }
-                            return max_death >= interval.min && max_death <= interval.max;
+                            return median_death >= interval.min && median_death <= interval.max;
                         });          
                         size = size_death_f.size;
                     }
@@ -655,6 +668,7 @@ Vue.createApp({
                 this.show_general_menu = true;
                 this.show_event_type_filter = false;
                 this.show_date_filter = false;
+                this.show_casualties_filter = false;
                 this.show_popularity_filter = false;
             }
 
@@ -726,6 +740,10 @@ Vue.createApp({
 
         },
 
+        convertir_str_to_int(str) {
+            
+        },
+
         // Met à jour la propriété visibilité de la feature selon le filtre
         set_feature_visibility(feature, start_date_ymd, end_date_ymd) {
       
@@ -754,6 +772,32 @@ Vue.createApp({
                 return;
             }
             if (Date.parse(feature.get('event_time')) > Date.parse(end_date_ymd)) {
+                feature.set('visible',false);
+                return;
+            }
+
+            // Impact
+            if (!this.median_death_null && feature.get('median_death') === null) {
+                feature.set('visible',false);
+                return;
+            }
+            if (parseInt(feature.get('median_death')) < parseInt(this.median_death_min)) {
+                feature.set('visible',false);
+                return;
+            }
+            if (parseInt(feature.get('median_death')) > parseInt(this.median_death_max)) {
+                feature.set('visible',false);
+                return;
+            }
+            if (!this.median_injured_null && feature.get('median_injured') === null) {
+                feature.set('visible',false);
+                return;
+            }
+            if (parseInt(feature.get('median_injured')) < parseInt(this.median_injured_min)) {
+                feature.set('visible',false);
+                return;
+            }
+            if (parseInt(feature.get('median_injured')) > parseInt(this.median_injured_max)) {
                 feature.set('visible',false);
                 return;
             }

@@ -61,7 +61,7 @@
                     <label>Size style:
                         <select class="margin_left" v-model="size_style">
                             <option value="Standard">Standard</option>
-                            <option value="Max_death">Max death</option>
+                            <option value="Median_death">Median death</option>
                         </select>
                     </label>
                 </div>
@@ -72,7 +72,7 @@
                     <span class="margin_left">{{size_standard}}</span>
                 </div>
 
-                <div id="size_maxdeath" class="padding" v-if="size_style === 'Max_death'">
+                <div id="size_mediandeath" class="padding" v-if="size_style === 'Median_death'">
                     <div class="flexrow margin" v-for="step in size_death">
                         <div class="vertical_center">{{step.label}}:</div>
                         <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
@@ -112,11 +112,18 @@
 
                 <hr style='margin:0' v-if="show_general_menu" />
 
+                <button id="casualties_button" class="flexrow space_between padding largeur_min" @click="change_true_false(['show_general_menu','show_casualties_filter'])" v-if="show_general_menu">
+                    <h6>Casualties</h6>
+                    <div class="vertical_center">&#62;</div>
+                </button>
+
+                <hr style='margin:0' v-if="show_general_menu" />
+
                 <button id="popularity_button" class="flexrow space_between padding largeur_min" @click="change_true_false(['show_general_menu','show_popularity_filter'])" v-if="show_general_menu">
                     <h6>Popularity</h6>
                     <div class="vertical_center">&#62;</div>
                 </button>
-
+                
                 <div id="event_type_filter" class="flexrow space_between padding largeur_min" v-if="show_event_type_filter">
                     <div class="vertical_center">
                         <button class='back_button' @click="change_true_false(['show_general_menu','show_event_type_filter'])">&#60;</button>
@@ -152,6 +159,32 @@
                     <div class='back_button'></div>
                 </div>
 
+                <div id="casualties_filter" class="flexrow space_between padding largeur_min" v-if="show_casualties_filter">
+                    <div class="vertical_center">
+                        <button class='back_button' @click="change_true_false(['show_general_menu','show_casualties_filter'])">&#60;</button>
+                    </div>
+                    <div id="casualties_field" class="margin">
+                        <div class="title">Casualties filter:</div>
+                        <div id="median_death">Median death:</div>
+                        <div>
+                            <label>Show null values: <input type="checkbox" v-model="median_death_null"></label>
+                        </div>
+                        <div>
+                            <label>Min: <input class="input_number" type="text" :min="median_death_min_depart" :max="median_death_max_depart" v-model="median_death_min" @beforeinput="(event) => validateInput(event, median_death_min_depart, median_death_max_depart)"/></label>
+                            <label class="margin_left">Max: <input class="input_number" type="text" :min="median_death_min_depart" :max="median_death_max_depart" v-model="median_death_max" @beforeinput="(event) => validateInput(event, median_death_min_depart, median_death_max_depart)"/></label>
+                        </div>
+                        <div id="median_injured">Median injured:</div>
+                        <div>
+                            <label>Show null values: <input type="checkbox" v-model="median_injured_null"></label>
+                        </div>
+                        <div>
+                            <label>Min: <input class="input_number" type="text" :min="median_injured_min_depart" :max="median_injured_max_depart" v-model="median_injured_min" @beforeinput="(event) => validateInput(event, median_injured_min_depart, median_injured_max_depart)"/></label>
+                            <label class="margin_left">Max: <input class="input_number" type="text" :min="median_injured_min_depart" :max="median_injured_max_depart" v-model="median_injured_max" @beforeinput="(event) => validateInput(event, median_injured_min_depart, median_injured_max_depart)"/></label>
+                        </div>
+                    </div>  
+                    <div class='back_button'></div>
+                </div>
+
                 <div id="popularity_filter" class="flexrow space_between padding largeur_min" v-if="show_popularity_filter">
                     <div class="vertical_center">
                         <button class='back_button' @click="change_true_false(['show_general_menu','show_popularity_filter'])">&#60;</button>
@@ -160,13 +193,13 @@
                         <div class="title">Popularity filter:</div>
                         <div id="n_articles">Number of articles:</div>
                         <div>
-                            <label>Min: <input class="input_number" type="text" :min="n_articles_min_depart" :max="n_articles_max_depart" v-model="n_articles_min" @beforeinput="(event) => validateInput(event, n_articles_min_depart, n_articles_max_depart, 'n_articles_min')"/></label>
-                            <label class="margin_left">Max: <input class="input_number" type="text" :min="n_articles_min_depart" :max="n_articles_max_depart" v-model="n_articles_max" @beforeinput="(event) => validateInput(event, n_articles_min_depart, n_articles_max_depart, 'n_articles_max')"/></label>
+                            <label>Min: <input class="input_number" type="text" :min="n_articles_min_depart" :max="n_articles_max_depart" v-model="n_articles_min" @beforeinput="(event) => validateInput(event, n_articles_min_depart, n_articles_max_depart)"/></label>
+                            <label class="margin_left">Max: <input class="input_number" type="text" :min="n_articles_min_depart" :max="n_articles_max_depart" v-model="n_articles_max" @beforeinput="(event) => validateInput(event, n_articles_min_depart, n_articles_max_depart)"/></label>
                         </div>
                         <div id="n_paragraphs">Number of paragraphs:</div>
                         <div>
-                            <label>Min: <input class="input_number" type="text" :min="n_paragraphs_min_depart" :max="n_paragraphs_max_depart" v-model="n_paragraphs_min" @beforeinput="(event) => validateInput(event, n_paragraphs_min_depart, n_paragraphs_max_depart, 'n_paragraphs_min')"/></label>
-                            <label class="margin_left">Max: <input class="input_number" type="text" :min="n_paragraphs_min_depart" :max="n_paragraphs_max_depart" v-model="n_paragraphs_max" @beforeinput="(event) => validateInput(event, n_paragraphs_min_depart, n_paragraphs_max_depart, 'n_paragraphs_max')"/></label>
+                            <label>Min: <input class="input_number" type="text" :min="n_paragraphs_min_depart" :max="n_paragraphs_max_depart" v-model="n_paragraphs_min" @beforeinput="(event) => validateInput(event, n_paragraphs_min_depart, n_paragraphs_max_depart)"/></label>
+                            <label class="margin_left">Max: <input class="input_number" type="text" :min="n_paragraphs_min_depart" :max="n_paragraphs_max_depart" v-model="n_paragraphs_max" @beforeinput="(event) => validateInput(event, n_paragraphs_min_depart, n_paragraphs_max_depart)"/></label>
                         </div>
                     </div>  
                     <div class='back_button'></div>
