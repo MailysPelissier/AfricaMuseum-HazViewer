@@ -61,7 +61,7 @@
                     <label>Size style:
                         <select class="margin_left" v-model="size_style">
                             <option value="Standard">Standard</option>
-                            <option value="Median_death">Median death</option>
+                            <option v-for="casualty in casualties_list" :value="casualty.size_style">{{casualty.label}}</option>
                         </select>
                     </label>
                 </div>
@@ -72,11 +72,13 @@
                     <span class="margin_left">{{size_standard}}</span>
                 </div>
 
-                <div id="size_mediandeath" class="padding" v-if="size_style === 'Median_death'">
-                    <div class="flexrow margin" v-for="step in size_death">
-                        <div class="vertical_center">{{step.label}}:</div>
-                        <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
-                        <span class="margin_left">{{step.size}}</span></label>
+                <div v-for="casualty in casualties_list">
+                    <div v-if="size_style === casualty.size_style">
+                        <div class="flexrow margin" v-for="step in casualty.table">
+                            <div class="vertical_center">{{step.label}}:</div>
+                            <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                            <span class="margin_left">{{step.size}}</span></label>
+                        </div>
                     </div>
                 </div>
 

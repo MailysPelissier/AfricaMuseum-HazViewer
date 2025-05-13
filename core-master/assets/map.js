@@ -70,9 +70,33 @@ Vue.createApp({
                 { label: '0 - 9', min: 0, max: 9, size: 5 },
                 { label: '10 - 99', min: 10, max: 99, size: 7 },
                 { label: '100 - 999', min: 100, max: 999, size: 9 },
-                { label: '1000 - 9999', min: 1000, max: 9999, size: 11 },
-                { label: '10000 - 99999', min: 10000, max: 99999, size: 13 },
-                { label: '≥ 100000', min: 100000, max: Infinity, size: 15 }
+                { label: '1000 - 9999', min: 1000, max: 9999, size: 12 },
+                { label: '≥ 10000', min: 10000, max: Infinity, size: 15 },
+            ],
+            size_injured: [
+                { label: 'No value', min: null, max: null, size: 3 },
+                { label: '0 - 9', min: 0, max: 9, size: 4 },
+                { label: '10 - 99', min: 10, max: 99, size: 5 },
+                { label: '100 - 999', min: 100, max: 999, size: 6 },
+                { label: '1000 - 9999', min: 1000, max: 9999, size: 7 },
+                { label: '10000 - 99999', min: 10000, max: 99999, size: 8 },
+                { label: '100000 - 999999', min: 100000, max: 999999, size: 9 },
+                { label: '1000000 - 9999999', min: 1000000, max: 9999999, size: 11 },
+                { label: '10000000 - 99999999', min: 10000000, max: 99999999, size: 13 },
+                { label: '≥ 100000000', min: 100000000, max: Infinity, size: 15 },
+            ],
+            size_affected: [
+                { label: 'No value', min: null, max: null, size: 3 },
+                { label: '0 - 9', min: 0, max: 9, size: 4 },
+                { label: '10 - 99', min: 10, max: 99, size: 5 },
+                { label: '100 - 999', min: 100, max: 999, size: 6 },
+                { label: '1000 - 9999', min: 1000, max: 9999, size: 7 },
+                { label: '10000 - 99999', min: 10000, max: 99999, size: 8 },
+                { label: '100000 - 999999', min: 100000, max: 999999, size: 9 },
+                { label: '1000000 - 9999999', min: 1000000, max: 9999999, size: 10 },
+                { label: '10000000 - 99999999', min: 10000000, max: 99999999, size: 11 },
+                { label: '100000000 - 999999999', min: 100000000, max: 999999999, size: 13 },
+                { label: '≥ 1000000000', min: 1000000000, max: Infinity, size: 15 },
             ],
             // Affichage popup filtres
             show_filter_form: false,
@@ -117,6 +141,19 @@ Vue.createApp({
                 { id: 'n_source_countries', label: 'Number of source countries:', min: 1, max: 113, min_depart: 1, max_depart: 113 },
             ],
         };
+    },
+
+    computed: {
+        casualties_list() {
+            return [
+                { size_style: 'Median_death', label: 'Median death', table: this.size_death },
+                { size_style: 'Median_injured', label: 'Median injured', table: this.size_injured },
+                { size_style: 'Median_affected', label: 'Median affected', table: this.size_affected },
+                { size_style: 'Median_homeless', label: 'Median homeless', table: this.size_homeless},
+                { size_style: 'Median_missing', label: 'Median missing', table: this.size_missing },
+                { size_style: 'Median_evacuated', label: 'Median evacuated', table: this.size_evacuated },
+            ];
+        }
     },
 
     methods: {
@@ -649,7 +686,7 @@ Vue.createApp({
 
         // Change le style des évènements
         change_style() {
-            
+
             // Appliquer le style à la couche events
             this.events_layer.setStyle(this.creation_style());
 
