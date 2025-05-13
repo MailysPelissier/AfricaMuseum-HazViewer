@@ -98,25 +98,19 @@ Vue.createApp({
             flatpickr_start: null,
             flatpickr_end: null,
             // Filtre impact
-            median_death_null: true,
-            median_death_min: 1,
-            median_death_max: 35000,
-            median_death_min_depart: 1,
-            median_death_max_depart: 35000,
-            median_injured_null: true,
-            median_injured_min: 1,
-            median_injured_max: 900000000,
-            median_injured_min_depart: 1,
-            median_injured_max_depart: 900000000,
+            impact_filter: [
+                { id: 'median_death', label: 'Median death:', checkbox_null: true, min: 1, max: 35000, min_depart: 1, max_depart: 35000 },
+                { id: 'median_injured', label: 'Median injured:', checkbox_null: true, min: 1, max: 900000000, min_depart: 1, max_depart: 900000000 },
+                { id: 'median_affected', label: 'Median affected:', checkbox_null: true, min: 1, max: 1600000000, min_depart: 1, max_depart: 1600000000 },
+                { id: 'median_homeless', label: 'Median homeless:', checkbox_null: true, min: 1, max: 23000000, min_depart: 1, max_depart: 23000000 },
+                { id: 'median_missing', label: 'Median missing:', checkbox_null: true, min: 1, max: 140000000, min_depart: 1, max_depart: 140000000 },
+                { id: 'median_evacuated', label: 'Median evacuated:', checkbox_null: true, min: 1, max: 185000000, min_depart: 1, max_depart: 185000000 },
+            ],
             // Filtre popularité
-            n_articles_min: 1,
-            n_articles_max: 15000,
-            n_articles_min_depart: 1,
-            n_articles_max_depart: 15000,
-            n_paragraphs_min: 1,
-            n_paragraphs_max: 60000,
-            n_paragraphs_min_depart: 1,
-            n_paragraphs_max_depart: 60000,
+            popularity_filter : [
+                { id: 'n_articles', label: 'Number of articles:', min: 1, max: 15000, min_depart: 1, max_depart: 15000 },
+                { id: 'n_paragraphs', label: 'Number of paragraphs:', min: 1, max: 60000, min_depart: 1, max_depart: 60000 },
+            ],
         };
     },
 
@@ -204,7 +198,7 @@ Vue.createApp({
 
         // Crée le texte en récupérant les infos sur l'event, change le style de l'event
         affichage_selection_event (feature) { 
-console.log(parseInt(feature.get('median_injured')))
+
             // Chargement et affichage du texte sur l'event
             this.event_main_text = '<ul>';
             this.event_other_text = '<ul>';
@@ -740,8 +734,18 @@ console.log(parseInt(feature.get('median_injured')))
 
         },
 
-        convertir_str_to_int(str) {
-            
+        // Convertir les chaines de caractères en flottants : permet de gérer le cas où la chaine contient une puissance (ex: 9e+08)
+        convertir_str_to_float(feature,field) {
+            if (feature.get(field) != null) {
+                if (feature.get(field).includes('e')) {
+                    let index = feature.get(field).indexOf('+')
+                    let puissance = parseInt(feature.get(field).substring(index+1))
+                    let nombre = parseFloat(feature.get(field).substring(0,index-1))
+                    let valeur = nombre * 10 ** puissance
+                    return valeur
+                }
+            }
+            return parseFloat(feature.get(field))
         },
 
         // Met à jour la propriété visibilité de la feature selon le filtre
@@ -777,47 +781,31 @@ console.log(parseInt(feature.get('median_injured')))
             }
 
             // Impact
-            if (!this.median_death_null && feature.get('median_death') === null) {
-                feature.set('visible',false);
-                return;
-            }
-            if (parseInt(feature.get('median_death')) < parseInt(this.median_death_min)) {
-                feature.set('visible',false);
-                return;
-            }
-            if (parseInt(feature.get('median_death')) > parseInt(this.median_death_max)) {
-                feature.set('visible',false);
-                return;
-            }
-            if (!this.median_injured_null && feature.get('median_injured') === null) {
-                feature.set('visible',false);
-                return;
-            }
-            if (parseInt(feature.get('median_injured')) < parseInt(this.median_injured_min)) {
-                feature.set('visible',false);
-                return;
-            }
-            if (parseInt(feature.get('median_injured')) > parseInt(this.median_injured_max)) {
-                feature.set('visible',false);
-                return;
+            for(let i = 0; i < this.impact_filter.length; i++) {
+                if (!this.impact_filter[i].checkbox_null && feature.get(this.impact_filter[i].id) === null) {
+                    feature.set('visible',false);
+                    return;
+                }
+                if (this.convertir_str_to_float(feature,this.impact_filter[i].id) < parseInt(this.impact_filter[i].min)) {
+                    feature.set('visible',false);
+                    return;
+                }
+                if (this.convertir_str_to_float(feature,this.impact_filter[i].id) > parseInt(this.impact_filter[i].max)) {
+                    feature.set('visible',false);
+                    return;
+                }
             }
 
             // Popularity
-            if (parseInt(feature.get('n_paragraphs')) < parseInt(this.n_paragraphs_min)) {
-                feature.set('visible',false);
-                return;
-            }
-            if (parseInt(feature.get('n_paragraphs')) > parseInt(this.n_paragraphs_max)) {
-                feature.set('visible',false);
-                return;
-            }
-            if (parseInt(feature.get('n_articles')) < parseInt(this.n_articles_min)) {
-                feature.set('visible',false);
-                return;
-            }
-            if (parseInt(feature.get('n_articles')) > parseInt(this.n_articles_max)) {
-                feature.set('visible',false);
-                return;
+            for(let i = 0; i < this.popularity_filter.length; i++) {
+                if (parseInt(feature.get(this.popularity_filter[i].id)) < parseInt(this.popularity_filter[i].min)) {
+                    feature.set('visible',false);
+                    return;
+                }
+                if (parseInt(feature.get(this.popularity_filter[i].id)) > parseInt(this.popularity_filter[i].max)) {
+                    feature.set('visible',false);
+                    return;
+                }
             }
 
         },
