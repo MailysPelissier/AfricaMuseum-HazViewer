@@ -147,14 +147,21 @@
                     <div class="vertical_center">
                         <button class='back_button' @click="display_date_filter">&#60;</button>
                     </div>
-                    <div id="date_field">
+                    <div id="date_field" class="margin">
                         <div class="title">Date filter:</div>
-                        <div id="start_date">
-                            <label>Start date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date"></label>
-                        </div>
-                        <div id="end_date">
-                            <label>End date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date"></label>
-                        </div>
+                        <ul>
+                            <li id="start_date">
+                                <label>Start date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date"></label>
+                            </li>
+                            <li id="end_date">
+                                <label>End date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date"></label>
+                            </li>
+                            <li id="duration">{{duration_filter[0].label}}</li>
+                            <div>
+                                <label>Min: <input class="input_number" type="text" :min="duration_filter[0].min_depart" :max="duration_filter[0].max_depart" v-model="duration_filter[0].min" @beforeinput="(event) => validateInput(event, duration_filter[0].min_depart, duration_filter[0].max_depart)"/></label>
+                                <label class="margin_left">Max: <input class="input_number" type="text" :min="duration_filter[0].min_depart" :max="duration_filter[0].max_depart" v-model="duration_filter[0].max" @beforeinput="(event) => validateInput(event, duration_filter[0].min_depart, duration_filter[0].max_depart)"/></label>
+                            </div>
+                        </ul>
                     </div>  
                     <div class='back_button'></div>
                 </div>

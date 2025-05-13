@@ -97,6 +97,9 @@ Vue.createApp({
             end_date: "31-12-2023",
             flatpickr_start: null,
             flatpickr_end: null,
+            duration_filter: [
+                { id: 'duration', label: 'Duration:', min: 0, max: 25, min_depart: 0, max_depart: 25 },
+            ],
             // Filtre impact
             impact_filter: [
                 { id: 'median_death', label: 'Median death:', checkbox_null: true, min: 1, max: 35000, min_depart: 1, max_depart: 35000 },
@@ -110,6 +113,8 @@ Vue.createApp({
             popularity_filter : [
                 { id: 'n_articles', label: 'Number of articles:', min: 1, max: 15000, min_depart: 1, max_depart: 15000 },
                 { id: 'n_paragraphs', label: 'Number of paragraphs:', min: 1, max: 60000, min_depart: 1, max_depart: 60000 },
+                { id: 'n_languages', label: 'Number of languages:', min: 1, max: 34, min_depart: 1, max_depart: 34 },
+                { id: 'n_source_countries', label: 'Number of source countries:', min: 1, max: 113, min_depart: 1, max_depart: 113 },
             ],
         };
     },
@@ -776,6 +781,14 @@ Vue.createApp({
                 return;
             }
             if (Date.parse(feature.get('event_time')) > Date.parse(end_date_ymd)) {
+                feature.set('visible',false);
+                return;
+            }
+            if (this.convertir_str_to_float(feature,this.duration_filter[0].id) < parseInt(this.duration_filter[0].min)) {
+                feature.set('visible',false);
+                return;
+            }
+            if (this.convertir_str_to_float(feature,this.duration_filter[0].id) > parseInt(this.duration_filter[0].max)) {
                 feature.set('visible',false);
                 return;
             }
