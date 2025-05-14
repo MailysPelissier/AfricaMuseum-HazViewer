@@ -61,7 +61,8 @@
                     <label>Size style:
                         <select class="margin_left" v-model="size_style">
                             <option value="Standard">Standard</option>
-                            <option v-for="casualty in casualties_list" :value="casualty.size_style">{{casualty.label}}</option>
+                            <option value="Casualties">Casualties</option> 
+                            <option value="Popularity">Popularity</option>                         
                         </select>
                     </label>
                 </div>
@@ -72,9 +73,35 @@
                     <span class="margin_left">{{size_standard}}</span>
                 </div>
 
-                <div v-for="casualty in casualties_list">
-                    <div v-if="size_style === casualty.size_style">
+                <div id="size_casualties" class="flexrow padding" v-if="size_style ==='Casualties'">
+                    <label>Size style (casualties):
+                        <select class="margin_left" v-model="size_casualties">
+                            <option v-for="casualty in casualties_list" :value="casualty.id">{{casualty.label}}</option>  
+                        </select>
+                    </label>
+                </div>
+
+                <div v-for="casualty in casualties_list" v-if="size_style ==='Casualties'">
+                    <div v-if="size_casualties === casualty.id">
                         <div class="flexrow margin" v-for="step in casualty.table">
+                            <div class="vertical_center">{{step.label}}:</div>
+                            <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                            <span class="margin_left">{{step.size}}</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="size_popularity" class="flexrow padding" v-if="size_style ==='Popularity'">
+                    <label>Size style (popularity):
+                        <select class="margin_left" v-model="size_popularity">
+                            <option v-for="pop in popularity_list" :value="pop.id">{{pop.label}}</option>  
+                        </select>
+                    </label>
+                </div>
+
+                <div v-for="pop in popularity_list" v-if="size_style ==='Popularity'">
+                    <div v-if="size_popularity === pop.id">
+                        <div class="flexrow margin" v-for="step in pop.table">
                             <div class="vertical_center">{{step.label}}:</div>
                             <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
                             <span class="margin_left">{{step.size}}</span></label>

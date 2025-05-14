@@ -65,6 +65,7 @@ Vue.createApp({
             color_landslide: '#4a2c03',
             size_style: 'Standard',
             size_standard: 10,
+            size_casualties: 'median_death',
             size_death: [
                 { label: 'No value', min: null, max: null, size: 3 },
                 { label: '0 - 9', min: 0, max: 9, size: 5 },
@@ -97,6 +98,75 @@ Vue.createApp({
                 { label: '10000000 - 99999999', min: 10000000, max: 99999999, size: 11 },
                 { label: '100000000 - 999999999', min: 100000000, max: 999999999, size: 13 },
                 { label: '≥ 1000000000', min: 1000000000, max: Infinity, size: 15 },
+            ],
+            size_homeless: [
+                { label: 'No value', min: null, max: null, size: 3 },
+                { label: '0 - 9', min: 0, max: 9, size: 4 },
+                { label: '10 - 99', min: 10, max: 99, size: 5 },
+                { label: '100 - 999', min: 100, max: 999, size: 6 },
+                { label: '1000 - 9999', min: 1000, max: 9999, size: 7 },
+                { label: '10000 - 99999', min: 10000, max: 99999, size: 9 },
+                { label: '100000 - 999999', min: 100000, max: 999999, size: 11 },
+                { label: '1000000 - 9999999', min: 1000000, max: 9999999, size: 13 },
+                { label: '≥ 10000000', min: 10000000, max: Infinity, size: 15 },
+            ],
+            size_missing: [
+                { label: 'No value', min: null, max: null, size: 3 },
+                { label: '0 - 9', min: 0, max: 9, size: 4 },
+                { label: '10 - 99', min: 10, max: 99, size: 5 },
+                { label: '100 - 999', min: 100, max: 999, size: 6 },
+                { label: '1000 - 9999', min: 1000, max: 9999, size: 7 },
+                { label: '10000 - 99999', min: 10000, max: 99999, size: 8 },
+                { label: '100000 - 999999', min: 100000, max: 999999, size: 9 },
+                { label: '1000000 - 9999999', min: 1000000, max: 9999999, size: 11 },
+                { label: '10000000 - 99999999', min: 10000000, max: 99999999, size: 13 },
+                { label: '≥ 100000000', min: 100000000, max: Infinity, size: 15 },
+            ],
+            size_evacuated: [
+                { label: 'No value', min: null, max: null, size: 3 },
+                { label: '0 - 9', min: 0, max: 9, size: 4 },
+                { label: '10 - 99', min: 10, max: 99, size: 5 },
+                { label: '100 - 999', min: 100, max: 999, size: 6 },
+                { label: '1000 - 9999', min: 1000, max: 9999, size: 7 },
+                { label: '10000 - 99999', min: 10000, max: 99999, size: 8 },
+                { label: '100000 - 999999', min: 100000, max: 999999, size: 9 },
+                { label: '1000000 - 9999999', min: 1000000, max: 9999999, size: 11 },
+                { label: '10000000 - 99999999', min: 10000000, max: 99999999, size: 13 },
+                { label: '≥ 100000000', min: 100000000, max: Infinity, size: 15 },
+            ],
+            size_popularity: 'n_articles',
+            size_articles: [
+                { label: 'No value', min: null, max: null, size: 3 },
+                { label: '0 - 9', min: 0, max: 9, size: 5 },
+                { label: '10 - 99', min: 10, max: 99, size: 7 },
+                { label: '100 - 999', min: 100, max: 999, size: 9 },
+                { label: '1000 - 9999', min: 1000, max: 9999, size: 12 },
+                { label: '≥ 10000', min: 10000, max: Infinity, size: 15 },
+            ],
+            size_paragraphs: [
+                { label: 'No value', min: null, max: null, size: 3 },
+                { label: '0 - 9', min: 0, max: 9, size: 5 },
+                { label: '10 - 99', min: 10, max: 99, size: 7 },
+                { label: '100 - 999', min: 100, max: 999, size: 9 },
+                { label: '1000 - 9999', min: 1000, max: 9999, size: 12 },
+                { label: '≥ 10000', min: 10000, max: Infinity, size: 15 },
+            ],
+            size_languages: [
+                { label: '1 - 5', min: 1, max: 5, size: 3 },
+                { label: '6 - 10', min: 6, max: 10, size: 5 },
+                { label: '11 - 15', min: 11, max: 15, size: 7 },
+                { label: '16 - 20', min: 16, max: 20, size: 9 },
+                { label: '21 - 25', min: 21, max: 25, size: 11 },
+                { label: '26 - 30', min: 26, max: 30, size: 13 },
+                { label: '31 - 35', min: 31, max: 35, size: 15 },
+            ],
+            size_source_countries: [
+                { label: '1 - 20', min: 1, max: 20, size: 3 },
+                { label: '21 - 40', min: 21, max: 40, size: 5 },
+                { label: '41 - 60', min: 41, max: 60, size: 7 },
+                { label: '61 - 80', min: 61, max: 80, size: 9 },
+                { label: '81 - 100', min: 81, max: 100, size: 12 },
+                { label: '101 - 120', min: 101, max: 120, size: 15 },
             ],
             // Affichage popup filtres
             show_filter_form: false,
@@ -144,16 +214,27 @@ Vue.createApp({
     },
 
     computed: {
+
         casualties_list() {
             return [
-                { size_style: 'Median_death', label: 'Median death', table: this.size_death },
-                { size_style: 'Median_injured', label: 'Median injured', table: this.size_injured },
-                { size_style: 'Median_affected', label: 'Median affected', table: this.size_affected },
-                { size_style: 'Median_homeless', label: 'Median homeless', table: this.size_homeless},
-                { size_style: 'Median_missing', label: 'Median missing', table: this.size_missing },
-                { size_style: 'Median_evacuated', label: 'Median evacuated', table: this.size_evacuated },
+                { id: 'median_death', label: 'Median death', table: this.size_death },
+                { id: 'median_injured', label: 'Median injured', table: this.size_injured },
+                { id: 'median_affected', label: 'Median affected', table: this.size_affected },
+                { id: 'median_homeless', label: 'Median homeless', table: this.size_homeless },
+                { id: 'median_missing', label: 'Median missing', table: this.size_missing },
+                { id: 'median_evacuated', label: 'Median evacuated', table: this.size_evacuated },
             ];
-        }
+        },
+
+        popularity_list() {
+            return [
+                { id: 'n_articles', label: 'Number of articles', table: this.size_articles },
+                { id: 'n_paragraphs', label: 'Number of paragraphs', table: this.size_paragraphs },
+                { id: 'n_languages', label: 'Number of languages', table: this.size_languages },
+                { id: 'n_source_countries', label: 'Number of source countries', table: this.size_source_countries },
+            ];
+        },
+
     },
 
     methods: {
@@ -633,6 +714,7 @@ Vue.createApp({
                 }
 
                 else {
+
                     // Définition de la couleur
                     let color;
                     if (couleur_fixee) {
@@ -658,16 +740,35 @@ Vue.createApp({
                     let size;
                     if (this.size_style === 'Standard') {
                         size = this.size_standard;
-                    } else if (this.size_style === 'Median_death') {
-                        let median_death = feature.get('median_death');
-                        let size_death_f = this.size_death.find(interval => {
-                            if (interval.min === null && interval.max === null) {
-                                return median_death === null;
+                    } 
+                    if (this.size_style === 'Casualties') {
+                        for (let i = 0; i < this.casualties_list.length; i++) {
+                            if (this.size_casualties === this.casualties_list[i].id) {
+                                let median_field = feature.get(this.casualties_list[i].id);
+                                let size_field_f = this.casualties_list[i].table.find(interval => {
+                                    if (interval.min === null && interval.max === null) {
+                                        return median_field === null;
+                                    }
+                                    return median_field >= interval.min && median_field <= interval.max;
+                                });          
+                                size = size_field_f.size;
                             }
-                            return median_death >= interval.min && median_death <= interval.max;
-                        });          
-                        size = size_death_f.size;
-                    }
+                        }
+                    } 
+                    if (this.size_style === 'Popularity') {
+                        for (let i = 0; i < this.popularity_list.length; i++) {
+                            if (this.size_popularity === this.popularity_list[i].id) {
+                                let median_field = feature.get(this.popularity_list[i].id);
+                                let size_field_f = this.popularity_list[i].table.find(interval => {
+                                    if (interval.min === null && interval.max === null) {
+                                        return median_field === null;
+                                    }
+                                    return median_field >= interval.min && median_field <= interval.max;
+                                });          
+                                size = size_field_f.size;
+                            }
+                        }
+                    } 
             
                     return new ol.style.Style({
                         image: new ol.style.Circle({
