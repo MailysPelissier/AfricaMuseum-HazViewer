@@ -61,6 +61,7 @@
                     <label>Size style:
                         <select class="margin_left" v-model="size_style">
                             <option value="Standard">Standard</option>
+                            <option value="Duration">Duration</option>
                             <option value="Casualties">Casualties</option> 
                             <option value="Popularity">Popularity</option>                         
                         </select>
@@ -72,6 +73,16 @@
                     <input type="range" min="0" max="15" class="slider margin_left" v-model="size_standard">
                     <span class="margin_left">{{size_standard}}</span>
                 </div>
+
+                <div id="size_duration" class="flexrow padding" v-if="size_style ==='Duration'">
+                    <div>
+                        <div class="flexrow margin" v-for="step in size_duration">
+                            <div class="vertical_center">{{step.label}}:</div>
+                            <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                            <span class="margin_left">{{step.size}}</span></label>
+                        </div>
+                    </div>
+                </div>        
 
                 <div id="size_casualties" class="flexrow padding" v-if="size_style ==='Casualties'">
                     <label>Size style (casualties):

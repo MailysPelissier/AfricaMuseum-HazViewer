@@ -65,6 +65,14 @@ Vue.createApp({
             color_landslide: '#4a2c03',
             size_style: 'Standard',
             size_standard: 10,
+            size_duration: [
+                { label: '0', min: 0, max: 0, size: 3 },
+                { label: '1 - 5', min: 1, max: 5, size: 3 },
+                { label: '6 - 10', min: 6, max: 10, size: 6 },
+                { label: '11 - 15', min: 11, max: 15, size: 9 },
+                { label: '16 - 20', min: 16, max: 20, size: 12 },
+                { label: '21 - 25', min: 21, max: 25, size: 15 },
+            ],
             size_casualties: 'median_death',
             size_death: [
                 { label: 'No value', min: null, max: null, size: 3 },
@@ -741,6 +749,13 @@ Vue.createApp({
                     if (this.size_style === 'Standard') {
                         size = this.size_standard;
                     } 
+                    if (this.size_style === 'Duration') {
+                        let median_field = parseInt(feature.get('duration'));
+                        let size_field_f = this.size_duration.find(interval => {
+                            return median_field >= interval.min && median_field <= interval.max;
+                        });
+                        size = size_field_f.size;
+                    }
                     if (this.size_style === 'Casualties') {
                         for (let i = 0; i < this.casualties_list.length; i++) {
                             if (this.size_casualties === this.casualties_list[i].id) {
