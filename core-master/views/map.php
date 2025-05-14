@@ -31,6 +31,8 @@
                         <select class="margin_left" v-model="color_style">
                             <option value="Standard">Standard</option>
                             <option value="Event_type">Hazard type</option>
+                            <option value="Year">Year</option>
+                            <option value="Month">Month</option>
                         </select>
                     </label>
                 </div>
@@ -54,6 +56,24 @@
                         <input type="color" class="color_input margin_left" v-model="color_landslide">
                     </div>
                 </div>
+
+                <div id="color_year" class="flexrow padding" v-if="color_style ==='Year'">
+                    <div>
+                        <div class="flexrow" v-for="step in color_year">
+                            <div class="vertical_center">{{step.label}}:</div>
+                            <input type="color" class="color_input margin_left" v-model="step.color">
+                        </div>
+                    </div>
+                </div> 
+
+                <div id="color_month" class="flexrow padding" v-if="color_style ==='Month'">
+                    <div>
+                        <div class="flexrow" v-for="step in color_month">
+                            <div class="vertical_center">{{step.label}}:</div>
+                            <input type="color" class="color_input margin_left" v-model="step.color">
+                        </div>
+                    </div>
+                </div> 
 
                 <hr />
 

@@ -63,6 +63,28 @@ Vue.createApp({
             color_flood: '#3252a8',
             color_flashflood: '#7f14cc',
             color_landslide: '#4a2c03',
+            color_year: [
+                { label: 'Before 2020', min: -Infinity, max: Date.parse("2020-01-01"), color: '#6d458b' },
+                { label: '2020', min: Date.parse("2020-01-01"), max: Date.parse("2021-01-01"), color: '#0491d0' },
+                { label: '2021', min: Date.parse("2021-01-01"), max: Date.parse("2022-01-01"), color: '#88bb64' },
+                { label: '2022', min: Date.parse("2022-01-01"), max: Date.parse("2023-01-01"), color: '#f2ce3f' },
+                { label: '2023', min: Date.parse("2023-01-01"), max: Date.parse("2024-01-01"), color: '#fc9548' },
+                { label: 'After 2023', min: Date.parse("2024-01-01"), max: Infinity, color: '#fb5b44' },
+            ],
+            color_month: [
+                { label: 'January', number: '01', color: '#ed008c' },
+                { label: 'February', number: '02', color: '#d0191b' },
+                { label: 'March', number: '03', color: '#f06730' },
+                { label: 'April', number: '04', color: '#f08622' },
+                { label: 'May', number: '05', color: '#e9eb28' },
+                { label: 'June', number: '06', color: '#b4e742' },
+                { label: 'July', number: '07', color: '#5fc650' },
+                { label: 'August', number: '08', color: '#1fa5a6' },
+                { label: 'September', number: '09', color: '#2689c7' },
+                { label: 'October', number: '10', color: '#3242a8' },
+                { label: 'November', number: '11', color: '#761ca2' },
+                { label: 'December', number: '12', color: '#b23593' },
+            ],
             size_style: 'Standard',
             size_standard: 10,
             size_duration: [
@@ -727,9 +749,11 @@ Vue.createApp({
                     let color;
                     if (couleur_fixee) {
                         color = couleur_fixee;
-                    } else if (this.color_style === 'Standard') {
+                    }
+                    else if (this.color_style === 'Standard') {
                         color = this.color_standard;
-                    } else if (this.color_style === 'Event_type') {
+                    }
+                    else if (this.color_style === 'Event_type') {
                         let hazardType = feature.get('hazard_type');
                         switch (hazardType) {
                         case 'flood':
@@ -743,44 +767,58 @@ Vue.createApp({
                             break;
                         }
                     }
+                    else if (this.color_style === 'Year') {
+                        let date = Date.parse(feature.get('event_time'));
+                        let intervalle_date = this.color_year.find(interval => {
+                            return date >= interval.min && date <= interval.max;
+                        });
+                        color = intervalle_date.color;
+                    }
+                    else if (this.color_style === 'Month') {
+                        let str_mois = feature.get('event_time').substring(5,7);
+                        let mois = this.color_month.find(interval => {
+                            return str_mois === interval.number
+                        });
+                        color = mois.color;
+                    }
             
                     // Définition de la taille
                     let size;
                     if (this.size_style === 'Standard') {
                         size = this.size_standard;
                     } 
-                    if (this.size_style === 'Duration') {
-                        let median_field = parseInt(feature.get('duration'));
-                        let size_field_f = this.size_duration.find(interval => {
-                            return median_field >= interval.min && median_field <= interval.max;
+                    else if (this.size_style === 'Duration') {
+                        let duration = parseInt(feature.get('duration'));
+                        let intervalle_duration = this.size_duration.find(interval => {
+                            return duration >= interval.min && duration <= interval.max;
                         });
-                        size = size_field_f.size;
+                        size = intervalle_duration.size;
                     }
-                    if (this.size_style === 'Casualties') {
+                    else if (this.size_style === 'Casualties') {
                         for (let i = 0; i < this.casualties_list.length; i++) {
                             if (this.size_casualties === this.casualties_list[i].id) {
-                                let median_field = feature.get(this.casualties_list[i].id);
-                                let size_field_f = this.casualties_list[i].table.find(interval => {
+                                let property = feature.get(this.casualties_list[i].id);
+                                let intervalle_property = this.casualties_list[i].table.find(interval => {
                                     if (interval.min === null && interval.max === null) {
-                                        return median_field === null;
+                                        return property === null;
                                     }
-                                    return median_field >= interval.min && median_field <= interval.max;
+                                    return property >= interval.min && property <= interval.max;
                                 });          
-                                size = size_field_f.size;
+                                size = intervalle_property.size;
                             }
                         }
                     } 
-                    if (this.size_style === 'Popularity') {
+                    else if (this.size_style === 'Popularity') {
                         for (let i = 0; i < this.popularity_list.length; i++) {
                             if (this.size_popularity === this.popularity_list[i].id) {
-                                let median_field = feature.get(this.popularity_list[i].id);
-                                let size_field_f = this.popularity_list[i].table.find(interval => {
+                                let property = feature.get(this.popularity_list[i].id);
+                                let intervalle_property = this.popularity_list[i].table.find(interval => {
                                     if (interval.min === null && interval.max === null) {
-                                        return median_field === null;
+                                        return property === null;
                                     }
-                                    return median_field >= interval.min && median_field <= interval.max;
+                                    return property >= interval.min && property <= interval.max;
                                 });          
-                                size = size_field_f.size;
+                                size = intervalle_property.size;
                             }
                         }
                     } 
