@@ -32,7 +32,7 @@ Flight::route('GET /postgres/events', function () {
         median_affected,mostfreq_missing,n_mostfreq_missing,time_mostfreq_missing,max_missing,n_max_missing,time_max_missing,
         median_missing,mostfreq_evacuated,n_mostfreq_evacuated,time_mostfreq_evacuated,max_evacuated,n_max_evacuated,
         time_max_evacuated,median_evacuated,country
-        FROM events2020_23 WHERE $min_lon<longitude and longitude<$max_lon and $min_lat<latitude and latitude<$max_lat");
+        FROM events2020_23 WHERE longitude BETWEEN $min_lon AND $max_lon AND latitude BETWEEN $min_lat AND $max_lat");
         $resultats = pg_fetch_all($reponse, PGSQL_ASSOC);
         $events = [];
         if ($resultats !== false) {

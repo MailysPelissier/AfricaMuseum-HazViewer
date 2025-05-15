@@ -351,7 +351,7 @@ Vue.createApp({
                         this.events_layer.getSource().addFeature(new_event); 
 
                     }      
-                
+
                 };
             
             });
@@ -540,6 +540,7 @@ Vue.createApp({
 
             // Création de listes de 50 paragraph_id (url peut être trop longue si on ne fait qu'une liste)
             let nb_boucles = Math.ceil(paragraphs_list.length/50)
+
             for(let i = 0; i < nb_boucles; i++) {
 
                 // Tableaux de 50 paragraph_id
@@ -556,10 +557,10 @@ Vue.createApp({
                 .then( (json) => {
 
                     // Pour chaque paragraph récupéré :
-                    for (let i = 0; i < json.length; i++) {
+                    for (let j = 0; j < json.length; j++) {
 
                         // Récupération de l'identifiant
-                        let paragraph_id = json[i].paragraph_id;
+                        let paragraph_id = json[j].paragraph_id;
 
                         // Si le paragraph n'est pas déjà dans la couche :
                         let exists = this.paragraphs_layer.getSource().getFeatureById(paragraph_id);
@@ -567,33 +568,33 @@ Vue.createApp({
 
                             // Création de la liste des propriétés (une seule fois)
                             if (this.paragraph_all_property.length == 0) {
-                                for (let key in json[i]) {
-                                    if (json[i].hasOwnProperty(key)) {
+                                for (let key in json[j]) {
+                                    if (json[j].hasOwnProperty(key)) {
                                         this.paragraph_all_property.push(key);
                                     }
                                 }
                             }
 
                             // Création de la feature à l'aide de ses coordonnées (projection en 3857)
-                            let new_paragraph = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([json[i].longitude,json[i].latitude])));
+                            let new_paragraph = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([json[j].longitude,json[j].latitude])));
 
                             // Stockage de l'identifiant
                             new_paragraph.setId(paragraph_id);
 
                             // Récupération et stockage des propriétés
-                            for (let key in json[i]) {
-                                if (json[i].hasOwnProperty(key)) {
-                                    new_paragraph.set(key, json[i][key]);
+                            for (let key in json[j]) {
+                                if (json[j].hasOwnProperty(key)) {
+                                    new_paragraph.set(key, json[j][key]);
                                 }
                             }
 
                             // Ajout à la couche paragraphs
-                            this.paragraphs_layer.getSource().addFeature(new_paragraph);                   
-                        
+                            this.paragraphs_layer.getSource().addFeature(new_paragraph);    
+                             
                         }
                     
-                    };
-                
+                    }; 
+                    
                 });
 
             }
