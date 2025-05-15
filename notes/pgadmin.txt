@@ -311,6 +311,20 @@ QUOTE '"';
 SELECT * FROM public.events2020_23
 LIMIT 100
 
+-- DROP INDEX IF EXISTS public.events2020_23_latitude_index;
+
+CREATE INDEX IF NOT EXISTS events2020_23_latitude_index
+    ON public.events2020_23 USING btree
+    (latitude ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+-- DROP INDEX IF EXISTS public.events2020_23_longitude_index;
+
+CREATE INDEX IF NOT EXISTS events2020_23_longitude_index
+    ON public.events2020_23 USING btree
+    (longitude ASC NULLS LAST)
+    TABLESPACE pg_default;
+
 
 Paragraphs v3 :
 
@@ -390,3 +404,10 @@ QUOTE '"';
 
 SELECT * FROM public.paragraphs2020_23
 LIMIT 100
+
+-- DROP INDEX IF EXISTS public.events2020_23_latitude_index;
+
+CREATE INDEX IF NOT EXISTS events2020_23_latitude_index
+    ON public.events2020_23 USING btree
+    (latitude ASC NULLS LAST)
+    TABLESPACE pg_default;
