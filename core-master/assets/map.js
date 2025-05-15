@@ -3,6 +3,7 @@ Vue.createApp({
     data() {
         return {
             map: null, // Initialisation de la map
+            countries_layer: null, // Initialisation de la couche countries
             bbox_events_layer: null, // Initialisation de la couche bbox events
             bbox_paragraphs_layer: null, // Initialisation de la couche bbox paragraphs
             events_layer: null, // Initialisation de la couche events
@@ -15,7 +16,7 @@ Vue.createApp({
             event_main_property: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
                  "n_paragraphs", "n_articles"],
             // Autres propriétés des events
-            event_other_property: ["country", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
+            event_other_property: ["country", "country_found", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
             // Propriétés locations des events
             event_location_property: ["latitude", "longitude", "bbox_event"],
             // Propriétés chiffrées des events (souvent null)
@@ -335,6 +336,10 @@ Vue.createApp({
                             }
                         }
 
+                        // Création de la propriété country_found
+                        let country = this.get_country(new_event);
+                        new_event.set('country_found',country);
+
                         // Dates du filtre en format y-m-d
                         let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
                         let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
@@ -351,6 +356,23 @@ Vue.createApp({
             
             });
         
+        },
+
+        // Trouver le pays où est situé l'objet
+        get_country (feature) {
+
+            let countries = this.countries_layer.getSource().getFeatures();
+            let country_found = null;
+
+            for (let country of countries) {
+                if (country.getGeometry().intersectsCoordinate(feature.getGeometry().getCoordinates())) {
+                    country_found = country.values_.admin;
+                    break;
+                }
+            }
+
+            return country_found
+
         },
 
         // Crée le texte en récupérant les infos sur l'event, change le style de l'event
@@ -1059,6 +1081,23 @@ Vue.createApp({
             ],
         });
 
+        // Couche des pays (source : Natural Earth, https://geojson-maps.kyd.au/?utm_source=self&utm_medium=redirect)
+        this.countries_layer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                projection: 'EPSG:3857',
+                url: '../assets/layers/countries50m.json',
+                format: new ol.format.GeoJSON()
+            }),
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'rgb(0, 0, 0, 0.5)',
+                    width: 1
+                })
+            }),
+            zIndex: 2,
+        }),
+        this.map.addLayer(this.countries_layer);
+
         // Création de la couche bbox events (vide)
         this.bbox_events_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
@@ -1071,7 +1110,7 @@ Vue.createApp({
                     width: 2
                 })
             }),
-            zIndex: 2,
+            zIndex: 10,
         });
         this.map.addLayer(this.bbox_events_layer);
 
@@ -1087,7 +1126,7 @@ Vue.createApp({
                     width: 1
                 })
             }),
-            zIndex: 3,
+            zIndex: 11,
         });
         this.map.addLayer(this.bbox_paragraphs_layer);
 
@@ -1102,7 +1141,7 @@ Vue.createApp({
                     }),
                 }),
             }),
-            zIndex: 4,
+            zIndex: 12,
         });
         this.map.addLayer(this.events_layer);
 
@@ -1117,7 +1156,7 @@ Vue.createApp({
                     }),
                 }),
             }),
-            zIndex: 5,
+            zIndex: 13,
         });
         this.map.addLayer(this.selected_event_layer);
 
@@ -1132,7 +1171,7 @@ Vue.createApp({
                     }),
                 }),
             }),
-            zIndex: 6,
+            zIndex: 14,
         });
         this.map.addLayer(this.paragraphs_layer);
 
@@ -1147,7 +1186,7 @@ Vue.createApp({
                     }),
                 }),
             }),
-            zIndex: 7,
+            zIndex: 15,
         });
         this.map.addLayer(this.selected_paragraph_layer);
 
@@ -1184,7 +1223,7 @@ Vue.createApp({
             document.getElementById("popup_clic").style.display = "none";
         });
 
-        // A chaque déplacement du pointer, si plusieurs features (events ou paragraphs) sont superposées au niveu du pointer,
+        // A chaque déplacement du pointer, si plusieurs features (events ou paragraphs) sont superposées au niveau du pointer,
         // on affiche leur nombre
         this.map.on("pointermove", evt => {
 
