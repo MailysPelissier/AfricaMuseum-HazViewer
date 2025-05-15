@@ -215,10 +215,10 @@ Vue.createApp({
             flashflood: true,
             landslide: true,
             // Filtre dates
-            min_date: "01-01-2020",
-            max_date: "31-12-2023",
-            start_date: "01-01-2020",
-            end_date: "31-12-2023",
+            min_date: "01-01-1953",
+            max_date: "31-12-2028",
+            start_date: "01-01-1953",
+            end_date: "31-12-2028",
             flatpickr_start: null,
             flatpickr_end: null,
             duration_filter: [
@@ -335,8 +335,12 @@ Vue.createApp({
                             }
                         }
 
+                        // Dates du filtre en format y-m-d
+                        let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
+                        let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
+
                         // Propriété visibilité dépend des filtres
-                        this.set_feature_visibility(new_event);
+                        this.set_feature_visibility(new_event, start_date_ymd, end_date_ymd);
 
                         // Ajout à la couche events
                         this.events_layer.getSource().addFeature(new_event); 
