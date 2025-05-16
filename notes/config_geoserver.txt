@@ -1,0 +1,23 @@
+Installer le fichier d'installation Geoserver : https://geoserver.org/
+
+Avoir un environnement Java 11 ou 17 : https://adoptium.net/
+
+Mettre le chemin de cet environnement lors du setup ex : C:\Program Files\Eclipse Adoptium\jre-11.0.26.4-hotspot
+
+Il faut également autoriser l’accès à votre serveur (Jetty) depuis un client avec les CORS :
+https://docs.geoserver.org/latest/en/user/production/container.html#enable-cors-for-jetty-binary-installer
+
+Username : admin
+Password : geoserver
+Port : 8080
+
+Geoserver v2.27.1
+
+Créer d’abord un nouveau Workspace (webGIS)
+Créer un Store, lié à votre base PostGIS (webGIS)
+Créer les layers (la géométrie est utilisée automatiquement)
+Layer : 
+Declared SRS: EPSG:4326
+Bounding Boxes : cliquer sur Compute from SRS bounds puis sur Compute from native bounds
+layer events2020_23 et paragraphs2020_23
+Vérifier que ça fonctionne avec le layer preview

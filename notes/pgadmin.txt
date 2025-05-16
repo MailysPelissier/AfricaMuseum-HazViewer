@@ -308,8 +308,20 @@ DELIMITER ','
 CSV HEADER
 QUOTE '"';
 
+
+ALTER TABLE IF EXISTS public.events2020_23
+    ADD COLUMN wkt character varying;
+
+ALTER TABLE IF EXISTS public.events2020_23
+    ADD COLUMN geom geometry(Point,4326);
+
+update events2020_23 set wkt=concat('POINT (',longitude,' ',latitude,')')
+update events2020_23 set geom=ST_GeomFromText(wkt)
+
+
 SELECT * FROM public.events2020_23
 LIMIT 100
+
 
 -- DROP INDEX IF EXISTS public.events2020_23_latitude_index;
 
@@ -324,6 +336,7 @@ CREATE INDEX IF NOT EXISTS events2020_23_longitude_index
     ON public.events2020_23 USING btree
     (longitude ASC NULLS LAST)
     TABLESPACE pg_default;
+
 
 
 Paragraphs v3 :
@@ -402,8 +415,22 @@ DELIMITER ','
 CSV HEADER
 QUOTE '"';
 
+
+delete from paragraphs2020_23 where longitude is null
+
+ALTER TABLE IF EXISTS public.paragraphs2020_23
+    ADD COLUMN wkt character varying;
+
+ALTER TABLE IF EXISTS public.paragraphs2020_23
+    ADD COLUMN geom geometry(Point,4326);
+
+update paragraphs2020_23 set wkt=concat('POINT (',longitude,' ',latitude,')')
+update paragraphs2020_23 set geom=ST_GeomFromText(wkt)
+
+
 SELECT * FROM public.paragraphs2020_23
 LIMIT 100
+
 
 -- DROP INDEX IF EXISTS public.events2020_23_latitude_index;
 
