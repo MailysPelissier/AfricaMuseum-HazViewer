@@ -7,6 +7,7 @@ Vue.createApp({
             bbox_events_layer: null, // Initialisation de la couche bbox events
             bbox_paragraphs_layer: null, // Initialisation de la couche bbox paragraphs
             events_layer: null, // Initialisation de la couche events
+            events_layer_source: null, // Initialisation de la source de la couche events
             selected_event_layer: null, // Initialisation de la couche selected event
             paragraphs_layer: null, // Initialisation de la couche paragraphs
             selected_paragraph_layer: null, // Initialisation de la couche selected paragraph
@@ -271,6 +272,7 @@ Vue.createApp({
     methods: {
 
         // Calcul de l'emprise de l'écran
+        // Pas utilisée pour l'instant
         emprise_ecran () {
 
             // Récupération de l'emprise de l'écran
@@ -291,8 +293,9 @@ Vue.createApp({
 
         },
 
-        // Ajout des events à la couche events, selon la bbox
-        ajout_events () {
+        // Ajout des events à la couche events par pg_connect, selon la bbox
+        // Pas utilisée pour l'instant
+        ajout_events_postgres () {
 
             let { min_lon, min_lat, max_lon, max_lat } = this.emprise_ecran();
 
@@ -356,6 +359,56 @@ Vue.createApp({
             
             });
         
+        },
+
+        // Ajout des events à la couche events par geoservices, selon la bbox
+        ajout_events_geoservices(feature) {
+
+            // Récupération de l'identifiant
+            let event_id = feature.event_id;
+
+            // Si l'event n'est pas déjà dans la couche :
+            let exists = this.events_layer.getSource().getFeatureById(event_id);
+            if (!exists) {
+
+                // Création de la liste des propriétés (une seule fois)
+                if (this.event_all_property.length == 0) {
+                    for (let key in json[i]) {
+                        if (json[i].hasOwnProperty(key)) {
+                            this.event_all_property.push(key);
+                        }
+                    }                           
+                }   
+
+                // Création de la feature à l'aide de ses coordonnées (projection en 3857)
+                let new_event = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([json[i].longitude,json[i].latitude])));
+
+                // Stockage de l'identifiant
+                new_event.setId(event_id);
+
+                // Récupération et stockage des propriétés
+                for (let key in json[i]) {
+                    if (json[i].hasOwnProperty(key)) {
+                        new_event.set(key, json[i][key]);
+                    }
+                }
+
+                // Création de la propriété country_found
+                let country = this.get_country(new_event);
+                new_event.set('country_found',country);
+
+                // Dates du filtre en format y-m-d
+                let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
+                let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
+
+                // Propriété visibilité dépend des filtres
+                this.set_feature_visibility(new_event, start_date_ymd, end_date_ymd);
+
+                // Ajout à la couche events
+                this.events_layer.getSource().addFeature(new_event); 
+
+            } 
+
         },
 
         // Trouver le pays où est situé l'objet
@@ -1099,6 +1152,46 @@ Vue.createApp({
         }),
         this.map.addLayer(this.countries_layer);
 
+        this.events_layer_source = new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: function(extent) {
+                return 'http://localhost:8080/geoserver/webGIS/ows?' +
+                    'service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23&' +
+                    'outputFormat=application/json&bbox=' + extent.join(',') + ',EPSG:3857';
+            },
+            strategy: ol.loadingstrategy.bbox
+        });
+
+        this.events_layer = new ol.layer.Vector({
+            source: this.events_layer_source,
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 10,
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 0, 0, 1)',
+                    }),
+                }),
+            }),
+            zIndex: 12,
+        });
+
+        this.map.addLayer(this.events_layer)
+
+        // Ajouter une fonction de filtrage pour éviter les doublons
+        this.events_layer_source.on('featuresloadend', function(event) {
+
+            const features = event.features;
+            features.forEach((feature) => {
+
+
+                // this.ajout_events_geoservices(event.feature)
+                console.log(feature.id_,feature.getId())
+                let existingFeature = this.events_layer_source.getFeatureById(feature.getId());
+                console.log(existingFeature)
+
+            })
+        });
+
         // Création de la couche bbox events (vide)
         this.bbox_events_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
@@ -1131,20 +1224,20 @@ Vue.createApp({
         });
         this.map.addLayer(this.bbox_paragraphs_layer);
 
-        // Création de la couche events (vide)
-        this.events_layer = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 10,
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255, 0, 0, 1)',
-                    }),
-                }),
-            }),
-            zIndex: 12,
-        });
-        this.map.addLayer(this.events_layer);
+        // // Création de la couche events (vide)
+        // this.events_layer = new ol.layer.Vector({
+        //     source: new ol.source.Vector(),
+        //     style: new ol.style.Style({
+        //         image: new ol.style.Circle({
+        //             radius: 10,
+        //             fill: new ol.style.Fill({
+        //                 color: 'rgba(255, 0, 0, 1)',
+        //             }),
+        //         }),
+        //     }),
+        //     zIndex: 12,
+        // });
+        // this.map.addLayer(this.events_layer);
 
         // Création de la couche event selectionné (vide)
         this.selected_event_layer = new ol.layer.Vector({
@@ -1220,7 +1313,7 @@ Vue.createApp({
         // A chaque déplacement/zoom, ajout des events à la couche events selon la bbox
         // Suppression du popup clic
         this.map.on('moveend', () => {
-            this.ajout_events();
+            // this.ajout_events();
             document.getElementById("popup_clic").style.display = "none";
         });
 
