@@ -351,15 +351,15 @@ Vue.createApp({
         visibilite_features_ajoutees(feature) {
 
             // Si l'event n'est pas déjà dans la couche :
-            let feature_couche = this.events_layer.getSource().getFeatureById(feature.getId());
-            if (!feature_couche.get('visible')) {
+            let exists = this.events_layer.getSource().getFeatureById(feature.getId());
+            if (!exists.get('visible')) {
 
                 // Dates du filtre en format y-m-d
                 let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
                 let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
 
                 // Propriété visibilité dépend des filtres
-                this.set_feature_visibility(feature_couche, start_date_ymd, end_date_ymd);
+                this.set_feature_visibility(exists, start_date_ymd, end_date_ymd);
 
             }
 
@@ -435,6 +435,8 @@ Vue.createApp({
         // Fonction appelée quand on appuie sur le bouton pour avoir plus d'infos
         // Rend les autres events invisibles, affiche les paragraphs et la bbox associés
         more_infos_page () {
+
+            window.open("https://stackoverflow.com/questions/4907843/open-a-url-in-a-new-tab-and-not-a-new-window", '_blank').focus();
 
             // Récupération de l'event
             let feature = this.selected_event;
