@@ -11,8 +11,6 @@ Vue.createApp({
             selected_event_layer: null, // Initialisation de la couche selected event
             paragraphs_layer: null, // Initialisation de la couche paragraphs
             selected_paragraph_layer: null, // Initialisation de la couche selected paragraph
-            // Liste de toutes les propriétés pour les events
-            event_all_property: [],
             // Propriétés principales des events
             event_main_property: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
                  "n_paragraphs", "n_articles"],
@@ -28,8 +26,6 @@ Vue.createApp({
                 "max_affected", "n_max_affected", "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", 
                 "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", 
                 "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated"],
-            // Liste de toutes les propriétés pour les paragraphs
-            paragraph_all_property: [],
             // Propriétés principales des paragraphs
             paragraph_main_property: ["title", "hasard_type", "publication_time", "paragraph_time", "nb_death", "nb_injured", "nb_affected",
                 "article_language"],
@@ -60,8 +56,7 @@ Vue.createApp({
             // Affichage popup changer style
             show_changer_style_form: false,
             // Propriétés par défaut du changement de style
-            color_style: 'Standard',
-            color_standard: '#ff0000',
+            color_style: 'Event_type',
             color_flood: '#3252a8',
             color_flashflood: '#7f14cc',
             color_landslide: '#4a2c03',
@@ -315,16 +310,7 @@ Vue.createApp({
 
                     // Si l'event n'est pas déjà dans la couche :
                     let exists = this.events_layer.getSource().getFeatureById(event_id);
-                    if (!exists) {
-
-                        // Création de la liste des propriétés (une seule fois)
-                        if (this.event_all_property.length == 0) {
-                            for (let key in json[i]) {
-                                if (json[i].hasOwnProperty(key)) {
-                                    this.event_all_property.push(key);
-                                }
-                            }                           
-                        }   
+                    if (!exists) {  
 
                         // Création de la feature à l'aide de ses coordonnées (projection en 3857)
                         let new_event = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([json[i].longitude,json[i].latitude])));
@@ -362,56 +348,25 @@ Vue.createApp({
         },
 
         // Ajout des events à la couche events par geoservices, selon la bbox
-        ajout_events_geoservices(feature) {
-
-            // Récupération de l'identifiant
-            let event_id = feature.event_id;
+        visibilite_features_ajoutees(feature) {
 
             // Si l'event n'est pas déjà dans la couche :
-            let exists = this.events_layer.getSource().getFeatureById(event_id);
-            if (!exists) {
-
-                // Création de la liste des propriétés (une seule fois)
-                if (this.event_all_property.length == 0) {
-                    for (let key in json[i]) {
-                        if (json[i].hasOwnProperty(key)) {
-                            this.event_all_property.push(key);
-                        }
-                    }                           
-                }   
-
-                // Création de la feature à l'aide de ses coordonnées (projection en 3857)
-                let new_event = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([json[i].longitude,json[i].latitude])));
-
-                // Stockage de l'identifiant
-                new_event.setId(event_id);
-
-                // Récupération et stockage des propriétés
-                for (let key in json[i]) {
-                    if (json[i].hasOwnProperty(key)) {
-                        new_event.set(key, json[i][key]);
-                    }
-                }
-
-                // Création de la propriété country_found
-                let country = this.get_country(new_event);
-                new_event.set('country_found',country);
+            let feature_couche = this.events_layer.getSource().getFeatureById(feature.getId());
+            if (!feature_couche.get('visible')) {
 
                 // Dates du filtre en format y-m-d
                 let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
                 let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
 
                 // Propriété visibilité dépend des filtres
-                this.set_feature_visibility(new_event, start_date_ymd, end_date_ymd);
+                this.set_feature_visibility(feature_couche, start_date_ymd, end_date_ymd);
 
-                // Ajout à la couche events
-                this.events_layer.getSource().addFeature(new_event); 
-
-            } 
+            }
 
         },
 
         // Trouver le pays où est situé l'objet
+        // Pas utilisée pour l'instant
         get_country (feature) {
 
             let countries = this.countries_layer.getSource().getFeatures();
@@ -429,7 +384,7 @@ Vue.createApp({
         },
 
         // Crée le texte en récupérant les infos sur l'event, change le style de l'event
-        affichage_selection_event (feature) { 
+        affichage_selection_event (feature) {
 
             // Chargement et affichage du texte sur l'event
             this.event_main_text = '<ul>';
@@ -500,7 +455,7 @@ Vue.createApp({
             this.affichage_bbox_event(feature);
 
             // Afficher paragraphs
-            this.affichage_paragraphs(feature);
+            this.affichage_paragraphs_geoserver(feature);
 
         },
 
@@ -581,8 +536,8 @@ Vue.createApp({
 
         },
 
-        // Affichage des paragraphs correspondant à l'event
-        affichage_paragraphs (feature) {
+        // Affichage des paragraphs correspondant à l'event (depuis Postgres)
+        affichage_paragraphs_postgres (feature) {
 
             // Récupérer les valeurs des paragraphs_id
             let paragraphs_list = feature.get('paragraphs_list');
@@ -597,7 +552,7 @@ Vue.createApp({
             for(let i = 0; i < nb_boucles; i++) {
 
                 // Tableaux de 50 paragraph_id
-                let paragraphs_list_50 = paragraphs_list.slice(50*i,50*(i+1));
+                let paragraphs_list_50 = paragraphs_list.slice(50*i, 50*(i+1));
                 // Liste de 50 paragraph_id reformatée pour la requête
                 paragraphs_list_50 = `(${paragraphs_list_50.map(e => `'${e}'`).join(',')})`;
 
@@ -618,15 +573,6 @@ Vue.createApp({
                         // Si le paragraph n'est pas déjà dans la couche :
                         let exists = this.paragraphs_layer.getSource().getFeatureById(paragraph_id);
                         if (!exists) {
-
-                            // Création de la liste des propriétés (une seule fois)
-                            if (this.paragraph_all_property.length == 0) {
-                                for (let key in json[j]) {
-                                    if (json[j].hasOwnProperty(key)) {
-                                        this.paragraph_all_property.push(key);
-                                    }
-                                }
-                            }
 
                             // Création de la feature à l'aide de ses coordonnées (projection en 3857)
                             let new_paragraph = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([json[j].longitude,json[j].latitude])));
@@ -652,6 +598,53 @@ Vue.createApp({
 
             }
         
+        },
+
+        // Affichage des paragraphs correspondant à l'event (depuis Geoserver)
+        affichage_paragraphs_geoserver(feature) {
+
+            // Récupérer les valeurs des paragraphs_id
+            let paragraphs_list = feature.get('paragraphs_list');
+            // Nettoyage de la chaîne pour enlever les parenthèses extérieures
+            paragraphs_list = paragraphs_list.replace(/^\(|\)$/g, '');
+            // Transformation en tableau
+            paragraphs_list = paragraphs_list.split(',').map(e => e.trim().replace(/^'|'$/g, ''));
+
+            // Création de listes de 50 paragraph_id (url peut être trop longue si on ne fait qu'une liste)
+            let nb_boucles = Math.ceil(paragraphs_list.length/50);
+
+            for (let i = 0; i < nb_boucles; i++) {
+
+                // Tableaux de 50 paragraph_id
+                let paragraphs_list_50 = paragraphs_list.slice(50*i, 50*(i+1));
+                // Partie filtre cql de la requête
+                let cqlFilter = "paragraph_id IN (" + paragraphs_list_50.map(id => `'${id}'`).join(",") + ")";
+
+                // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
+                let url = "http://localhost:8080/geoserver/webGIS/ows?" +
+                    "service=WFS&version=1.1.0&request=GetFeature" +
+                    "&typeName=webGIS:paragraphs2020_23" +
+                    "&outputFormat=application/json" +
+                    "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
+
+                fetch(url)
+                .then(result => result.json())
+                .then(json => {
+
+                    // Récupération des groupes de paragraphs
+                    let features = new ol.format.GeoJSON().readFeatures(json, {
+                        featureProjection: 'EPSG:3857'  // Pour afficher correctement sur la carte
+                    });
+
+                    // Chaque paragraph récupéré est ajouté à la couche paragraphs
+                    features.forEach(feature => {
+                        this.paragraphs_layer.getSource().addFeature(feature);
+                    });
+
+                });
+
+            }
+            
         },
 
         // Crée le texte en récupérant les infos sur le paragraph, change le style du paragraph
@@ -1010,20 +1003,6 @@ Vue.createApp({
 
         },
 
-        // Convertir les chaines de caractères en flottants : permet de gérer le cas où la chaine contient une puissance (ex: 9e+08)
-        convertir_str_to_float(feature,field) {
-            if (feature.get(field) != null) {
-                if (feature.get(field).includes('e')) {
-                    let index = feature.get(field).indexOf('+')
-                    let puissance = parseInt(feature.get(field).substring(index+1))
-                    let nombre = parseFloat(feature.get(field).substring(0,index-1))
-                    let valeur = nombre * 10 ** puissance
-                    return valeur
-                }
-            }
-            return parseFloat(feature.get(field))
-        },
-
         // Met à jour la propriété visibilité de la feature selon le filtre
         set_feature_visibility(feature, start_date_ymd, end_date_ymd) {
       
@@ -1055,11 +1034,11 @@ Vue.createApp({
                 feature.set('visible',false);
                 return;
             }
-            if (this.convertir_str_to_float(feature,this.duration_filter[0].id) < parseInt(this.duration_filter[0].min)) {
+            if (feature.get(this.duration_filter[0].id) < parseInt(this.duration_filter[0].min)) {
                 feature.set('visible',false);
                 return;
             }
-            if (this.convertir_str_to_float(feature,this.duration_filter[0].id) > parseInt(this.duration_filter[0].max)) {
+            if (feature.get(this.duration_filter[0].id) > parseInt(this.duration_filter[0].max)) {
                 feature.set('visible',false);
                 return;
             }
@@ -1070,11 +1049,11 @@ Vue.createApp({
                     feature.set('visible',false);
                     return;
                 }
-                if (this.convertir_str_to_float(feature,this.impact_filter[i].id) < parseInt(this.impact_filter[i].min)) {
+                if (parseFloat(feature.get(this.impact_filter[i].id)) < parseInt(this.impact_filter[i].min)) {
                     feature.set('visible',false);
                     return;
                 }
-                if (this.convertir_str_to_float(feature,this.impact_filter[i].id) > parseInt(this.impact_filter[i].max)) {
+                if (parseFloat(feature.get(this.impact_filter[i].id)) > parseInt(this.impact_filter[i].max)) {
                     feature.set('visible',false);
                     return;
                 }
@@ -1152,46 +1131,6 @@ Vue.createApp({
         }),
         this.map.addLayer(this.countries_layer);
 
-        this.events_layer_source = new ol.source.Vector({
-            format: new ol.format.GeoJSON(),
-            url: function(extent) {
-                return 'http://localhost:8080/geoserver/webGIS/ows?' +
-                    'service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23&' +
-                    'outputFormat=application/json&bbox=' + extent.join(',') + ',EPSG:3857';
-            },
-            strategy: ol.loadingstrategy.bbox
-        });
-
-        this.events_layer = new ol.layer.Vector({
-            source: this.events_layer_source,
-            style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 10,
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255, 0, 0, 1)',
-                    }),
-                }),
-            }),
-            zIndex: 12,
-        });
-
-        this.map.addLayer(this.events_layer)
-
-        // Ajouter une fonction de filtrage pour éviter les doublons
-        this.events_layer_source.on('featuresloadend', function(event) {
-
-            const features = event.features;
-            features.forEach((feature) => {
-
-
-                // this.ajout_events_geoservices(event.feature)
-                console.log(feature.id_,feature.getId())
-                let existingFeature = this.events_layer_source.getFeatureById(feature.getId());
-                console.log(existingFeature)
-
-            })
-        });
-
         // Création de la couche bbox events (vide)
         this.bbox_events_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
@@ -1224,20 +1163,37 @@ Vue.createApp({
         });
         this.map.addLayer(this.bbox_paragraphs_layer);
 
-        // // Création de la couche events (vide)
-        // this.events_layer = new ol.layer.Vector({
-        //     source: new ol.source.Vector(),
-        //     style: new ol.style.Style({
-        //         image: new ol.style.Circle({
-        //             radius: 10,
-        //             fill: new ol.style.Fill({
-        //                 color: 'rgba(255, 0, 0, 1)',
-        //             }),
-        //         }),
-        //     }),
-        //     zIndex: 12,
-        // });
-        // this.map.addLayer(this.events_layer);
+        // Création de la couche events (se remplit selon la bbox)
+        this.events_layer_source = new ol.source.Vector({
+            format: new ol.format.GeoJSON(),
+            url: function(extent) {
+                return 'http://localhost:8080/geoserver/webGIS/ows?' +
+                    'service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23&' +
+                    'outputFormat=application/json&bbox=' + extent.join(',') + ',EPSG:3857';
+            },
+            strategy: ol.loadingstrategy.bbox
+        });
+        this.events_layer = new ol.layer.Vector({
+            source: this.events_layer_source,
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 10,
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 0, 0, 1)',
+                    }),
+                }),
+            }),
+            zIndex: 12,
+        });
+        this.map.addLayer(this.events_layer)
+
+        // À chaque ajout de nouvelles features, création de la variable visibilité selon les filtres actifs
+        this.events_layer_source.on('featuresloadend', event => {
+            let features = event.features;
+            features.forEach((feature) => {
+                this.visibilite_features_ajoutees(feature)
+            })
+        });
 
         // Création de la couche event selectionné (vide)
         this.selected_event_layer = new ol.layer.Vector({
@@ -1310,7 +1266,10 @@ Vue.createApp({
         });
         this.map.addControl(change_style_control);
 
-        // A chaque déplacement/zoom, ajout des events à la couche events selon la bbox
+        // Style au départ
+        this.change_style();
+
+        // A chaque déplacement/zoom, ajout des events à la couche events selon la bbox (pas utilisé pour l'instant)
         // Suppression du popup clic
         this.map.on('moveend', () => {
             // this.ajout_events();

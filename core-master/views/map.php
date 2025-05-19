@@ -29,17 +29,11 @@
                 <div id="choix_couleur" class="padding">
                     <label>Color style:
                         <select class="margin_left" v-model="color_style">
-                            <option value="Standard">Standard</option>
                             <option value="Event_type">Hazard type</option>
                             <option value="Year">Year</option>
                             <option value="Month">Month</option>
                         </select>
                     </label>
-                </div>
-
-                <div id="color_standard" class="flexrow padding" v-if="color_style ==='Standard'">
-                    <div class="vertical_center">All events:</div>
-                    <input type="color" class="color_input margin_left" v-model="color_standard">
                 </div>
 
                 <div id="color_eventtype" class="padding" v-if="color_style ==='Event_type'">
