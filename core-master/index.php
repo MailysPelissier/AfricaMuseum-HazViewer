@@ -10,6 +10,13 @@ Flight::route('GET /', function () {
     Flight::render('map');
 });
 
+// Page zoom sur un event
+Flight::route('GET /event', function () {
+    // Récupération de l'identifiant de l'évènement
+    $event_id = Flight::request()->query['event_id'];
+    Flight::render('zoom_event', ['event_id' => $event_id]);
+});
+
 // Accès aux données events de Postgres
 Flight::route('GET /postgres/events', function () {
 
@@ -75,4 +82,5 @@ Flight::route('GET /postgres/paragraphs', function () {
 });
 
 Flight::start();
+
 ?>

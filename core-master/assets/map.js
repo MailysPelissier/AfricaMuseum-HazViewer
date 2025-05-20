@@ -436,7 +436,9 @@ Vue.createApp({
         // Rend les autres events invisibles, affiche les paragraphs et la bbox associés
         more_infos_page () {
 
-            window.open("https://stackoverflow.com/questions/4907843/open-a-url-in-a-new-tab-and-not-a-new-window", '_blank').focus();
+            const eventId = this.selected_event.get('event_id');
+            const url = `/event?event_id=${encodeURIComponent(eventId)}`;
+            window.open(url, '_blank').focus();
 
             // Récupération de l'event
             let feature = this.selected_event;
