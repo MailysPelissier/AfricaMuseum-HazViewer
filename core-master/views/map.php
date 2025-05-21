@@ -294,19 +294,8 @@
             <div id=event_number_data v-html="event_number_text" v-if="number_information"></div>
 
             <div class="flexrow space_evenly padding">
-                <button id=more_info_button v-if="more_info_button" @click="more_infos_page">More information</button>
-                <div id="zoom_auto_checkbox" v-if="more_info_button">
-                    <label>Automatic zoom: <input type="checkbox" v-model="zoom_auto"></label>
-                </div>
-                <button id=back_to_map_button v-if="back_to_map_button" @click="back_to_map">Back to map</button>
+                <button id=more_info_button v-if="selected_event" @click="more_infos_page">More information</button>
             </div>
-
-        </div>
-
-        <div id=paragraph_data_scroll_box class="scroll_box margin padding">
-
-            <div id=paragraph_title  class=title v-if="selected_paragraph">Paragraph:</div>
-            <div id=paragraph_data v-html="paragraph_text" v-if="selected_paragraph"></div>
 
         </div>
 
