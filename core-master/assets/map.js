@@ -10,10 +10,14 @@ Vue.createApp({
             // Propriétés principales des events
             event_main_property: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
                  "n_paragraphs", "n_articles"],
+            event_main_property_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
+                "Number of paragraphs", "Number of articles"],
             // Autres propriétés des events
             event_other_property: ["country", "country_found", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
+            event_other_property_title: ["Country", "Number of languages", "Number of source countries", "Duration", "Disaster score", "Hasard type score"],
             // Propriétés locations des events
             event_location_property: ["latitude", "longitude", "bbox_event"],
+            event_location_property_title: ["Latitude", "Longitude", "Bbox event"],
             // Propriétés chiffrées des events (souvent null)
             event_number_property: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
                 "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
@@ -22,6 +26,15 @@ Vue.createApp({
                 "max_affected", "n_max_affected", "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", 
                 "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", 
                 "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated"],
+            event_number_property_title: ["Most frequent death", "Number of most frequent death", "Time of most frequent death", "Max death", 
+                "Number of max death", "Time of max death", "Median death", "Most frequent homeless", "Number of most frequent homeless", 
+                "Time of most frequent homeless", "Max homeless", "Number of max homeless", "Time of max homeless", "Median homeless", "Most frequent injured", 
+                "Number of most frequent injured", "Time of most frequent injured", "Max injured", "Number of max injured", "Time of max injured", 
+                "Median injured", "Most frequent affected", "Number of most frequent affected", "Time of most frequent affected", "Max affected", 
+                "Number of max affected", "Time of max affected", "Median affected", "Most frequent missing", "Number of most frequent missing", 
+                "Time of most frequent missing", "Max missing", "Number of max missing", "Time of max missing", "Median missing", "Most frequent evacuated", 
+                "Number of most frequent evacuated", "Time of most frequent evacuated", "Max evacuated", "Number of max evacuated", "Time of max evacuated", 
+                "Median evacuated"],
             event_main_text: 'Select an event to get more information!', // Texte sur les events (haut droite de l'écran)
             event_other_text: '', // Texte sur les events, partie optionnelle others (haut droite de l'écran)
             event_location_text: '', // Texte sur les events, partie optionnelle locations (haut droite de l'écran)
@@ -369,23 +382,23 @@ Vue.createApp({
             this.event_location_text = '<ul>';
             this.event_number_text = '<ul>';
             // Les propriétés principales s'affichent tout le temps
-            for (let property of this.event_main_property) {
-                this.event_main_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
+            for (let i = 0; i < this.event_main_property.length; i++) {
+                this.event_main_text += '<li>' + this.event_main_property_title[i] + ': ' + feature.get(this.event_main_property[i]) + '</li>';
             }
-            // Les propriétés de other se chargent, mais elles ne s'affichent que si la checkbox Show other information est cochée
+            // Les propriétés supplémentaires se chargent, mais elles ne s'affichent que si la checkbox Show other information est cochée
             // L'utilisateur peut choisir s'il veut afficher les informations supplémentaires ou non, son choix est conservé
-            for (let property of this.event_other_property) {
-                this.event_other_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
+            for (let i = 0; i < this.event_other_property.length; i++) {
+                this.event_other_text += '<li>' + this.event_other_property_title[i] + ': ' + feature.get(this.event_other_property[i]) + '</li>';
             }
-            // Les propriétés de location se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
-            // L'utilisateur peut choisir s'il veut afficher les informations sur la location ou non, son choix est conservé
-            for (let property of this.event_location_property) {
-                this.event_location_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
+            // Les propriétés sur la localisation se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
+            // L'utilisateur peut choisir s'il veut afficher les informations sur la localisation ou non, son choix est conservé
+            for (let i = 0; i < this.event_location_property.length; i++) {
+                this.event_location_text += '<li>' + this.event_location_property_title[i] + ': ' + feature.get(this.event_location_property[i]) + '</li>';
             }
-            // Les propriétés de number se chargent, mais elles ne s'affichent que si la checkbox Show number information est cochée
+            // Les propriétés statistiques se chargent, mais elles ne s'affichent que si la checkbox Show more statistics est cochée
             // L'utilisateur peut choisir s'il veut afficher les informations statistiques ou non, son choix est conservé
-            for (let property of this.event_number_property) {
-                this.event_number_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
+            for (let i = 0; i < this.event_number_property.length; i++) {
+                this.event_number_text += '<li>' + this.event_number_property_title[i] + ': ' + feature.get(this.event_number_property[i]) + '</li>';
             }
             this.event_main_text += '</ul>';
             this.event_other_text += '</ul>';
