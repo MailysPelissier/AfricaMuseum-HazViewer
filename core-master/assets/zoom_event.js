@@ -14,9 +14,9 @@ Vue.createApp({
                  "n_paragraphs", "n_articles"],
             // Autres propriétés des events
             event_other_property: ["country", "country_found", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
-            // Propriétés locations des events
+            // Propriétés localisations des events
             event_location_property: ["latitude", "longitude", "bbox_event"],
-            // Propriétés chiffrées des events (souvent null)
+            // Propriétés statistiques des events (souvent null)
             event_number_property: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
                 "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
                 "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", 
@@ -30,34 +30,30 @@ Vue.createApp({
             // Autres propriétés des paragraphs
             paragraph_other_property: ["extracted_text", "original_text", "country", "source_country", "domain_url", "extracted_location", 
                 "ner_score", "n_locations", "disaster_label", "disaster_score", "hasard_type_score", "unnamed_column"],
-            // Propriétés locations des events
+            // Propriétés localisations des events
             paragraph_location_property: ["latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon"],
-            // Propriétés chiffrées des paragraphs (souvent null)
+            // Propriétés statistiques des paragraphs (souvent null)
             paragraph_number_property: ["nb_death", "score_death", "answer_death", "nb_homeless", "score_homeless", "answer_homeless", 
                 "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", "answer_affected", "nb_missing",
                 "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min",
                 "nb_affected_max", "nb_missing_min", "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max"],
-            event_main_text: 'Select an event to get more information!', // Texte sur les events (haut droite de l'écran)
-            event_other_text: '', // Texte sur les events, partie optionnelle others (haut droite de l'écran)
-            event_location_text: '', // Texte sur les events, partie optionnelle locations (haut droite de l'écran)
-            event_number_text: '', // Texte sur les events, partie optionnelle numbers (haut droite de l'écran)
-            paragraph_text: '', // Texte sur les pargraphs (bas droite de l'écran)
-            event_id: '',
-            selected_event: null, // Permet de conserver l'event sélectionné
+            event_main_text: '', // Texte sur les events (haut droite de l'écran)
+            event_other_text: '', // Texte sur les events, partie optionnelle autres (haut droite de l'écran)
+            event_location_text: '', // Texte sur les events, partie optionnelle localisations (haut droite de l'écran)
+            event_number_text: '', // Texte sur les events, partie optionnelle statistiques (haut droite de l'écran)
+            paragraph_text: '', // Texte sur les paragraphs (bas droite de l'écran)
             selected_paragraph: null, // Permet de conserver le paragraph sélectionné
-            more_info_button: false, // Permet de faire apparaitre le bouton plus d'infos quand un event est sélectionné
-            back_to_map_button: false, // Permet de faire apparaitre le bouton pour retourner à la carte
-            zoom_auto: true, // Zoom auto activé ou non (actif par défaut)
-            other_information: false, // Affichage des informations de other ou non (inactif par défaut)
-            location_information: false, // Affichage des informations de location ou non (inactif par défaut)
-            number_information: false, // Affichage des informations de number ou non (inactif par défaut)  
+            event_id: '', // Permet de récupérer l'event
+            other_information: false, // Affichage des informations supplémentaires ou non (inactif par défaut)
+            location_information: false, // Affichage des informations de localisation ou non (inactif par défaut)
+            number_information: false, // Affichage des informations statistiques ou non (inactif par défaut)  
         };
     },
 
     methods: {
 
-        // Récupération de l'évènement
+        // Récupération de l'évènement, mise en place de la page
         recuperer_event () {
 
             // Récupération de l'event_id depuis le php
@@ -82,19 +78,27 @@ Vue.createApp({
                     featureProjection: 'EPSG:3857'
                 });
 
+                let selected_event
                 features.forEach(event => {
-                    // L'event est ajouté à la couche selected event et gardé dans la variable selected_event
-                    this.selected_event = event;
+                    // L'event est ajouté à la couche selected event
+                    selected_event = event;
                     this.selected_event_layer.getSource().addFeature(event);
-                    console.log(this.selected_event_layer.getSource().getFeatures())
                 });
-                
 
-            });
+                // Afficher le texte sur l'event
+                this.affichage_selection_event(selected_event)
+
+                // Afficher la bbox de l'event
+                this.affichage_bbox_event(selected_event);
+
+                // Afficher les paragraphs liés à l'event
+                this.affichage_paragraphs_geoserver(selected_event);
+
+            })
             
         },
 
-        // Crée le texte en récupérant les infos sur l'event, change le style de l'event
+        // Crée le texte en récupérant les infos sur l'event
         affichage_selection_event (feature) {
 
             // Chargement et affichage du texte sur l'event
@@ -106,17 +110,17 @@ Vue.createApp({
             for (let property of this.event_main_property) {
                 this.event_main_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
-            // Les propriétés de other se chargent, mais elles ne s'affichent que si la checkbox Show other information est cochée
+            // Les propriétés supplémentaires se chargent, mais elles ne s'affichent que si la checkbox Show other information est cochée
             // L'utilisateur peut choisir s'il veut afficher les informations supplémentaires ou non, son choix est conservé
             for (let property of this.event_other_property) {
                 this.event_other_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
-            // Les propriétés de location se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
-            // L'utilisateur peut choisir s'il veut afficher les informations sur la location ou non, son choix est conservé
+            // Les propriétés sur la localisation se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
+            // L'utilisateur peut choisir s'il veut afficher les informations sur la localisation ou non, son choix est conservé
             for (let property of this.event_location_property) {
                 this.event_location_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
             }
-            // Les propriétés de number se chargent, mais elles ne s'affichent que si la checkbox Show number information est cochée
+            // Les propriétés statistiques se chargent, mais elles ne s'affichent que si la checkbox Show more statistics est cochée
             // L'utilisateur peut choisir s'il veut afficher les informations statistiques ou non, son choix est conservé
             for (let property of this.event_number_property) {
                 this.event_number_text += '<li>' + property + ': ' + feature.get(property) + '</li>';
@@ -128,77 +132,6 @@ Vue.createApp({
 
             // Affichage contours scrollbox
             document.getElementById('event_data_scroll_box').style.border = "1px solid #ccc";
-
-            // Apparition du bouton More infos
-            this.more_info_button = true;
-
-            // Garder l'event actuel
-            this.selected_event = feature;
-
-            // Couche selected_event vidée
-            this.selected_event_layer.getSource().clear();
-
-            // Couche selected_event contient l'event sélectionné : permet de voir l'event
-            this.selected_event_layer.getSource().addFeature(feature);
-
-        },
-
-        // Fonction appelée quand on appuie sur le bouton pour avoir plus d'infos
-        // Rend les autres events invisibles, affiche les paragraphs et la bbox associés
-        more_infos_page () {
-
-            window.open("/event", '_blank').focus();
-
-            // Récupération de l'event
-            let feature = this.selected_event;
-
-            // Disparition du bouton More infos
-            this.more_info_button = false;
-
-            // Apparition du bouton Back to map
-            this.back_to_map_button = true;
-
-            // Disparition du popup clic
-            document.getElementById("popup_clic").style.display = "none";
-
-            // Couche events invisible
-            this.events_layer.setVisible(false);
-
-            // Afficher bbox
-            this.affichage_bbox_event(feature);
-
-            // Afficher paragraphs
-            this.affichage_paragraphs_geoserver(feature);
-
-        },
-
-        // Fonction appelée quand on appuie sur le bouton pour retourner sur la map
-        // Réinitialise la carte à l'état précédent
-        back_to_map () {
-
-            // Apparition du bouton More infos
-            this.more_info_button = true;
-
-            // Disparition du bouton Back to map
-            this.back_to_map_button = false;
-
-            // Disparition du popup clic
-            document.getElementById("popup_clic").style.display = "none";
-
-            // Suppression contours scrollbox
-            document.getElementById('paragraph_data_scroll_box').style.border = "none";
-
-            // Couche events visible
-            this.events_layer.setVisible(true);
-
-            // Couche selected paragraph vidée
-            this.selected_paragraph_layer.getSource().clear();
-
-            // Déselection du paragraph
-            this.selected_paragraph = null;
-
-            // Suppression du paragraph_text
-            this.paragraph_text = '';
 
         },
 
@@ -231,16 +164,14 @@ Vue.createApp({
             // Ajout à la couche bbox events
             this.bbox_events_layer.getSource().addFeature(new_event);
 
-            // Zoom sur la bbox si zoom_auto activé
-            // L'utilisateur peut choisir s'il veut zoomer automatiquement sur l'emprise de l'event, son choix est conservé
-            if (this.zoom_auto) {
-                this.map.getView().fit([min_lon, min_lat, max_lon, max_lat], this.map.getSize());
-                this.map.getView().setZoom(this.map.getView().getZoom() - 0.5);
-            }
+            // Zoom sur l'emprise de l'event
+            this.map.getView().fit([min_lon, min_lat, max_lon, max_lat], this.map.getSize());
+            this.map.getView().setZoom(this.map.getView().getZoom() - 0.5);
 
         },
 
         // Affichage des paragraphs correspondant à l'event (depuis Postgres)
+        // Pas utilisé pour l'instant
         affichage_paragraphs_postgres (feature) {
 
             // Récupérer les valeurs des paragraphs_id
@@ -354,6 +285,9 @@ Vue.createApp({
         // Crée le texte en récupérant les infos sur le paragraph, change le style du paragraph
         affichage_selection_paragraph (feature) {
 
+            // Garder le paragraph
+            this.selected_paragraph = feature
+
             // Chargement et affichage du texte sur le paragraph
             this.paragraph_text = '<ul>';
             // Les propriétés principales s'affichent tout le temps
@@ -365,13 +299,10 @@ Vue.createApp({
             // Affichage contours scrollbox
             document.getElementById('paragraph_data_scroll_box').style.border = "1px solid #ccc";
 
-            // Garder le paragraph actuel
-            this.selected_paragraph = feature;
-
-            // Couche selected_paragraph vidée
+            // Couche selected paragraph vidée
             this.selected_paragraph_layer.getSource().clear();
 
-            // Couche selected_paragraph contient le paragraph sélectionné : permet de voir le paragraph
+            // Couche selected paragraph contient le paragraph sélectionné : permet de voir le paragraph
             this.selected_paragraph_layer.getSource().addFeature(feature);
 
             // Affichage bbox et standard deviation du paragraph
@@ -503,35 +434,6 @@ Vue.createApp({
 
         },
 
-        // Change la variable passée en paramètre (utilisée avec boutons)
-        change_true_false (parameters) {
-            for (let parameter of parameters) {
-                this[parameter] = !this[parameter];
-            }
-        },
-
-        // Création du style de l'event selon ses propriétés et le style choisi dans la carte principale
-        creation_style(color,size) { 
-            
-            return new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: size,
-                    fill: new ol.style.Fill({
-                        color: color,
-                    }),
-                })
-            });
-
-        },
-
-        // Change le style des évènements
-        change_style() {
-
-            // Appliquer le style à la couche selected event (couleur imposée)
-            this.selected_event_layer.setStyle(this.creation_style());
-        
-        },  
-
     },
 
     mounted() {
@@ -619,7 +521,8 @@ Vue.createApp({
         });
         this.map.addLayer(this.selected_event_layer);
 
-        this.recuperer_event();
+        // Récupérer l'event et le rajouter dans la couche event selectionné
+        this.recuperer_event()
 
         // Création de la couche paragraphs (vide)
         this.paragraphs_layer = new ol.layer.Vector({
@@ -670,8 +573,7 @@ Vue.createApp({
             document.getElementById("popup_clic").style.display = "none";
         });
 
-        // A chaque déplacement du pointer, si plusieurs paragraphs sont superposées au niveau du pointer,
-        // on affiche leur nombre
+        // A chaque déplacement du pointer, si plusieurs paragraphs sont superposées au niveau du pointer, on affiche leur nombre
         this.map.on("pointermove", evt => {
 
             let paragraph_features = [];
@@ -696,7 +598,7 @@ Vue.createApp({
 
         });
 
-        // Quand on clique sur une ou plusieurs features :
+        // Quand on clique sur un ou plusieurs paragraphs :
         this.map.on('click', evt => {
 
             let paragraph_features = [];
@@ -741,9 +643,5 @@ Vue.createApp({
         });
 
     },
-
-    created() {
     
-    },
-
 }).mount('#vue_map');
