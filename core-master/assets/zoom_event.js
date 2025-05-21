@@ -568,6 +568,12 @@ Vue.createApp({
         });
         this.map.addOverlay(var_popup_clic);
 
+        // Scale line
+        var scaleline = new ol.control.ScaleLine({
+            element: document.getElementById("scaleline_div"),
+        })
+        this.map.addControl(scaleline);
+
         // A chaque déplacement/zoom, suppression du popup clic
         this.map.on('moveend', () => {
             document.getElementById("popup_clic").style.display = "none";

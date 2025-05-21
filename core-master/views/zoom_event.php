@@ -54,6 +54,8 @@
 
         <div id=popup_clic class="popup petit_popup scroll_box"></div>
 
+        <div id="scaleline_div"></div>
+
     </div>  
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>

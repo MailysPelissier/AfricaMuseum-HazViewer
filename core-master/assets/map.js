@@ -829,6 +829,12 @@ Vue.createApp({
         });
         this.map.addControl(change_style_control);
 
+        // Scale line
+        var scaleline = new ol.control.ScaleLine({
+            element: document.getElementById("scaleline_div"),
+        })
+        this.map.addControl(scaleline);
+
         // Style au départ
         this.change_style();
 
@@ -915,3 +921,7 @@ Vue.createApp({
     },
 
 }).mount('#vue_map');
+
+
+
+

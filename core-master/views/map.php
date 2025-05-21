@@ -311,6 +311,8 @@
             <button id=changer_style_button @click="change_true_false(['show_changer_style_form'])">Change style</button>
         </div>
 
+        <div id="scaleline_div"></div>
+
     </div>  
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
