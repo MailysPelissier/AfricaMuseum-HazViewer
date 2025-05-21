@@ -20,7 +20,7 @@
         <div id="map" class="margin">
         </div>
 
-        <div id=event_data_scroll_box class="scroll_box margin padding">
+        <div id=event_data_zoom_event_scroll_box class="scroll_box margin padding">
 
             <div id=event_title class=title>Event:</div>
 

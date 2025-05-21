@@ -13,7 +13,7 @@ Vue.createApp({
             event_main_property_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des events
-            event_other_property: ["country", "country_found", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
+            event_other_property: ["country", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
             event_other_property_title: ["Country", "Number of languages", "Number of source countries", "Duration", "Disaster score", "Hasard type score"],
             // Propriétés locations des events
             event_location_property: ["latitude", "longitude", "bbox_event"],
@@ -406,7 +406,7 @@ Vue.createApp({
             this.event_number_text += '</ul>';
 
             // Affichage contours scrollbox
-            document.getElementById('event_data_scroll_box').style.border = "1px solid #ccc";
+            document.getElementById('event_data_map_scroll_box').style.border = "1px solid #ccc";
 
             // Garder l'event actuel
             this.selected_event = feature;

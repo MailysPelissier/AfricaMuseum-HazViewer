@@ -272,7 +272,7 @@
 
         </div>
 
-        <div id=event_data_scroll_box class="scroll_box margin padding">
+        <div id=event_data_map_scroll_box class="scroll_box margin padding">
 
             <div id=event_title class=title v-if="selected_event">Event:</div>
 

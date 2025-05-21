@@ -146,7 +146,7 @@ Vue.createApp({
             this.event_number_text += '</ul>';
 
             // Affichage contours scrollbox
-            document.getElementById('event_data_scroll_box').style.border = "1px solid #ccc";
+            document.getElementById('event_data_zoom_event_scroll_box').style.border = "1px solid #ccc";
 
         },
 
