@@ -444,6 +444,14 @@ Vue.createApp({
             }
         },
 
+        // Affiche le changement de style, ferme le filtre si besoin
+        setup_changer_style_form() {
+
+            this.show_changer_style_form = !this.show_changer_style_form;
+            this.show_filter_form = false;
+
+        },
+
         // Création du style de chaque feature selon ses propriétés et le style choisi
         creation_style(couleur_fixee = null) {
 
@@ -641,11 +649,12 @@ Vue.createApp({
         
         },
 
-        // Afficher le filtre
+        // Affiche le filtre, ferme le changement de style si besoin
         // Initialisation des calendriers
         setup_filter_form() {
 
             this.show_filter_form = !this.show_filter_form;
+            this.show_changer_style_form = false;
 
             this.set_flatpickr();
 

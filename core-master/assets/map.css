@@ -46,8 +46,8 @@ html, body {
 }
 
 #changer_style_div {
-    bottom: .5em;
-    left: .5em;
+    top: .5em;
+    left: 9em;
 }
 
 #changer_style_button {
@@ -68,7 +68,7 @@ html, body {
 }
 
 #form_changer_style {
-    bottom: 3em; 
+    top: 3em; 
     left: 0.5em;
     z-index: 1000;
 }
@@ -109,7 +109,7 @@ ul {
 }
 
 .hauteur_max {
-    max-height: 40%;
+    max-height: 90%;
 }
 
 .flexrow {

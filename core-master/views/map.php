@@ -313,7 +313,7 @@
         </div>
 
         <div id=changer_style_div class='ol-unselectable ol-control'>
-            <button id=changer_style_button @click="change_true_false(['show_changer_style_form'])">Change style</button>
+            <button id=changer_style_button @click=setup_changer_style_form>Change style</button>
         </div>
 
         <div id="scaleline_div"></div>
