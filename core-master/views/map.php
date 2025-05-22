@@ -152,35 +152,15 @@
 
                 <br>
 
-                <button id="event_type_button" class="flexrow space_between padding largeur_min" @click="change_true_false(['show_general_menu','show_event_type_filter'])" v-if="show_general_menu">
+                <button id="event_type_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_event_type_filter'])">
                     <h6>Hazard type</h6>
-                    <div class="vertical_center">&#62;</div>
+                    <div class="vertical_center" v-if="!show_event_type_filter">&#62;</div>
+                    <div class="vertical_center" v-if="show_event_type_filter">&#60;</div>
                 </button>
 
-                <hr style='margin:0' v-if="show_general_menu" />
-
-                <button id="date_button" class="flexrow space_between padding largeur_min" @click="display_date_filter" v-if="show_general_menu">
-                    <h6>Date</h6>
-                    <div class="vertical_center">&#62;</div>
-                </button>
-
-                <hr style='margin:0' v-if="show_general_menu" />
-
-                <button id="casualties_button" class="flexrow space_between padding largeur_min" @click="change_true_false(['show_general_menu','show_casualties_filter'])" v-if="show_general_menu">
-                    <h6>Casualties</h6>
-                    <div class="vertical_center">&#62;</div>
-                </button>
-
-                <hr style='margin:0' v-if="show_general_menu" />
-
-                <button id="popularity_button" class="flexrow space_between padding largeur_min" @click="change_true_false(['show_general_menu','show_popularity_filter'])" v-if="show_general_menu">
-                    <h6>Popularity</h6>
-                    <div class="vertical_center">&#62;</div>
-                </button>
-                
                 <div id="event_type_filter" class="flexrow space_between padding largeur_min" v-if="show_event_type_filter">
                     <div class="vertical_center">
-                        <button class='back_button' @click="change_true_false(['show_general_menu','show_event_type_filter'])">&#60;</button>
+                        <button class='back_button' @click="change_true_false(['show_event_type_filter'])">&#60;</button>
                     </div>
                     <div id="event_type_field">
                         <div class="title">Hazard type filter:</div>
@@ -196,6 +176,14 @@
                     </div>  
                     <div class='back_button'></div>
                 </div>
+
+                <hr style='margin:5px;' />
+
+                <button id="date_button" class="flexrow space_between padding largeur_min largeur_auto" @click="display_date_filter">
+                    <h6>Date</h6>
+                    <div class="vertical_center" v-if="!show_date_filter">&#62;</div>
+                    <div class="vertical_center" v-if="show_date_filter">&#60;</div>
+                </button>
 
                 <div id="date_filter" class="flexrow space_between padding largeur_min" v-if="show_date_filter">
                     <div class="vertical_center">
@@ -220,9 +208,17 @@
                     <div class='back_button'></div>
                 </div>
 
+                <hr style='margin:5px' />
+
+                <button id="casualties_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_casualties_filter'])">
+                    <h6>Casualties</h6>
+                    <div class="vertical_center" v-if="!show_casualties_filter">&#62;</div>
+                    <div class="vertical_center" v-if="show_casualties_filter">&#60;</div>
+                </button>
+
                 <div id="casualties_filter" class="flexrow space_between padding largeur_min" v-if="show_casualties_filter">
                     <div class="vertical_center">
-                        <button class='back_button' @click="change_true_false(['show_general_menu','show_casualties_filter'])">&#60;</button>
+                        <button class='back_button' @click="change_true_false(['show_casualties_filter'])">&#60;</button>
                     </div>
                     <div id="casualties_field" class="margin">
                         <div class="title">Casualties filter:</div>
@@ -242,9 +238,17 @@
                     <div class='back_button'></div>
                 </div>
 
+                <hr style='margin:5px' />
+
+                <button id="popularity_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_popularity_filter'])">
+                    <h6>Popularity</h6>
+                    <div class="vertical_center" v-if="!show_popularity_filter">&#62;</div>
+                    <div class="vertical_center" v-if="show_popularity_filter">&#60;</div>
+                </button>
+                
                 <div id="popularity_filter" class="flexrow space_between padding largeur_min" v-if="show_popularity_filter">
                     <div class="vertical_center">
-                        <button class='back_button' @click="change_true_false(['show_general_menu','show_popularity_filter'])">&#60;</button>
+                        <button class='back_button' @click="change_true_false(['show_popularity_filter'])">&#60;</button>
                     </div>
                     <div id="popularity_field" class="margin">
                         <div class="title">Popularity filter:</div>
@@ -264,6 +268,7 @@
                 <br>
 
                 <div class="flexrow space_evenly padding">
+                    <button id="reset" @click="reset_filter_form">Reset</button>
                     <button id="apply" @click="appliquer_filtres">Apply</button>
                     <button id="cancel" @click="change_true_false(['show_filter_form'])">Close</button>
                 </div>

@@ -560,27 +560,42 @@ Vue.createApp({
         
         },
 
-        // Met en forme le formulaire des filtres
-        setup_filter_form() {
+        // Reset le formulaire des filtres
+        reset_filter_form() {
 
-            this.show_filter_form = !this.show_filter_form;
-
-            if (this.show_filter_form) {
-                this.show_general_menu = true;
-                this.show_event_type_filter = false;
-                this.show_date_filter = false;
-                this.show_casualties_filter = false;
-                this.show_popularity_filter = false;
+            // Remet les propriétés à leur état initial
+            this.flood = true;
+            this.flashflood = true;
+            this.landslide = true;
+            this.start_date = this.min_date;
+            this.end_date = this.max_date;
+            this.duration_filter[0].min = this.duration_filter[0].min_depart;
+            this.duration_filter[0].max = this.duration_filter[0].max_depart;
+            for(let i = 0; i < this.impact_filter.length; i++) {
+                this.impact_filter[i].checkbox_null = true;              
+                this.impact_filter[i].min = this.impact_filter[i].min_depart;
+                this.impact_filter[i].max = this.impact_filter[i].max;
             }
+            for(let i = 0; i < this.popularity_filter.length; i++) {           
+                this.popularity_filter[i].min = this.popularity_filter[i].min_depart;
+                this.popularity_filter[i].max = this.popularity_filter[i].max;
+            }
+
+            // Chaque event devient visible
+            for (let feature of this.events_layer.getSource().getFeatures()) {
+                feature.set('visible',true);
+            }
+
+            // Ferme les panneaux ouverts
+            this.show_event_type_filter = false;
+            this.show_date_filter = false;
+            this.show_casualties_filter = false;
+            this.show_popularity_filter = false;
 
         },
 
-        // Afficher / masquer le choix des dates
-        // Initialisation des calendriers
-        display_date_filter() {
-
-            this.show_general_menu = !this.show_general_menu;
-            this.show_date_filter = !this.show_date_filter;
+        // Initialise les calendriers
+        set_flatpickr() {
 
             if (this.show_date_filter) {
 
@@ -613,6 +628,26 @@ Vue.createApp({
                 });
 
             }
+
+        },
+
+        // Affiche le filtre dates
+        // Initialisation des calendriers
+        display_date_filter() {
+
+            this.show_date_filter = !this.show_date_filter;
+
+            this.set_flatpickr();
+        
+        },
+
+        // Afficher le filtre
+        // Initialisation des calendriers
+        setup_filter_form() {
+
+            this.show_filter_form = !this.show_filter_form;
+
+            this.set_flatpickr();
 
         },
 

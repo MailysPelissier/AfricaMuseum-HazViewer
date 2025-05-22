@@ -104,6 +104,10 @@ ul {
     min-width: 20em;
 }
 
+.largeur_auto {
+    width: 100%;
+}
+
 .hauteur_max {
     max-height: 40%;
 }
