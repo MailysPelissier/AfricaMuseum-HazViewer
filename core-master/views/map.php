@@ -318,7 +318,7 @@
 
         <!-- Bouton qui permet d'activer la localisation -->
         <div id="affichage_localisation_div" class='ol-unselectable ol-control'>
-            <button @click=affichage_localisation>&#9918;</button>
+            <button @click=affichage_localisation>&#8857;</button>
         </div>
 
         <div id="scaleline_div"></div>
