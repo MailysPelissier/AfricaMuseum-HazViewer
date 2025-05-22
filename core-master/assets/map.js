@@ -7,6 +7,7 @@ Vue.createApp({
             events_layer: null, // Initialisation de la couche events
             events_layer_source: null, // Initialisation de la source de la couche events
             selected_event_layer: null, // Initialisation de la couche selected event
+            localisation_layer: null, // Initialisation de la couche de géolocalisation
             // Propriétés principales des events
             event_main_property: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
                  "n_paragraphs", "n_articles"],
@@ -772,6 +773,57 @@ Vue.createApp({
 
         },
 
+        // Récupérer la localisation l'afficher
+        affichage_localisation() {
+
+            navigator.geolocation.getCurrentPosition((position) => {
+
+                // Récupérer les valeurs sur le position de l'appareil
+                let latitude_pos = position.coords.latitude;
+                let longitude_pos = position.coords.longitude;
+                let precision_pos = position.coords.accuracy;
+
+                // Vider la couche localisation
+                this.localisation_layer.getSource().clear();
+
+                // Transformer les coordonnées en EPSG:3857
+                let center = ol.proj.fromLonLat([longitude_pos, latitude_pos]);
+
+                // Feature pour le point central
+                let pointFeature = new ol.Feature(new ol.geom.Point(center));
+
+                // Feature pour le cercle de précision (en mètres, donc dans la projection EPSG:3857)
+                let circleFeature = new ol.Feature(new ol.geom.Circle(center, precision_pos));
+
+                // Ajouter les deux features à la couche
+                this.localisation_layer.getSource().addFeatures([circleFeature, pointFeature]);
+
+                // Appliquer les styles
+                this.localisation_layer.setStyle((feature) => {
+                    let geometry = feature.getGeometry();
+                    if (geometry instanceof ol.geom.Point) {
+                        return new ol.style.Style({
+                            image: new ol.style.Circle({
+                                radius: 8,
+                                fill: new ol.style.Fill({ color: 'rgba(0, 100, 255, 1)' }),
+                                stroke: new ol.style.Stroke({ color: 'white', width: 2 }),
+                            }),
+                        });
+                    } else if (geometry instanceof ol.geom.Circle) {
+                        return new ol.style.Style({
+                            fill: new ol.style.Fill({ color: 'rgba(0, 100, 255, 0.3)' }),
+                            stroke: new ol.style.Stroke({ color: 'rgba(0, 100, 255, 0.8)', width: 1 }),
+                        });
+                    }
+                });
+
+                // Centrer la vue sur la position
+                this.map.getView().setCenter(center);
+
+            });
+
+        },
+
 
     },
 
@@ -860,6 +912,13 @@ Vue.createApp({
         });
         this.map.addLayer(this.selected_event_layer);
 
+        // Création de la couche géolocalisation vide
+        this.localisation_layer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            zIndex: 14,
+        });
+        this.map.addLayer(this.localisation_layer);
+
         // Création du popup vide pour le pointermove
         let var_popup_pointermove = new ol.Overlay({
             element: document.getElementById("popup_pointermove"),
@@ -885,6 +944,12 @@ Vue.createApp({
             element: document.getElementById("changer_style_div"),
         });
         this.map.addControl(change_style_control);
+
+        // Bouton pour activer la localisation
+        var localisation_control = new ol.control.Control({
+            element: document.getElementById("affichage_localisation_div"),
+        });
+        this.map.addControl(localisation_control);
 
         // Scale line
         var scaleline = new ol.control.ScaleLine({

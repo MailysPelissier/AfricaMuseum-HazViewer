@@ -55,6 +55,11 @@ html, body {
     width: 8em !important;
 }
 
+#affichage_localisation_div {
+    top: .5em;
+    right: .5em;
+}
+
 .ol-scale-line {
     left: unset;
     right: 2.5em;

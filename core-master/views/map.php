@@ -316,6 +316,11 @@
             <button id=changer_style_button @click=setup_changer_style_form>Change style</button>
         </div>
 
+        <!-- Bouton qui permet d'activer la localisation -->
+        <div id="affichage_localisation_div" class='ol-unselectable ol-control'>
+            <button @click=affichage_localisation>&#9918;</button>
+        </div>
+
         <div id="scaleline_div"></div>
 
     </div>  
