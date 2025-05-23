@@ -265,6 +265,35 @@
                     <div class='back_button'></div>
                 </div>
 
+                <hr style='margin:5px' />
+
+                <button id="location_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_location_filter'])">
+                    <h6>Location</h6>
+                    <div class="vertical_center" v-if="!show_location_filter">&#62;</div>
+                    <div class="vertical_center" v-if="show_location_filter">&#60;</div>
+                </button>
+                
+                <div id="location_filter" class="flexrow space_between padding largeur_min" v-if="show_location_filter">
+                    <div class="vertical_center">
+                        <button class='back_button' @click="change_true_false(['show_location_filter'])">&#60;</button>
+                    </div>
+                    <div id="location_field" class="margin">
+                        <div class="title">Location filter:</div>
+                        <ul>
+                            <li id="countries">
+                                <label>Country:
+                                    <input class="margin_left" type="text" v-model="substring_country" @input="input_search_country"/>
+                                    <select class="margin_left" v-model="chosen_country">
+                                        <option value="All">---All---</option>
+                                        <option v-for="country in research_list" :value="country">{{country}}</option> 
+                                    </select>
+                                </label>
+                            </li>
+                        </ul>
+                    </div>  
+                    <div class='back_button'></div>
+                </div>
+
                 <br>
 
                 <div class="flexrow space_evenly padding">

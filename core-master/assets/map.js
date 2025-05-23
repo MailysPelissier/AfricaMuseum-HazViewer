@@ -4,6 +4,7 @@ Vue.createApp({
         return {
             map: null, // Initialisation de la map
             countries_layer: null, // Initialisation de la couche countries
+            countries_list: [], // Liste des pays
             events_layer: null, // Initialisation de la couche events
             events_layer_source: null, // Initialisation de la source de la couche events
             selected_event_layer: null, // Initialisation de la couche selected event
@@ -198,6 +199,8 @@ Vue.createApp({
             show_casualties_filter: false,
             // Affichage choix popularité
             show_popularity_filter: false,
+            // Affichage choix location
+            show_location_filter: false,
             // Filtre event type
             flood: true,
             flashflood: true,
@@ -228,6 +231,10 @@ Vue.createApp({
                 { id: 'n_languages', label: 'Number of languages:', min: 1, max: 34, min_depart: 1, max_depart: 34 },
                 { id: 'n_source_countries', label: 'Number of source countries:', min: 1, max: 113, min_depart: 1, max_depart: 113 },
             ],
+            // Filtre location
+            chosen_country: 'All',
+            substring_country: '',
+            research_list: [],
         };
     },
 
@@ -371,6 +378,21 @@ Vue.createApp({
             }
 
             return country_found
+
+        },
+
+        // Créer les listes de pays
+        set_countries_list() {
+
+            this.countries_list = [];
+            this.research_list = [];
+            let countries = this.countries_layer.getSource().getFeatures();
+            for (let country of countries) {
+                this.countries_list.push(country.values_.admin);
+                this.research_list.push(country.values_.admin);
+            }
+            this.countries_list.sort()
+            this.research_list.sort();
 
         },
 
@@ -589,6 +611,9 @@ Vue.createApp({
                 this.popularity_filter[i].min = this.popularity_filter[i].min_depart;
                 this.popularity_filter[i].max = this.popularity_filter[i].max;
             }
+            this.chosen_country = 'All';
+            this.substring_country = '';
+            this.set_countries_list();
 
             // Chaque event devient visible
             for (let feature of this.events_layer.getSource().getFeatures()) {
@@ -600,6 +625,7 @@ Vue.createApp({
             this.show_date_filter = false;
             this.show_casualties_filter = false;
             this.show_popularity_filter = false;
+            this.show_location_filter = false;
 
         },
 
@@ -686,6 +712,16 @@ Vue.createApp({
 
         },
 
+        // Affiche les pays répondant aux critères
+        input_search_country() {
+            this.research_list = [];
+            for (let country of this.countries_list) {
+                if (country.toLowerCase().includes(this.substring_country)) {
+                    this.research_list.push(country)
+                }
+            }
+        },
+
         // Met à jour la propriété visibilité de la feature selon le filtre
         set_feature_visibility(feature, start_date_ymd, end_date_ymd) {
       
@@ -752,6 +788,12 @@ Vue.createApp({
                     feature.set('visible',false);
                     return;
                 }
+            }
+
+            // Location
+            if (this.chosen_country != 'All' && feature.get('country_found') != this.chosen_country) {
+                feature.set('visible',false);
+                return;
             }
 
         },
@@ -865,6 +907,11 @@ Vue.createApp({
         }),
         this.map.addLayer(this.countries_layer);
 
+        // Créer la liste des pays une fois que les entités sont chargées
+        this.countries_layer.getSource().on('featuresloadend', () => {
+            this.set_countries_list();
+        });
+
         // Création de la couche events (se remplit selon la bbox)
         this.events_layer_source = new ol.source.Vector({
             format: new ol.format.GeoJSON(),
@@ -887,7 +934,7 @@ Vue.createApp({
             }),
             zIndex: 12,
         });
-        this.map.addLayer(this.events_layer)
+        this.map.addLayer(this.events_layer);
 
         // À chaque ajout de nouvelles features, création de la variable visibilité selon les filtres actifs
         this.events_layer_source.on('featuresloadend', event => {
@@ -954,7 +1001,7 @@ Vue.createApp({
         // Scale line
         var scaleline = new ol.control.ScaleLine({
             element: document.getElementById("scaleline_div"),
-        })
+        });
         this.map.addControl(scaleline);
 
         // Style au départ
