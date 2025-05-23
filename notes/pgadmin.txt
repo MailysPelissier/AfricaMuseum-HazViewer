@@ -4,227 +4,13 @@ port : 5432
 
 create extension POSTGIS;
 
+Ajouter couche pays : ne_10m_admin_0_countries.shp (Natural Earth)
 
-Locations : 
+Ajouter dans pg Admin :
+dans l'invite de commande : 
+cd C:\Program Files\PostgreSQL\17\bin
+shp2pgsql -s 4326 -c -D -i -I C:\Mailys\data\ne_10m_admin_0_countries\ne_10m_admin_0_countries.shp countries | psql -h localhost -U postgres -d webGIS
 
-DROP TABLE IF EXISTS public.locations2023;
-
-CREATE TABLE IF NOT EXISTS public.locations2023
-(
-	location_id integer GENERATED ALWAYS AS IDENTITY,
-    article_id character varying COLLATE pg_catalog."default",
-    paragraph_id character varying COLLATE pg_catalog."default",
-    char_location character varying COLLATE pg_catalog."default",
-    latitude real,
-    longitude real,
-	rang integer,
-    min_lat real,
-    max_lat real,
-    min_lon real,
-    max_lon real,
-    squared_distance real
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.locations2023
-    OWNER to postgres;
-
-COPY locations2023(article_id, paragraph_id, char_location, latitude, longitude, rang, min_lat, max_lat, min_lon, max_lon, squared_distance)
-FROM 'C:/Mailys/data/S20230101000000_E20240101000000_GDELT_Locations_v2.csv'
-DELIMITER ',' 
-CSV HEADER
-QUOTE '"';
-
-SELECT * FROM public.locations2023
-
-
-Paragraphs : 
-
-DROP TABLE IF EXISTS public.paragraphs2023;
-
-CREATE TABLE IF NOT EXISTS public.paragraphs2023
-(
-    article_id character varying COLLATE pg_catalog."default",
-    title character varying COLLATE pg_catalog."default",
-    extracted_text character varying COLLATE pg_catalog."default",
-    event_time timestamp without time zone,
-    char_language character varying COLLATE pg_catalog."default",
-    source_country character varying COLLATE pg_catalog."default",
-    site_domain character varying COLLATE pg_catalog."default",
-    paragraph_id character varying COLLATE pg_catalog."default",
-    disaster_label real,
-    disaster_score real,
-    hasard_type character varying COLLATE pg_catalog."default",
-    hasard_type_score real,
-    nb_death real,
-    score_death real,
-    answer_death character varying COLLATE pg_catalog."default",
-    nb_homeless real,
-    score_homeless real,
-    answer_homeless character varying COLLATE pg_catalog."default",
-    nb_injured real,
-    score_injured real,
-    answer_injured character varying COLLATE pg_catalog."default",
-    nb_affected real,
-    score_affected real,
-    answer_affected character varying COLLATE pg_catalog."default",
-    nb_missing real,
-    score_missing real,
-    answer_missing character varying COLLATE pg_catalog."default",
-    nb_evacuated real,
-    score_evacuated real,
-    answer_evacuated character varying COLLATE pg_catalog."default",
-    char_location character varying COLLATE pg_catalog."default",
-    ner_score character varying COLLATE pg_catalog."default",
-    latitude real,
-    longitude real,
-    std_dev real,
-    min_lat real,
-    max_lat real,
-    min_lon real,
-    max_lon real,
-    n_locations real,
-    publication_time timestamp without time zone,
-    original_text character varying COLLATE pg_catalog."default"
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.paragraphs2023
-    OWNER to postgres;
-
-
-COPY paragraphs2023(article_id,title,extracted_text,event_time,char_language,source_country,site_domain,paragraph_id,disaster_label,disaster_score,hasard_type,hasard_type_score,nb_death,score_death,answer_death,nb_homeless,score_homeless,answer_homeless,nb_injured,score_injured,answer_injured,nb_affected,score_affected,answer_affected,nb_missing,score_missing,answer_missing,nb_evacuated,score_evacuated,answer_evacuated,char_location,ner_score,latitude,longitude,std_dev,min_lat,max_lat,min_lon,max_lon,n_locations,publication_time,original_text)
-FROM 'C:/Mailys/data/S20230101000000_E20240101000000_GDELT_Paragraphs_v2.csv'
-DELIMITER ',' 
-CSV HEADER
-QUOTE '"';
-
-SELECT * FROM public.paragraphs2023
-LIMIT 100
-
-
-Events :
-
-DROP TABLE IF EXISTS public.events2021_22_23;
-
-CREATE TABLE IF NOT EXISTS public.events2021_22_23
-(
-    event_id character varying COLLATE pg_catalog."default",
-	hazard_type character varying COLLATE pg_catalog."default",
-	disaster_score real,
-	hasard_type_score real,
-	latitude real,
-    longitude real,
-	event_time timestamp without time zone,
-	bbox character varying COLLATE pg_catalog."default",
-	n_languages real,
-	n_source_countries real,
-	paragraphs_list character varying COLLATE pg_catalog."default",
-	articles_list character varying COLLATE pg_catalog."default",
-	n_paragraphs real,
-	n_articles real,
-	start_time timestamp without time zone,
-	end_time timestamp without time zone,
-	duration integer,
-	mostfreq_death real,
-	n_mostfreq_death real,
-	time_mostfreq_death real,
-	max_death real,
-	n_max_death real,
-	time_max_death real,
-	median_death real,
-	mostfreq_homeless real,
-	n_mostfreq_homeless real,
-	time_mostfreq_homeless real,
-	max_homeless real,
-	n_max_homeless real,
-	time_max_homeless real,
-	median_homeless real,
-	mostfreq_injured real,
-	n_mostfreq_injured real,
-	time_mostfreq_injured real,
-	max_injured real,
-	n_max_injured real,
-	time_max_injured real,
-	median_injured real,
-	mostfreq_affected real,
-	n_mostfreq_affected real,
-	time_mostfreq_affected real,
-	max_affected real,
-	n_max_affected real,
-	time_max_affected real,
-	median_affected real,
-	mostfreq_missing real,
-	n_mostfreq_missing real,
-	time_mostfreq_missing real,
-	max_missing real,
-	n_max_missing real,
-	time_max_missing real,
-	median_missing real,
-	mostfreq_evacuated real,
-	n_mostfreq_evacuated real,
-	time_mostfreq_evacuated real,
-	max_evacuated real,
-	n_max_evacuated real,
-	time_max_evacuated real,
-	median_evacuated real,
-	ipcc_region character varying COLLATE pg_catalog."default",
-	ipcc_continent character varying COLLATE pg_catalog."default"
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.events2021_22_23
-    OWNER to postgres;
-
-
-COPY events2021_22_23(event_id,hazard_type,disaster_score,hasard_type_score,latitude,longitude,event_time,bbox,n_languages,n_source_countries,paragraphs_list,articles_list,n_paragraphs,n_articles,start_time,end_time,duration,mostfreq_death,n_mostfreq_death,time_mostfreq_death,max_death,n_max_death,time_max_death,median_death,mostfreq_homeless,n_mostfreq_homeless,time_mostfreq_homeless,max_homeless,n_max_homeless,time_max_homeless,median_homeless,mostfreq_injured,n_mostfreq_injured,time_mostfreq_injured,max_injured,n_max_injured,time_max_injured,median_injured,mostfreq_affected,n_mostfreq_affected,time_mostfreq_affected,max_affected,n_max_affected,time_max_affected,median_affected,mostfreq_missing,n_mostfreq_missing,time_mostfreq_missing,max_missing,n_max_missing,time_max_missing,median_missing,mostfreq_evacuated,n_mostfreq_evacuated,time_mostfreq_evacuated,max_evacuated,n_max_evacuated,time_max_evacuated,median_evacuated,ipcc_region,ipcc_continent)
-FROM 'C:/Mailys/data/S20210101000000_E20240101000000_GDELT_Events_v2.csv'
-DELIMITER ',' 
-CSV HEADER
-QUOTE '"';
-
-SELECT * FROM public.events2021_22_23
-LIMIT 100
-
-
-Articles : 
-
-DROP TABLE IF EXISTS public.articles2023;
-
-CREATE TABLE IF NOT EXISTS public.articles2023
-(
-	id1 integer,
-	id2 integer,
-	article_url character varying COLLATE pg_catalog."default",
-	title character varying COLLATE pg_catalog."default",
-	article_domain character varying COLLATE pg_catalog."default",
-	article_language character varying COLLATE pg_catalog."default",
-	source_country character varying COLLATE pg_catalog."default",
-	article_time timestamp without time zone,
-	article_id character varying COLLATE pg_catalog."default",
-	article_text character varying COLLATE pg_catalog."default",
-	error_code integer,
-	text_extracted character varying COLLATE pg_catalog."default",
-	char_location character varying COLLATE pg_catalog."default",
-	ner_score character varying COLLATE pg_catalog."default"
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.articles2023
-    OWNER to postgres;
-
-COPY articles2023(id1,id2,article_url,title,article_domain,article_language,source_country,article_time,article_id,article_text,error_code,text_extracted,char_location,ner_score)
-FROM 'C:/Mailys/data/S20230101000000_E20240101000000_GDELT_Articles_v2.csv'
-DELIMITER ',' 
-CSV HEADER
-QUOTE '"';
-
-SELECT * FROM public.articles2023
-LIMIT 100
 
 
 Events v3 :
@@ -323,24 +109,23 @@ ALTER TABLE IF EXISTS public.events2020_23
 
 ALTER TABLE events2020_23 ADD PRIMARY KEY (primary_key);
 
+ALTER TABLE events2020_23 ADD COLUMN country_found character varying COLLATE pg_catalog."default";
 
--- DROP INDEX IF EXISTS public.events2020_23_latitude_index;
+UPDATE events2020_23 SET country_found = c.admin FROM countries c WHERE ST_Contains(c.geom, events2020_23.geom);
 
-CREATE INDEX IF NOT EXISTS events2020_23_latitude_index
+
+-- DROP INDEX IF EXISTS public.event2020_23_geom_index;
+
+CREATE INDEX IF NOT EXISTS event2020_23_geom_index
     ON public.events2020_23 USING btree
-    (latitude ASC NULLS LAST)
-    TABLESPACE pg_default;
-
--- DROP INDEX IF EXISTS public.events2020_23_longitude_index;
-
-CREATE INDEX IF NOT EXISTS events2020_23_longitude_index
-    ON public.events2020_23 USING btree
-    (longitude ASC NULLS LAST)
+    (geom ASC NULLS LAST)
+    WITH (deduplicate_items=True)
     TABLESPACE pg_default;
 
 
 SELECT * FROM public.events2020_23
 LIMIT 100
+
 
 
 Paragraphs v3 :
@@ -436,12 +221,24 @@ ALTER TABLE IF EXISTS public.paragraphs2020_23
 
 ALTER TABLE paragraphs2020_23 ADD PRIMARY KEY (primary_key);
 
+ALTER TABLE paragraphs2020_23 ADD COLUMN country_found character varying COLLATE pg_catalog."default";
+
+UPDATE paragraphs2020_23 SET country_found = c.admin FROM countries c WHERE ST_Contains(c.geom, paragraphs2020_23.geom);
+
 
 -- DROP INDEX IF EXISTS public.paragraphs2020_23_id_index;
 
 CREATE INDEX IF NOT EXISTS paragraphs2020_23_id_index
     ON public.paragraphs2020_23 USING btree
     (paragraph_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+-- DROP INDEX IF EXISTS public.paragraph2020_23_geom_index;
+
+CREATE INDEX IF NOT EXISTS paragraph2020_23_geom_index
+    ON public.paragraphs2020_23 USING gist
+    (geom)
+    WITH (buffering=auto)
     TABLESPACE pg_default;
 
 
