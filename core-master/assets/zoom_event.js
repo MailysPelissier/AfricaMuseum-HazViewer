@@ -15,8 +15,8 @@ Vue.createApp({
             event_main_property_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des events
-            event_other_property: ["country", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
-            event_other_property_title: ["Country", "Number of languages", "Number of source countries", "Duration", "Disaster score", "Hasard type score"],
+            event_other_property: ["country", "country_found", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
+            event_other_property_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Duration", "Disaster score", "Hasard type score"],
             // Propriétés localisations des events
             event_location_property: ["latitude", "longitude", "bbox_event"],
             event_location_property_title: ["Latitude", "Longitude", "Bbox event"],
@@ -43,7 +43,7 @@ Vue.createApp({
             paragraph_main_property_title: ["Title", "Hasard type", "Publication time", "Paragraph time", "Number of death", "Number of injured", 
                 "Number of affected", "Article language"],
             // Autres propriétés des paragraphs
-            paragraph_other_property: ["extracted_text", "original_text", "country", "source_country", "domain_url", "extracted_location", 
+            paragraph_other_property: ["extracted_text", "original_text", "country", "country_found", "source_country", "domain_url", "extracted_location", 
                 "ner_score", "n_locations", "disaster_label", "disaster_score", "hasard_type_score", "unnamed_column"],
             // Propriétés localisations des events
             paragraph_location_property: ["latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon"],
