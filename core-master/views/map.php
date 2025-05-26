@@ -280,7 +280,7 @@
                     <div id="location_field" class="margin">
                         <div class="title">Location filter:</div>
                         <ul>
-                            <div class="flexrow">
+                            <div class="flexrow margin">
                                 <li id="countries">Country:</li>
                                 <div class=flexcolumn>
                                     <input class="margin_left" type="text" v-model="substring_country" @input="input_search_country"/>
@@ -289,6 +289,12 @@
                                         <option v-for="country in research_country_list" :value="country">{{country}}</option> 
                                     </select>
                                 </div>
+                            </div>
+                            <div class="flexrow space_between margin">
+                                <li id="draw">Choose area:</li>
+                                <button @click="add_draw" v-if=draw_actif>Stop drawing</button>
+                                <button @click="add_draw" v-if=!draw_actif>Draw</button>
+                                <button @click="reset_draw">Reset draw</button>
                             </div>
                         </ul>
                     </div>  

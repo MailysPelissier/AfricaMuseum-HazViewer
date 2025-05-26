@@ -4,9 +4,8 @@ Vue.createApp({
         return {
             map: null, // Initialisation de la map
             countries_layer: null, // Initialisation de la couche countries
-            countries_list: [], // Liste des pays
+            draw_layer: null, // Initialisation de la couche de dessin
             events_layer: null, // Initialisation de la couche events
-            events_layer_source: null, // Initialisation de la source de la couche events
             selected_event_layer: null, // Initialisation de la couche selected event
             localisation_layer: null, // Initialisation de la couche de géolocalisation
             // Propriétés principales des events
@@ -232,9 +231,13 @@ Vue.createApp({
                 { id: 'n_source_countries', label: 'Number of source countries:', min: 1, max: 113, min_depart: 1, max_depart: 113 },
             ],
             // Filtre location
+            countries_list: [], // Liste des pays
             chosen_country: 'All',
             substring_country: '',
             research_country_list: [],
+            draw: null,
+            draw_actif: false,
+            features_polygon: [],
         };
     },
 
@@ -360,24 +363,6 @@ Vue.createApp({
                 this.set_feature_visibility(exists, start_date_ymd, end_date_ymd);
 
             }
-
-        },
-
-        // Trouver le pays où est situé l'objet
-        // Pas utilisée pour l'instant
-        get_country (feature) {
-
-            let countries = this.countries_layer.getSource().getFeatures();
-            let country_found = null;
-
-            for (let country of countries) {
-                if (country.getGeometry().intersectsCoordinate(feature.getGeometry().getCoordinates())) {
-                    country_found = country.values_.admin;
-                    break;
-                }
-            }
-
-            return country_found
 
         },
 
@@ -591,42 +576,25 @@ Vue.createApp({
         
         },
 
-        // Reset le formulaire des filtres
-        reset_filter_form() {
+        // Affiche le filtre, ferme le changement de style si besoin
+        // Initialisation des calendriers
+        setup_filter_form() {
 
-            // Remet les propriétés à leur état initial
-            this.flood = true;
-            this.flashflood = true;
-            this.landslide = true;
-            this.start_date = this.min_date;
-            this.end_date = this.max_date;
-            this.duration_filter[0].min = this.duration_filter[0].min_depart;
-            this.duration_filter[0].max = this.duration_filter[0].max_depart;
-            for(let i = 0; i < this.impact_filter.length; i++) {
-                this.impact_filter[i].checkbox_null = true;              
-                this.impact_filter[i].min = this.impact_filter[i].min_depart;
-                this.impact_filter[i].max = this.impact_filter[i].max;
-            }
-            for(let i = 0; i < this.popularity_filter.length; i++) {           
-                this.popularity_filter[i].min = this.popularity_filter[i].min_depart;
-                this.popularity_filter[i].max = this.popularity_filter[i].max;
-            }
-            this.chosen_country = 'All';
-            this.substring_country = '';
-            this.set_countries_list();
+            this.show_filter_form = !this.show_filter_form;
+            this.show_changer_style_form = false;
 
-            // Chaque event devient visible
-            for (let feature of this.events_layer.getSource().getFeatures()) {
-                feature.set('visible',true);
-            }
+            this.set_flatpickr();
 
-            // Ferme les panneaux ouverts
-            this.show_event_type_filter = false;
-            this.show_date_filter = false;
-            this.show_casualties_filter = false;
-            this.show_popularity_filter = false;
-            this.show_location_filter = false;
+        },
 
+        // Affiche le filtre dates
+        // Initialisation des calendriers
+        display_date_filter() {
+
+            this.show_date_filter = !this.show_date_filter;
+
+            this.set_flatpickr();
+        
         },
 
         // Initialise les calendriers
@@ -663,27 +631,6 @@ Vue.createApp({
                 });
 
             }
-
-        },
-
-        // Affiche le filtre dates
-        // Initialisation des calendriers
-        display_date_filter() {
-
-            this.show_date_filter = !this.show_date_filter;
-
-            this.set_flatpickr();
-        
-        },
-
-        // Affiche le filtre, ferme le changement de style si besoin
-        // Initialisation des calendriers
-        setup_filter_form() {
-
-            this.show_filter_form = !this.show_filter_form;
-            this.show_changer_style_form = false;
-
-            this.set_flatpickr();
 
         },
 
@@ -729,6 +676,108 @@ Vue.createApp({
             else {
                 this.chosen_country = this.research_country_list[0]
             }
+        },
+
+        // Gestion de l'interaction de dessin
+        add_draw() {
+
+            // Si l'interaction de dessin est active
+            if (this.draw_actif) {
+
+                // Interaction de dessin désactivée
+                this.draw_actif = false;
+                this.map.removeInteraction(this.draw);
+
+            }
+
+            // Si l'interaction de dessin n'est pas active
+            else {
+
+                // Si un polygone existe déjà, on le supprime
+                if (this.draw_layer.getSource().getFeatures().length === 1) {
+                    this.draw_layer.getSource().clear();
+                }
+
+                // Interaction de dessin activée
+                this.draw_actif = true;
+                this.draw = new ol.interaction.Draw({
+                    source: this.draw_layer.getSource(),
+                    type: "Polygon",
+                });
+                this.map.addInteraction(this.draw);
+
+                // Quand le polygone est dessiné
+                this.draw.on("drawend", (event) => {
+
+                    let polygon = event.feature.getGeometry();
+
+                    // Récupération des events dans l'emprise (bbox) du polygone
+                    let features_polygon_extent = [];
+                    this.events_layer.getSource().forEachFeatureIntersectingExtent(polygon.getExtent(), (feature) => {
+                        features_polygon_extent.push(feature);
+                    });
+
+                    // Récupération des events intersectant le polygone
+                    this.features_polygon = [];
+                    for (feature of features_polygon_extent) {
+                        let point = feature.getGeometry().getCoordinates();
+                        if (polygon.intersectsCoordinate(point)) {
+                            this.features_polygon.push(feature);
+                        }
+                    }
+
+                });
+
+            }
+
+        },
+
+        // Réinitialiser la couche de dessin
+        reset_draw() {
+            this.draw_layer.getSource().clear();
+            this.features_polygon = [];
+            this.appliquer_filtres();
+        },
+
+        // Reset le formulaire des filtres
+        reset_filter_form() {
+
+            // Remet les propriétés à leur état initial
+            this.flood = true;
+            this.flashflood = true;
+            this.landslide = true;
+            this.start_date = this.min_date;
+            this.end_date = this.max_date;
+            this.duration_filter[0].min = this.duration_filter[0].min_depart;
+            this.duration_filter[0].max = this.duration_filter[0].max_depart;
+            for(let i = 0; i < this.impact_filter.length; i++) {
+                this.impact_filter[i].checkbox_null = true;              
+                this.impact_filter[i].min = this.impact_filter[i].min_depart;
+                this.impact_filter[i].max = this.impact_filter[i].max;
+            }
+            for(let i = 0; i < this.popularity_filter.length; i++) {           
+                this.popularity_filter[i].min = this.popularity_filter[i].min_depart;
+                this.popularity_filter[i].max = this.popularity_filter[i].max;
+            }
+            this.chosen_country = 'All';
+            this.substring_country = '';
+            this.set_countries_list();
+            this.draw_layer.getSource().clear();
+            this.features_polygon = [];
+
+
+            // Chaque event devient visible
+            for (let feature of this.events_layer.getSource().getFeatures()) {
+                feature.set('visible',true);
+            }
+
+            // Ferme les panneaux ouverts
+            this.show_event_type_filter = false;
+            this.show_date_filter = false;
+            this.show_casualties_filter = false;
+            this.show_popularity_filter = false;
+            this.show_location_filter = false;
+
         },
 
         // Met à jour la propriété visibilité de la feature selon le filtre
@@ -804,7 +853,11 @@ Vue.createApp({
                 feature.set('visible',false);
                 return;
             }
-
+            if (this.draw_layer.getSource().getFeatures().length === 1 && !this.features_polygon.includes(feature)) {
+                feature.set('visible',false);
+                return;
+            }
+            
         },
 
         // Application des filtres : seuls les évènements respectant les critères apparaissent
@@ -824,7 +877,7 @@ Vue.createApp({
 
         },
 
-        // Récupérer la localisation l'afficher
+        // Récupérer la localisation et l'afficher
         affichage_localisation() {
 
             navigator.geolocation.getCurrentPosition((position) => {
@@ -875,7 +928,6 @@ Vue.createApp({
 
         },
 
-
     },
 
     mounted() {
@@ -921,18 +973,30 @@ Vue.createApp({
             this.set_countries_list();
         });
 
-        // Création de la couche events (se remplit selon la bbox)
-        this.events_layer_source = new ol.source.Vector({
-            format: new ol.format.GeoJSON(),
-            url: function(extent) {
-                return 'http://localhost:8080/geoserver/webGIS/ows?' +
-                    'service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23&' +
-                    'outputFormat=application/json&bbox=' + extent.join(',') + ',EPSG:3857';
-            },
-            strategy: ol.loadingstrategy.bbox
+        // Couche de dessin (pour récupérer l'emprise d'un polygone)
+        this.draw_layer = new ol.layer.Vector({
+            source: new ol.source.Vector({}),
+            zIndex: 3,
         });
+        this.map.addLayer(this.draw_layer);
+
+        // Fin de l'interaction de dessin dès qu'une feature est dessinée
+        this.draw_layer.getSource().on('addfeature', event => {
+            this.draw_actif = false;
+            this.map.removeInteraction(this.draw);
+        });
+
+        // Création de la couche events (se remplit selon la bbox)
         this.events_layer = new ol.layer.Vector({
-            source: this.events_layer_source,
+            source: new ol.source.Vector({
+                format: new ol.format.GeoJSON(),
+                url: function(extent) {
+                    return 'http://localhost:8080/geoserver/webGIS/ows?' +
+                        'service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23&' +
+                        'outputFormat=application/json&bbox=' + extent.join(',') + ',EPSG:3857';
+                },
+                strategy: ol.loadingstrategy.bbox
+            }),
             style: new ol.style.Style({
                 image: new ol.style.Circle({
                     radius: 10,
@@ -941,12 +1005,12 @@ Vue.createApp({
                     }),
                 }),
             }),
-            zIndex: 12,
+            zIndex: 10,
         });
         this.map.addLayer(this.events_layer);
 
         // À chaque ajout de nouvelles features, création de la variable visibilité selon les filtres actifs
-        this.events_layer_source.on('featuresloadend', event => {
+        this.events_layer.getSource().on('featuresloadend', event => {
             let features = event.features;
             features.forEach((feature) => {
                 this.visibilite_features_ajoutees(feature)
@@ -964,14 +1028,17 @@ Vue.createApp({
                     }),
                 }),
             }),
-            zIndex: 13,
+            zIndex: 11,
         });
         this.map.addLayer(this.selected_event_layer);
+
+        // Style au départ
+        this.change_style();
 
         // Création de la couche géolocalisation vide
         this.localisation_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
-            zIndex: 14,
+            zIndex: 12,
         });
         this.map.addLayer(this.localisation_layer);
 
@@ -1012,9 +1079,6 @@ Vue.createApp({
             element: document.getElementById("scaleline_div"),
         });
         this.map.addControl(scaleline);
-
-        // Style au départ
-        this.change_style();
 
         // A chaque déplacement/zoom, ajout des events à la couche events selon la bbox (pas utilisé pour l'instant)
         // Suppression du popup clic
@@ -1099,7 +1163,3 @@ Vue.createApp({
     },
 
 }).mount('#vue_map');
-
-
-
-
