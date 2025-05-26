@@ -234,7 +234,7 @@ Vue.createApp({
             // Filtre location
             chosen_country: 'All',
             substring_country: '',
-            research_list: [],
+            research_country_list: [],
         };
     },
 
@@ -385,14 +385,14 @@ Vue.createApp({
         set_countries_list() {
 
             this.countries_list = [];
-            this.research_list = [];
+            this.research_country_list = [];
             let countries = this.countries_layer.getSource().getFeatures();
             for (let country of countries) {
                 this.countries_list.push(country.values_.admin);
-                this.research_list.push(country.values_.admin);
+                this.research_country_list.push(country.values_.admin);
             }
             this.countries_list.sort()
-            this.research_list.sort();
+            this.research_country_list.sort();
 
         },
 
@@ -714,11 +714,20 @@ Vue.createApp({
 
         // Affiche les pays répondant aux critères
         input_search_country() {
-            this.research_list = [];
+            this.research_country_list = [];
             for (let country of this.countries_list) {
                 if (country.toLowerCase().includes(this.substring_country)) {
-                    this.research_list.push(country)
+                    this.research_country_list.push(country);
                 }
+            }
+            if (this.substring_country === '') {
+                this.chosen_country = 'All';
+            }
+            else if (this.research_country_list.length === 0) {
+                this.chosen_country = 'All';
+            }
+            else {
+                this.chosen_country = this.research_country_list[0]
             }
         },
 
@@ -904,7 +913,7 @@ Vue.createApp({
                 })
             }),
             zIndex: 2,
-        }),
+        });
         this.map.addLayer(this.countries_layer);
 
         // Créer la liste des pays une fois que les entités sont chargées
@@ -1065,7 +1074,7 @@ Vue.createApp({
                     let ligne = event_feature.get('hazard_type') + ' - ' + event_feature.get('event_time').substring(0,10);
                     html_popup += `<li><a href="#" id="event_link_${index}">${ligne}</a></li>`;
                 });
-                html_popup += '</ul>'
+                html_popup += '</ul>';
                 document.getElementById("popup_clic").innerHTML = html_popup;
                 event_features.forEach((event_feature, index) => {
                     document.getElementById(`event_link_${index}`).addEventListener('click', (e) => {

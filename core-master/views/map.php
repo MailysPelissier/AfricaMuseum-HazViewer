@@ -280,15 +280,16 @@
                     <div id="location_field" class="margin">
                         <div class="title">Location filter:</div>
                         <ul>
-                            <li id="countries">
-                                <label>Country:
+                            <div class="flexrow">
+                                <li id="countries">Country:</li>
+                                <div class=flexcolumn>
                                     <input class="margin_left" type="text" v-model="substring_country" @input="input_search_country"/>
                                     <select class="margin_left" v-model="chosen_country">
                                         <option value="All">---All---</option>
-                                        <option v-for="country in research_list" :value="country">{{country}}</option> 
+                                        <option v-for="country in research_country_list" :value="country">{{country}}</option> 
                                     </select>
-                                </label>
-                            </li>
+                                </div>
+                            </div>
                         </ul>
                     </div>  
                     <div class='back_button'></div>
