@@ -291,10 +291,22 @@
                                 </div>
                             </div>
                             <div class="flexrow space_between margin">
-                                <li id="draw">Choose area:</li>
+                                <li id="draw">Choose area (draw):</li>
                                 <button @click="add_draw" v-if=draw_actif>Stop drawing</button>
                                 <button @click="add_draw" v-if=!draw_actif>Draw</button>
                                 <button @click="reset_draw">Reset draw</button>
+                            </div>
+                            <div class="margin">
+                                <li id="bbox">Choose extent:
+                                    <ul>
+                                    <li>Latitude:</li>
+                                    <div><label class="margin_left">Min: <input type="text"/></label></div>
+                                    <div><label class="margin_left">Max: <input type="text"/></label></div>
+                                    <li>Longitude:</li>
+                                    <div><label class="margin_left">Min: <input type="text"/></label></div>
+                                    <div><label class="margin_left">Max: <input type="text"/></label></div>
+                                    </ul>
+                                </li>
                             </div>
                         </ul>
                     </div>  
