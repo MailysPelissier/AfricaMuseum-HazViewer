@@ -4,6 +4,7 @@ Vue.createApp({
         return {
             map: null, // Initialisation de la map
             countries_layer: null, // Initialisation de la couche countries
+            extent_layer: null, // Initialisation de la couche du polygone de l'extent
             draw_layer: null, // Initialisation de la couche de dessin
             events_layer: null, // Initialisation de la couche events
             selected_event_layer: null, // Initialisation de la couche selected event
@@ -224,7 +225,7 @@ Vue.createApp({
                 { id: 'median_evacuated', label: 'Median evacuated:', checkbox_null: true, min: 1, max: 185000000, min_depart: 1, max_depart: 185000000 },
             ],
             // Filtre popularité
-            popularity_filter : [
+            popularity_filter: [
                 { id: 'n_articles', label: 'Number of articles:', min: 1, max: 15000, min_depart: 1, max_depart: 15000 },
                 { id: 'n_paragraphs', label: 'Number of paragraphs:', min: 1, max: 60000, min_depart: 1, max_depart: 60000 },
                 { id: 'n_languages', label: 'Number of languages:', min: 1, max: 34, min_depart: 1, max_depart: 34 },
@@ -238,6 +239,10 @@ Vue.createApp({
             draw: null,
             draw_actif: false,
             features_polygon: [],
+            extent_filter: [
+                { id: 'latitude', label: 'Latitude', min: -90, max: 90, min_depart: -90, max_depart: 90 },
+                { id: 'longitude', label: 'Longitude', min: -180, max: 180, min_depart: -180, max_depart: 180 },
+            ],
         };
     },
 
@@ -515,7 +520,7 @@ Vue.createApp({
                         size = this.size_standard;
                     } 
                     else if (this.size_style === 'Duration') {
-                        let duration = parseInt(feature.get('duration'));
+                        let duration = parseFloat(feature.get('duration'));
                         let intervalle_duration = this.size_duration.find(interval => {
                             return duration >= interval.min && duration <= interval.max;
                         });
@@ -634,7 +639,7 @@ Vue.createApp({
 
         },
 
-        // Vérifie si la valeur entrée est valide (chiffre entre les valeurs min et max)
+        // Vérifie si la valeur entrée est valide (nombre entre les valeurs min et max)
         validateInput(event,n_min_depart,n_max_depart) {
 
             // Calcule la prochaine valeur
@@ -645,15 +650,21 @@ Vue.createApp({
             let insertedText = event.data || '';
             let nextValue = value.slice(0, selectionStart) + insertedText + value.slice(selectionEnd);
     
-            // Empêche la saisie si ce n’est pas un chiffre
-            if (!/^\d*$/.test(nextValue)) {
+            // Autoriser les nombres négatifs et décimaux
+            // La regex autorise : chiffres, un seul "-", un seul "." (dans une position correcte)
+            if (!/^-?\d*\.?\d*$/.test(nextValue)) {
                 event.preventDefault();
                 return;
             }
 
-            // Empêche la saisie si la valeur n'est pas entre les valeurs min et max
-            let intVal = parseInt(nextValue);
-            if (intVal < n_min_depart || intVal > n_max_depart) {
+            // Convertit la valeur en nombre flottant
+            let floatVal = parseFloat(nextValue);
+            
+            // Ignore si la valeur n'est pas encore un nombre valide (ex : "-")
+            if (isNaN(floatVal)) return;
+
+            // Empêche la saisie si la valeur est hors des bornes
+            if (floatVal < n_min_depart || floatVal > n_max_depart) {
                 event.preventDefault();
             }
 
@@ -739,6 +750,43 @@ Vue.createApp({
             this.appliquer_filtres();
         },
 
+        // Crée le polynome extent
+        extent_polygon() {
+
+            // Couche extent layer vidée
+            this.extent_layer.getSource().clear();
+
+            // Projection en 3857
+            let coord_transfo = [
+                ol.proj.fromLonLat([this.extent_filter[1].min, this.extent_filter[0].min]),
+                ol.proj.fromLonLat([this.extent_filter[1].max, this.extent_filter[0].max]),
+            ];
+            let extent3857 = [].concat(...coord_transfo);
+            let min_lon = extent3857[0];
+            let min_lat = extent3857[1];
+            let max_lon = extent3857[2];
+            let max_lat = extent3857[3];
+
+            // Création de la feature à l'aide de ses coordonnées
+            let extent_polygon = new ol.Feature(
+                ol.geom.Polygon.fromExtent([min_lon, min_lat, max_lon, max_lat])
+            );
+
+            // Ajout à la couche extent layer 
+            this.extent_layer.getSource().addFeature(extent_polygon);
+
+        },
+
+        // Réinitialiser le choix manuel de la bbox
+        reset_extent() {
+            this.extent_layer.getSource().clear();
+            for(let i = 0; i < this.extent_filter.length; i++) {           
+                this.extent_filter[i].min = this.extent_filter[i].min_depart;
+                this.extent_filter[i].max = this.extent_filter[i].max_depart;
+            }
+            this.appliquer_filtres();
+        },
+
         // Reset le formulaire des filtres
         reset_filter_form() {
 
@@ -753,18 +801,22 @@ Vue.createApp({
             for(let i = 0; i < this.impact_filter.length; i++) {
                 this.impact_filter[i].checkbox_null = true;              
                 this.impact_filter[i].min = this.impact_filter[i].min_depart;
-                this.impact_filter[i].max = this.impact_filter[i].max;
+                this.impact_filter[i].max = this.impact_filter[i].max_depart;
             }
             for(let i = 0; i < this.popularity_filter.length; i++) {           
                 this.popularity_filter[i].min = this.popularity_filter[i].min_depart;
-                this.popularity_filter[i].max = this.popularity_filter[i].max;
+                this.popularity_filter[i].max = this.popularity_filter[i].max_depart;
             }
             this.chosen_country = 'All';
             this.substring_country = '';
             this.set_countries_list();
             this.draw_layer.getSource().clear();
             this.features_polygon = [];
-
+            this.extent_layer.getSource().clear();
+            for(let i = 0; i < this.extent_filter.length; i++) {           
+                this.extent_filter[i].min = this.extent_filter[i].min_depart;
+                this.extent_filter[i].max = this.extent_filter[i].max_depart;
+            }
 
             // Chaque event devient visible
             for (let feature of this.events_layer.getSource().getFeatures()) {
@@ -811,11 +863,11 @@ Vue.createApp({
                 feature.set('visible',false);
                 return;
             }
-            if (feature.get(this.duration_filter[0].id) < parseInt(this.duration_filter[0].min)) {
+            if (feature.get(this.duration_filter[0].id) < parseFloat(this.duration_filter[0].min)) {
                 feature.set('visible',false);
                 return;
             }
-            if (feature.get(this.duration_filter[0].id) > parseInt(this.duration_filter[0].max)) {
+            if (feature.get(this.duration_filter[0].id) > parseFloat(this.duration_filter[0].max)) {
                 feature.set('visible',false);
                 return;
             }
@@ -826,11 +878,11 @@ Vue.createApp({
                     feature.set('visible',false);
                     return;
                 }
-                if (parseFloat(feature.get(this.impact_filter[i].id)) < parseInt(this.impact_filter[i].min)) {
+                if (parseFloat(feature.get(this.impact_filter[i].id)) < parseFloat(this.impact_filter[i].min)) {
                     feature.set('visible',false);
                     return;
                 }
-                if (parseFloat(feature.get(this.impact_filter[i].id)) > parseInt(this.impact_filter[i].max)) {
+                if (parseFloat(feature.get(this.impact_filter[i].id)) > parseFloat(this.impact_filter[i].max)) {
                     feature.set('visible',false);
                     return;
                 }
@@ -838,11 +890,11 @@ Vue.createApp({
 
             // Popularity
             for(let i = 0; i < this.popularity_filter.length; i++) {
-                if (parseInt(feature.get(this.popularity_filter[i].id)) < parseInt(this.popularity_filter[i].min)) {
+                if (parseFloat(feature.get(this.popularity_filter[i].id)) < parseFloat(this.popularity_filter[i].min)) {
                     feature.set('visible',false);
                     return;
                 }
-                if (parseInt(feature.get(this.popularity_filter[i].id)) > parseInt(this.popularity_filter[i].max)) {
+                if (parseFloat(feature.get(this.popularity_filter[i].id)) > parseFloat(this.popularity_filter[i].max)) {
                     feature.set('visible',false);
                     return;
                 }
@@ -856,6 +908,16 @@ Vue.createApp({
             if (this.draw_layer.getSource().getFeatures().length === 1 && !this.features_polygon.includes(feature)) {
                 feature.set('visible',false);
                 return;
+            }
+            for(let i = 0; i < this.extent_filter.length; i++) {
+                if (parseFloat(feature.get(this.extent_filter[i].id)) < parseFloat(this.extent_filter[i].min)) {
+                    feature.set('visible',false);
+                    return;
+                }
+                if (parseFloat(feature.get(this.extent_filter[i].id)) > parseFloat(this.extent_filter[i].max)) {
+                    feature.set('visible',false);
+                    return;
+                }
             }
             
         },
@@ -973,10 +1035,26 @@ Vue.createApp({
             this.set_countries_list();
         });
 
+        // Couche du polygone de l'extent
+        this.extent_layer = new ol.layer.Vector({
+            source: new ol.source.Vector({}),
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'rgba(255, 0, 0, 1)',
+                    width: 1
+                }),
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 255, 255, 0.2)'
+                })
+            }),
+            zIndex: 3,
+        });
+        this.map.addLayer(this.extent_layer);
+
         // Couche de dessin (pour récupérer l'emprise d'un polygone)
         this.draw_layer = new ol.layer.Vector({
             source: new ol.source.Vector({}),
-            zIndex: 3,
+            zIndex: 4,
         });
         this.map.addLayer(this.draw_layer);
 
@@ -985,7 +1063,7 @@ Vue.createApp({
             this.draw_actif = false;
             this.map.removeInteraction(this.draw);
         });
-
+ 
         // Création de la couche events (se remplit selon la bbox)
         this.events_layer = new ol.layer.Vector({
             source: new ol.source.Vector({

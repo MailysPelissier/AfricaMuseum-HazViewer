@@ -296,15 +296,21 @@
                                 <button @click="add_draw" v-if=!draw_actif>Draw</button>
                                 <button @click="reset_draw">Reset draw</button>
                             </div>
-                            <div class="margin">
-                                <li id="bbox">Choose extent:
+                            <div class="flexrow space_between margin">
+                                <li id="bbox">Choose extent:</li>
+                                <button @click="extent_polygon">Show extent</button>
+                                <button @click="reset_extent">Reset extent</button>
+                            </div>
+                            <div>
+                                <li style="list-style-type:none">
                                     <ul>
-                                    <li>Latitude:</li>
-                                    <div><label class="margin_left">Min: <input type="text"/></label></div>
-                                    <div><label class="margin_left">Max: <input type="text"/></label></div>
-                                    <li>Longitude:</li>
-                                    <div><label class="margin_left">Min: <input type="text"/></label></div>
-                                    <div><label class="margin_left">Max: <input type="text"/></label></div>
+                                        <div class="margin" v-for="coord in extent_filter">
+                                            <li>{{coord.label}}</li>
+                                            <div>
+                                                <label>Min: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.min" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
+                                                <label class="margin_left">Max: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.max" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
+                                            </div>
+                                        </div>
                                     </ul>
                                 </li>
                             </div>
