@@ -329,6 +329,26 @@
 
             </div>
 
+            <div id="form_download" class="popup grand_popup hauteur_max scroll_box" v-if="show_download_form">
+
+                <div id="top_form" class="flexrow space_between padding">
+                    <h5>Download data</h5>
+                    <button class="vertical_center" @click="change_true_false(['show_download_form'])">&#215;</button>
+                </div> 
+
+                <br>
+
+                
+
+                <br>
+
+                <div class="flexrow space_evenly padding">
+                    <button id="download" @click="download">Download</button>
+                    <button id="cancel" @click="change_true_false(['show_download_form'])">Close</button>
+                </div>
+
+            </div>
+
         </div>
 
         <div id=event_data_map_scroll_box class="scroll_box margin padding">
@@ -370,6 +390,10 @@
             <button id=changer_style_button @click=setup_changer_style_form>Change style</button>
         </div>
 
+        <div id=download_div class='ol-unselectable ol-control'>
+            <button id=download_button @click=setup_download_form>Download data</button>
+        </div>
+ 
         <!-- Bouton qui permet d'activer la localisation -->
         <div id="affichage_localisation_div" class='ol-unselectable ol-control'>
             <button @click=affichage_localisation>&#8857;</button>

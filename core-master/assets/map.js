@@ -11,7 +11,7 @@ Vue.createApp({
             localisation_layer: null, // Initialisation de la couche de géolocalisation
             // Propriétés principales des events
             event_main_property: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
-                 "n_paragraphs", "n_articles"],
+                "n_paragraphs", "n_articles"],
             event_main_property_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des events
@@ -243,6 +243,8 @@ Vue.createApp({
                 { id: 'latitude', label: 'Latitude', min: -90, max: 90, min_depart: -90, max_depart: 90 },
                 { id: 'longitude', label: 'Longitude', min: -180, max: 180, min_depart: -180, max_depart: 180 },
             ],
+            // Affichage popup download
+            show_download_form: false,
         };
     },
 
@@ -457,11 +459,12 @@ Vue.createApp({
             }
         },
 
-        // Affiche le changement de style, ferme le filtre si besoin
+        // Affiche le changement de style, ferme les autres forms ouverts
         setup_changer_style_form() {
 
             this.show_changer_style_form = !this.show_changer_style_form;
             this.show_filter_form = false;
+            this.show_download_form = false;
 
         },
 
@@ -581,12 +584,13 @@ Vue.createApp({
         
         },
 
-        // Affiche le filtre, ferme le changement de style si besoin
+        // Affiche le filtre, ferme les autres forms ouverts
         // Initialisation des calendriers
         setup_filter_form() {
 
             this.show_filter_form = !this.show_filter_form;
             this.show_changer_style_form = false;
+            this.show_download_form = false;
 
             this.set_flatpickr();
 
@@ -939,6 +943,51 @@ Vue.createApp({
 
         },
 
+        // Affiche le form de download, ferme les autres forms ouverts
+        setup_download_form() {
+
+            this.show_download_form = !this.show_download_form;
+            this.show_changer_style_form = false;
+            this.show_filter_form = false;
+
+        },
+
+        download() {
+
+            let content = '';
+
+            for (let feature of this.events_layer.getSource().getFeatures()) {
+                if (content === '') {
+                    for (let property of Object.getOwnPropertyNames(feature.values_)) {
+                        if (property != 'geometry' || property != 'visible') {
+                            content += property + ',';
+                        }
+                    }
+                    content = content.substring(0, content.length - 1);
+                    content += '\n'
+                }
+                for (let property of Object.getOwnPropertyNames(feature.values_)) {
+                    content += feature.get(property) + ','
+                }
+                content = content.substring(0, content.length - 1);
+                content += '\n'
+            }
+
+            //create a file and put the content, name and type
+            var file = new File(["\ufeff"+content], 'myFile.csv', {type: "text/plain:charset=UTF-8"});
+
+            //create a ObjectURL in order to download the created file
+            url = window.URL.createObjectURL(file);
+
+            //create a hidden link and set the href and click it
+            var a = document.createElement("a");
+            a.style = "display: none";
+            a.href = url;
+            a.download = file.name;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        },
+
         // Récupérer la localisation et l'afficher
         affichage_localisation() {
 
@@ -1145,6 +1194,12 @@ Vue.createApp({
             element: document.getElementById("changer_style_div"),
         });
         this.map.addControl(change_style_control);
+
+        // Bouton download
+        var download_control = new ol.control.Control({
+            element: document.getElementById("download_div"),
+        });
+        this.map.addControl(download_control);
 
         // Bouton pour activer la localisation
         var localisation_control = new ol.control.Control({
