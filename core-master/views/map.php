@@ -17,7 +17,7 @@
 
         <div id="map" class="margin">
 
-            <div id="form_changer_style" class="popup grand_popup hauteur_max scroll_box" v-if="show_changer_style_form">
+            <div id="form_changer_style" class="form popup scroll_box" v-if="show_changer_style_form">
 
                 <div id="top_form" class="flexrow space_between padding">
                     <h5>Change style</h5>
@@ -143,7 +143,7 @@
 
             </div>
 
-            <div id="form_filter" class="popup grand_popup hauteur_max scroll_box" v-if="show_filter_form">
+            <div id="form_filter" class="form popup scroll_box" v-if="show_filter_form">
 
                 <div id="top_form" class="flexrow space_between padding">
                     <h5>Filter</h5>
@@ -329,7 +329,7 @@
 
             </div>
 
-            <div id="form_download" class="popup grand_popup hauteur_max scroll_box" v-if="show_download_form">
+            <div id="form_download" class="form popup scroll_box" v-if="show_download_form">
 
                 <div id="top_form" class="flexrow space_between padding">
                     <h5>Download data</h5>
@@ -383,15 +383,15 @@
         <div id=popup_clic class="popup petit_popup scroll_box"></div>
 
         <div id=outil_filtrage_div class='ol-unselectable ol-control'>
-            <button id=outil_filtrage_button @click="setup_filter_form">Filter</button>
+            <button class=open_form_button @click="setup_filter_form">Filter</button>
         </div>
 
         <div id=changer_style_div class='ol-unselectable ol-control'>
-            <button id=changer_style_button @click=setup_changer_style_form>Change style</button>
+            <button class=open_form_button @click=setup_changer_style_form>Change style</button>
         </div>
 
         <div id=download_div class='ol-unselectable ol-control'>
-            <button id=download_button @click=setup_download_form>Download data</button>
+            <button class=open_form_button @click=setup_download_form>Download data</button>
         </div>
  
         <!-- Bouton qui permet d'activer la localisation -->
