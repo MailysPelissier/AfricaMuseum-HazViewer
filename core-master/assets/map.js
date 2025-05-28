@@ -245,6 +245,7 @@ Vue.createApp({
             ],
             // Affichage popup download
             show_download_form: false,
+            download_progression: 0,
         };
     },
 
@@ -952,40 +953,111 @@ Vue.createApp({
 
         },
 
-        download() {
+        set_cqlfilter() {
+
+            let cqlFilter = '';
+            let hazard_type_liste = [];
+            if(this.flood) {
+                hazard_type_liste.push('flood')
+            }
+            if(this.flashflood) {
+                hazard_type_liste.push('flash flood')
+            }
+            if(this.landslide) {
+                hazard_type_liste.push('landslide')
+            }
+            if (hazard_type_liste.length != 0) {
+                cqlFilter = "hazard_type IN (" + hazard_type_liste.map(id => `'${id}'`).join(",") + ")";
+            }
+            
+            console.log(cqlFilter)
+            return cqlFilter
+        },
+
+        async download(type) {
+
+            let debut = Date.now();
+            console.log("Début :", debut);
+
+            let event_download_properties = ["id_integer", "event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
+                "event_time", "bbox_event", "n_languages", "n_source_countries", "paragraphs_list", "articles_list", "n_paragraphs", "n_articles", 
+                "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
+                "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
+                "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
+                "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", 
+                "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
+                "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
+                "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "wkt", "country_found"];
 
             let content = '';
 
-            for (let feature of this.events_layer.getSource().getFeatures()) {
-                if (content === '') {
-                    for (let property of Object.getOwnPropertyNames(feature.values_)) {
-                        if (property != 'geometry' || property != 'visible') {
-                            content += property + ',';
-                        }
-                    }
-                    content = content.substring(0, content.length - 1);
-                    content += '\n'
-                }
-                for (let property of Object.getOwnPropertyNames(feature.values_)) {
-                    content += feature.get(property) + ','
-                }
-                content = content.substring(0, content.length - 1);
-                content += '\n'
+            // Header events
+            content += event_download_properties.join(',') + '\n';
+
+            // Récupérer filtres
+            let cqlFilter;
+            if (type == 'filter') {
+                cqlFilter = this.set_cqlfilter();
             }
+            
+            // Récupérer le nombre d'events
+            let url_n_events;
+            if (type == 'all') {
+                url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
+                + "&outputFormat=application/json&resultType=hits";
+            }
+            if (type == 'filter') {
+                url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
+                + "&outputFormat=application/json&resultType=hits" + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
+            }       
+            let xmlString = await fetch(url_n_events).then(r => r.text());
+            let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
+            let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
+            let n_events = parseInt(featureCollection.getAttribute("numberOfFeatures"));
 
-            //create a file and put the content, name and type
-            var file = new File(["\ufeff"+content], 'myFile.csv', {type: "text/plain:charset=UTF-8"});
+            // On récupère les events 50 par 50
+            let nb_boucles = Math.ceil(n_events / 50);
+            for (let i = 0; i < nb_boucles; i++) {
+                let offset = 50 * i;
+                let url;
+                if (type == 'all') {
+                    url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23` 
+                    + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}`;
+                }
+                if (type == 'filter') {
+                    url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23` 
+                    + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}` + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
+                }           
+                let data = await fetch(url).then(res => res.json());
 
-            //create a ObjectURL in order to download the created file
-            url = window.URL.createObjectURL(file);
+                // Récupération des 50 events
+                let features = new ol.format.GeoJSON().readFeatures(data, {
+                    featureProjection: 'EPSG:3857'
+                });
 
-            //create a hidden link and set the href and click it
-            var a = document.createElement("a");
-            a.style = "display: none";
-            a.href = url;
-            a.download = file.name;
-            a.click();
-            window.URL.revokeObjectURL(url);
+                // Création d'une ligne de texte pour chaque event
+                features.forEach(feature => {
+                    let row = event_download_properties.map(prop => feature.get(prop)).join(',');
+                    content += row + '\n';  
+                });
+
+                this.download_progression = parseInt((i+1)*100/nb_boucles)
+                console.log(`Page ${i + 1}/${nb_boucles} téléchargée`,`Download: ${parseInt((i+1)*100/nb_boucles)}%`);
+
+            }          
+
+            let fin = Date.now();
+            console.log("Fin :", fin);
+            let temps = fin - debut;
+            console.log("Temps total (ms) :", temps);
+
+            let blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            let urlBlob = URL.createObjectURL(blob);
+            let link = document.createElement("a");
+            link.href = urlBlob;
+            link.download = "events.csv";
+            link.click();
+
         },
 
         // Récupérer la localisation et l'afficher

@@ -338,12 +338,13 @@
 
                 <br>
 
-                
+                <p>Download: {{download_progression}} %</p>
 
                 <br>
 
                 <div class="flexrow space_evenly padding">
-                    <button id="download" @click="download">Download</button>
+                    <button id="download_all" @click="download('all')">Download all</button>
+                    <button id="download_filter" @click="download('filter')">Download filter</button>
                     <button id="cancel" @click="change_true_false(['show_download_form'])">Close</button>
                 </div>
 
