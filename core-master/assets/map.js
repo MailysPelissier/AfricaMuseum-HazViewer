@@ -238,6 +238,7 @@ Vue.createApp({
             research_country_list: [],
             draw: null,
             draw_actif: false,
+            polygon: null,
             features_polygon: [],
             extent_filter: [
                 { id: 'latitude', label: 'Latitude', min: -90, max: 90, min_depart: -90, max_depart: 90 },
@@ -246,6 +247,7 @@ Vue.createApp({
             // Affichage popup download
             show_download_form: false,
             download_progression: 0,
+            no_event: false,
         };
     },
 
@@ -725,11 +727,11 @@ Vue.createApp({
                 // Quand le polygone est dessiné
                 this.draw.on("drawend", (event) => {
 
-                    let polygon = event.feature.getGeometry();
+                    this.polygon = event.feature.getGeometry();
 
                     // Récupération des events dans l'emprise (bbox) du polygone
                     let features_polygon_extent = [];
-                    this.events_layer.getSource().forEachFeatureIntersectingExtent(polygon.getExtent(), (feature) => {
+                    this.events_layer.getSource().forEachFeatureIntersectingExtent(this.polygon.getExtent(), (feature) => {
                         features_polygon_extent.push(feature);
                     });
 
@@ -737,7 +739,7 @@ Vue.createApp({
                     this.features_polygon = [];
                     for (feature of features_polygon_extent) {
                         let point = feature.getGeometry().getCoordinates();
-                        if (polygon.intersectsCoordinate(point)) {
+                        if (this.polygon.intersectsCoordinate(point)) {
                             this.features_polygon.push(feature);
                         }
                     }
@@ -953,31 +955,79 @@ Vue.createApp({
 
         },
 
-        set_cqlfilter() {
+        set_cqlfilter(type) {
 
             let cqlFilter = '';
-            let hazard_type_liste = [];
-            if(this.flood) {
-                hazard_type_liste.push('flood')
+            let draw_filter = 0;
+
+            if (type == 'all') {
+                return { cqlFilter, draw_filter }
             }
-            if(this.flashflood) {
-                hazard_type_liste.push('flash flood')
+
+            if (type == 'filter') {
+
+                // Hazard type
+                let hazard_type_liste = [];
+                if(this.flood) {
+                    hazard_type_liste.push('flood');
+                }
+                if(this.flashflood) {
+                    hazard_type_liste.push('flash flood');
+                }
+                if(this.landslide) {
+                    hazard_type_liste.push('landslide');
+                }
+                if (hazard_type_liste.length === 0) {  
+                    cqlFilter = 'No event'                 
+                    return { cqlFilter, draw_filter }
+                }
+                else {
+                    cqlFilter += "hazard_type IN (" + hazard_type_liste.map(id => `'${id}'`).join(",") + ")";
+                }
+
+                // Date
+                let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
+                let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
+                cqlFilter += " AND event_time >= '" + start_date_ymd + "'";
+                cqlFilter += " AND event_time <= '" + end_date_ymd + "'";
+                cqlFilter += " AND " + this.duration_filter[0].id + " BETWEEN " + this.duration_filter[0].min + " AND " + this.duration_filter[0].max;
+
+                // Impact
+                for(let i = 0; i < this.impact_filter.length; i++) {
+                    if (this.impact_filter[i].checkbox_null) {
+                        cqlFilter += " AND (" + this.impact_filter[i].id + " BETWEEN " + this.impact_filter[i].min + " AND " + this.impact_filter[i].max
+                        + " OR " + this.impact_filter[i].id + " IS NULL)";
+                    }
+                    else {
+                        cqlFilter += " AND " + this.impact_filter[i].id + " BETWEEN " + this.impact_filter[i].min + " AND " + this.impact_filter[i].max;
+                    }
+                }
+
+                // Popularity
+                for(let i = 0; i < this.popularity_filter.length; i++) {
+                    cqlFilter += " AND " + this.popularity_filter[i].id + " BETWEEN " + this.popularity_filter[i].min + " AND " + this.popularity_filter[i].max;
+                }
+
+                // Location
+                if (this.chosen_country != 'All') {
+                    cqlFilter += " AND country_found = '" + this.chosen_country + "'";
+                }
+                if (this.draw_layer.getSource().getFeatures().length === 1) {
+                    draw_filter = 1;
+                }
+                for(let i = 0; i < this.extent_filter.length; i++) {
+                    cqlFilter += " AND " + this.extent_filter[i].id + " BETWEEN " + this.extent_filter[i].min + " AND " + this.extent_filter[i].max;
+                }
+
+                return { cqlFilter, draw_filter }
+
             }
-            if(this.landslide) {
-                hazard_type_liste.push('landslide')
-            }
-            if (hazard_type_liste.length != 0) {
-                cqlFilter = "hazard_type IN (" + hazard_type_liste.map(id => `'${id}'`).join(",") + ")";
-            }
-            
-            console.log(cqlFilter)
-            return cqlFilter
+
         },
 
         async download(type) {
 
-            let debut = Date.now();
-            console.log("Début :", debut);
+            this.no_event = false;
 
             let event_download_properties = ["id_integer", "event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
                 "event_time", "bbox_event", "n_languages", "n_source_countries", "paragraphs_list", "articles_list", "n_paragraphs", "n_articles", 
@@ -995,26 +1045,35 @@ Vue.createApp({
             content += event_download_properties.join(',') + '\n';
 
             // Récupérer filtres
-            let cqlFilter;
-            if (type == 'filter') {
-                cqlFilter = this.set_cqlfilter();
+            let { cqlFilter, draw_filter } = this.set_cqlfilter(type);
+
+            if (cqlFilter === 'No event') {
+                console.log('pas de résultat')
+                this.no_event = true;
+                return;
             }
-            
+             
             // Récupérer le nombre d'events
             let url_n_events;
             if (type == 'all') {
                 url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
                 + "&outputFormat=application/json&resultType=hits";
             }
-            if (type == 'filter') {
+            if (type == 'filter' && cqlFilter !== 'No event') {
                 url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
                 + "&outputFormat=application/json&resultType=hits" + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
-            }       
+            }     
             let xmlString = await fetch(url_n_events).then(r => r.text());
             let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
             let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
             let n_events = parseInt(featureCollection.getAttribute("numberOfFeatures"));
 
+            if (n_events === 0) {
+                console.log('pas de résultat')
+                this.no_event = true;
+                return;
+            }
+            
             // On récupère les events 50 par 50
             let nb_boucles = Math.ceil(n_events / 50);
             for (let i = 0; i < nb_boucles; i++) {
@@ -1036,20 +1095,26 @@ Vue.createApp({
                 });
 
                 // Création d'une ligne de texte pour chaque event
-                features.forEach(feature => {
-                    let row = event_download_properties.map(prop => feature.get(prop)).join(',');
-                    content += row + '\n';  
-                });
-
+                if (draw_filter === 0) {
+                    features.forEach(feature => {
+                        let row = event_download_properties.map(prop => feature.get(prop)).join(',');
+                        content += row + '\n';
+                    });
+                }
+                if (draw_filter == 1) {
+                    features.forEach(feature => {
+                        let point = feature.getGeometry().getCoordinates();
+                        if (this.polygon.intersectsCoordinate(point)) {
+                            let row = event_download_properties.map(prop => feature.get(prop)).join(',');
+                            content += row + '\n';
+                        }
+                    });
+                }
+                
                 this.download_progression = parseInt((i+1)*100/nb_boucles)
                 console.log(`Page ${i + 1}/${nb_boucles} téléchargée`,`Download: ${parseInt((i+1)*100/nb_boucles)}%`);
 
             }          
-
-            let fin = Date.now();
-            console.log("Fin :", fin);
-            let temps = fin - debut;
-            console.log("Temps total (ms) :", temps);
 
             let blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
             let urlBlob = URL.createObjectURL(blob);
