@@ -246,6 +246,10 @@ Vue.createApp({
             ],
             // Affichage popup download
             show_download_form: false,
+            download_filter_e: true,
+            download_filter_e_p: false,
+            download_all_e: false,
+            download_all_e_p: false,
             download_progression: 0,
             no_event: false,
         };
@@ -955,16 +959,35 @@ Vue.createApp({
 
         },
 
-        set_cqlfilter(type) {
+        // Permet d'avoir une seule checkbox sélectionnée pour le choix du mode de download
+        checkbox_download(checkbox_name) {
+            let checkbox_list = ['download_filter_e', 'download_filter_e_p', 'download_all_e', 'download_all_e_p']
+            for (let checkbox of checkbox_list) {
+                if (checkbox_name != checkbox) {
+                    this[checkbox] = false;
+                }
+            }
+        },
+
+        // Crée le filtre cql pour la requête des events vers le Geoserver
+        set_cqlfilter_event(type) {
 
             let cqlFilter = '';
             let draw_filter = 0;
 
+            // Cas où on télécharge tous les events
             if (type == 'all') {
                 return { cqlFilter, draw_filter }
             }
 
-            if (type == 'filter') {
+            // Cas où on filtre selon un polygone: utilisation de la visibilité des features de la couche events
+            if (type == 'filter' && this.draw_layer.getSource().getFeatures().length === 1) {
+                draw_filter = 1;
+                return { cqlFilter, draw_filter }
+            }
+
+            // Cas où on filtre dans la requête Geoserver
+            if (type == 'filter' && this.draw_layer.getSource().getFeatures().length === 0) {
 
                 // Hazard type
                 let hazard_type_liste = [];
@@ -1012,9 +1035,6 @@ Vue.createApp({
                 if (this.chosen_country != 'All') {
                     cqlFilter += " AND country_found = '" + this.chosen_country + "'";
                 }
-                if (this.draw_layer.getSource().getFeatures().length === 1) {
-                    draw_filter = 1;
-                }
                 for(let i = 0; i < this.extent_filter.length; i++) {
                     cqlFilter += " AND " + this.extent_filter[i].id + " BETWEEN " + this.extent_filter[i].min + " AND " + this.extent_filter[i].max;
                 }
@@ -1025,10 +1045,27 @@ Vue.createApp({
 
         },
 
-        async download(type) {
+        // Download des events
+        async download() {
 
             this.no_event = false;
 
+            // Définition du type de download
+            let type = null;
+            if (this.download_all_e || this.download_all_e_p) {
+                type = 'all'
+            }
+            if (this.download_filter_e || this.download_filter_e_p) {
+                type = 'filter'
+            }
+
+            // Si aucun mode de download n'est choisi
+            if (type === null) {
+                console.log('veuillez choisir un mode de download')
+                return;
+            }
+
+            // Liste des propriétés
             let event_download_properties = ["id_integer", "event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
                 "event_time", "bbox_event", "n_languages", "n_source_countries", "paragraphs_list", "articles_list", "n_paragraphs", "n_articles", 
                 "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
@@ -1039,83 +1076,116 @@ Vue.createApp({
                 "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
                 "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "wkt", "country_found"];
 
-            let content = '';
-
-            // Header events
-            content += event_download_properties.join(',') + '\n';
+            // Initialisation du texte (header)
+            let content = event_download_properties.join(',') + '\n';
 
             // Récupérer filtres
-            let { cqlFilter, draw_filter } = this.set_cqlfilter(type);
+            let { cqlFilter, draw_filter } = this.set_cqlfilter_event(type);
 
+            // Si la liste des hazard type est vide
             if (cqlFilter === 'No event') {
                 console.log('pas de résultat')
                 this.no_event = true;
                 return;
             }
-             
-            // Récupérer le nombre d'events
-            let url_n_events;
-            if (type == 'all') {
-                url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
-                + "&outputFormat=application/json&resultType=hits";
-            }
-            if (type == 'filter' && cqlFilter !== 'No event') {
-                url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
-                + "&outputFormat=application/json&resultType=hits" + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
-            }     
-            let xmlString = await fetch(url_n_events).then(r => r.text());
-            let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
-            let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
-            let n_events = parseInt(featureCollection.getAttribute("numberOfFeatures"));
 
-            if (n_events === 0) {
-                console.log('pas de résultat')
-                this.no_event = true;
-                return;
-            }
-            
-            // On récupère les events 50 par 50
-            let nb_boucles = Math.ceil(n_events / 50);
-            for (let i = 0; i < nb_boucles; i++) {
-                let offset = 50 * i;
-                let url;
+            // Si on ne filtre pas selon un polygone
+            if (draw_filter == 0) {
+
+                // Récupérer le nombre d'events
+                let url_n_events;
                 if (type == 'all') {
-                    url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23` 
-                    + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}`;
+                    url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
+                    + "&outputFormat=application/json&resultType=hits";
                 }
-                if (type == 'filter') {
-                    url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23` 
-                    + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}` + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
-                }           
-                let data = await fetch(url).then(res => res.json());
+                if (type == 'filter' && cqlFilter !== 'No event') {
+                    url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
+                    + "&outputFormat=application/json&resultType=hits" + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
+                }     
+                let xmlString = await fetch(url_n_events).then(r => r.text());
+                let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
+                let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
+                let n_events = parseInt(featureCollection.getAttribute("numberOfFeatures"));
 
-                // Récupération des 50 events
-                let features = new ol.format.GeoJSON().readFeatures(data, {
-                    featureProjection: 'EPSG:3857'
-                });
-
-                // Création d'une ligne de texte pour chaque event
-                if (draw_filter === 0) {
-                    features.forEach(feature => {
-                        let row = event_download_properties.map(prop => feature.get(prop)).join(',');
-                        content += row + '\n';
-                    });
-                }
-                if (draw_filter == 1) {
-                    features.forEach(feature => {
-                        let point = feature.getGeometry().getCoordinates();
-                        if (this.polygon.intersectsCoordinate(point)) {
-                            let row = event_download_properties.map(prop => feature.get(prop)).join(',');
-                            content += row + '\n';
-                        }
-                    });
+                // Si aucun event ne correspond aux critères
+                if (n_events === 0) {
+                    console.log('pas de résultat')
+                    this.no_event = true;
+                    return;
                 }
                 
-                this.download_progression = parseInt((i+1)*100/nb_boucles)
-                console.log(`Page ${i + 1}/${nb_boucles} téléchargée`,`Download: ${parseInt((i+1)*100/nb_boucles)}%`);
+                // On récupère les events 50 par 50
+                let nb_boucles = Math.ceil(n_events / 50);
+                for (let i = 0; i < nb_boucles; i++) {
+                    let offset = 50 * i;
+                    let url;
+                    if (type == 'all') {
+                        url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23` 
+                        + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}`;
+                    }
+                    if (type == 'filter') {
+                        url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23` 
+                        + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}` + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
+                    }           
+                    let data = await fetch(url).then(res => res.json());
 
-            }          
+                    // Récupération des 50 events
+                    let features = new ol.format.GeoJSON().readFeatures(data, {
+                        featureProjection: 'EPSG:3857'
+                    });
 
+                    // Création d'une ligne de texte pour chaque event
+                    if (draw_filter === 0) {
+                        features.forEach(feature => {
+                            let row = event_download_properties.map(prop => feature.get(prop)).join(',');
+                            content += row + '\n';
+                        });
+                    }
+                    
+                    // Affichage de la progression
+                    this.download_progression = parseInt((i+1)*100/nb_boucles)
+                    console.log(`Page ${i + 1}/${nb_boucles} téléchargée`,`Download: ${parseInt((i+1)*100/nb_boucles)}%`);
+
+                }
+
+            }
+            
+            // Si on filtre selon un polygone
+            if (draw_filter == 1) {
+
+                let compteur_features = 0;
+                let compteur_features_visibles = 0;
+                let nb_total_features = this.events_layer.getSource().getFeatures().length;
+
+                // Pour chaque event de la couche events
+                for (let feature of this.events_layer.getSource().getFeatures()) {
+                    compteur_features += 1;
+
+                    // L'event est ajouté si il correspond aux critères
+                    if (feature.get('visible')) {
+                        compteur_features_visibles += 1;
+                        let row = event_download_properties.map(prop => feature.get(prop)).join(',');
+                        content += row + '\n';
+                    }
+
+                    // Affichage de la progression
+                    if (compteur_features_visibles > 0) {
+                        this.download_progression = parseInt(compteur_features*100/nb_total_features);
+                        console.log(`Download: ${this.download_progression}%`);
+                    }
+
+                }
+
+                // Si aucun event ne correspond aux critères
+                if (compteur_features_visibles == 0) {
+                    console.log('pas de résultat')
+                    this.no_event = true;
+                    return;
+                }
+
+            }
+
+            // Téléchargement
             let blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
             let urlBlob = URL.createObjectURL(blob);
             let link = document.createElement("a");

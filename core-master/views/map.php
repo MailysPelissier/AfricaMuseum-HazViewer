@@ -338,14 +338,37 @@
 
                 <br>
 
+                <div id="download_filter" class="padding largeur_min">
+                    <div class="title">Download filter:</div>
+                    <div id="events">
+                        <label>Events: <input type="checkbox" v-model="download_filter_e" @click=checkbox_download(download_filter_e)></label>
+                    </div>  
+                    <div id="events_paragraphs">
+                        <label>Events and paragraphs: <input type="checkbox" v-model="download_filter_e_p" @click=checkbox_download(download_filter_e_p)></label>
+                    </div>    
+                </div>
+
+                <hr style='margin:5px;' />
+
+                <div id="download_all" class="padding largeur_min">
+                    <div class="title">Download all:</div>
+                    <div id="events">
+                        <label>Events: <input type="checkbox" v-model="download_all_e" @click=checkbox_download(download_all_e)></label>
+                    </div>  
+                    <div id="events_paragraphs">
+                        <label>Events and paragraphs: <input type="checkbox" v-model="download_all_e_p" @click=checkbox_download(download_all_e_p)></label>
+                    </div>    
+                </div>
+
+                <hr style='margin:5px;' />
+
                 <p>Download: {{download_progression}} %</p>
                 <p v-if="no_event">No event matches the criteria!</p>
 
                 <br>
 
                 <div class="flexrow space_evenly padding">
-                    <button id="download_all" @click="download('all')">Download all</button>
-                    <button id="download_filter" @click="download('filter')">Download filter</button>
+                    <button id="download" @click="download">Download</button>
                     <button id="cancel" @click="change_true_false(['show_download_form'])">Close</button>
                 </div>
 
