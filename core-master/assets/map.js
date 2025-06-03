@@ -1053,10 +1053,10 @@ Vue.createApp({
             // Définition du type de download
             let type = null;
             if (this.download_all_e || this.download_all_e_p) {
-                type = 'all'
+                type = 'all';
             }
             if (this.download_filter_e || this.download_filter_e_p) {
-                type = 'filter'
+                type = 'filter';
             }
 
             // Si aucun mode de download n'est choisi
@@ -1075,9 +1075,10 @@ Vue.createApp({
                 "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
                 "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
                 "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "wkt", "country_found"];
+            let event_property_str = ['bbox_event', 'paragraphs_list', 'articles_list'];
 
             // Initialisation du texte (header)
-            let content = event_download_properties.join(',') + '\n';
+            let event_content = event_download_properties.join(',') + '\n';
 
             // Récupérer filtres
             let { cqlFilter, draw_filter } = this.set_cqlfilter_event(type);
@@ -1135,10 +1136,20 @@ Vue.createApp({
                     });
 
                     // Création d'une ligne de texte pour chaque event
-                    if (draw_filter === 0) {
+                    if (draw_filter === 0) {         
                         features.forEach(feature => {
-                            let row = event_download_properties.map(prop => feature.get(prop)).join(',');
-                            content += row + '\n';
+                            // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                            let row = event_download_properties.map(prop => {
+                                let value = feature.get(prop);
+                                if (event_property_str.includes(prop)) {
+                                    value = String(value).replace(/"/g, '""');
+                                    return `"${value}"`;
+                                } 
+                                else {
+                                    return String(value);
+                                }
+                            }).join(',');
+                            event_content += row + '\n';
                         });
                     }
                     
@@ -1164,8 +1175,18 @@ Vue.createApp({
                     // L'event est ajouté si il correspond aux critères
                     if (feature.get('visible')) {
                         compteur_features_visibles += 1;
-                        let row = event_download_properties.map(prop => feature.get(prop)).join(',');
-                        content += row + '\n';
+                        // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                        let row = event_download_properties.map(prop => {
+                            let value = feature.get(prop);
+                            if (event_property_str.includes(prop)) {
+                                value = String(value).replace(/"/g, '""');
+                                return `"${value}"`;
+                            } 
+                            else {
+                                return String(value);
+                            }
+                        }).join(',');
+                        event_content += row + '\n';
                     }
 
                     // Affichage de la progression
@@ -1186,7 +1207,7 @@ Vue.createApp({
             }
 
             // Téléchargement
-            let blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            let blob = new Blob([event_content], { type: 'text/csv;charset=utf-8;' });
             let urlBlob = URL.createObjectURL(blob);
             let link = document.createElement("a");
             link.href = urlBlob;
