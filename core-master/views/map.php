@@ -354,10 +354,7 @@
                     <div class="title">Download all:</div>
                     <div id="events">
                         <label>Events: <input type="checkbox" v-model="download_all_e" @click=checkbox_download(download_all_e)></label>
-                    </div>  
-                    <div id="events_paragraphs">
-                        <label>Events and paragraphs: <input type="checkbox" v-model="download_all_e_p" @click=checkbox_download(download_all_e_p)></label>
-                    </div>    
+                    </div>     
                 </div>
 
                 <hr style='margin:5px;' />

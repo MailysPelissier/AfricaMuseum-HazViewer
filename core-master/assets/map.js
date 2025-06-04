@@ -238,7 +238,6 @@ Vue.createApp({
             research_country_list: [],
             draw: null,
             draw_actif: false,
-            polygon: null,
             features_polygon: [],
             extent_filter: [
                 { id: 'latitude', label: 'Latitude', min: -90, max: 90, min_depart: -90, max_depart: 90 },
@@ -249,7 +248,6 @@ Vue.createApp({
             download_filter_e: true,
             download_filter_e_p: false,
             download_all_e: false,
-            download_all_e_p: false,
             download_progression: 0,
             no_event: false,
         };
@@ -731,11 +729,11 @@ Vue.createApp({
                 // Quand le polygone est dessiné
                 this.draw.on("drawend", (event) => {
 
-                    this.polygon = event.feature.getGeometry();
+                    let polygon = event.feature.getGeometry();
 
                     // Récupération des events dans l'emprise (bbox) du polygone
                     let features_polygon_extent = [];
-                    this.events_layer.getSource().forEachFeatureIntersectingExtent(this.polygon.getExtent(), (feature) => {
+                    this.events_layer.getSource().forEachFeatureIntersectingExtent(polygon.getExtent(), (feature) => {
                         features_polygon_extent.push(feature);
                     });
 
@@ -743,7 +741,7 @@ Vue.createApp({
                     this.features_polygon = [];
                     for (feature of features_polygon_extent) {
                         let point = feature.getGeometry().getCoordinates();
-                        if (this.polygon.intersectsCoordinate(point)) {
+                        if (polygon.intersectsCoordinate(point)) {
                             this.features_polygon.push(feature);
                         }
                     }
@@ -961,7 +959,7 @@ Vue.createApp({
 
         // Permet d'avoir une seule checkbox sélectionnée pour le choix du mode de download
         checkbox_download(checkbox_name) {
-            let checkbox_list = ['download_filter_e', 'download_filter_e_p', 'download_all_e', 'download_all_e_p']
+            let checkbox_list = ['download_filter_e', 'download_filter_e_p', 'download_all_e']
             for (let checkbox of checkbox_list) {
                 if (checkbox_name != checkbox) {
                     this[checkbox] = false;
@@ -1046,7 +1044,7 @@ Vue.createApp({
         },
 
         // Création du texte de download des paragraphs liés à un event
-        async create_paragraph_download_text(feature) {
+        async paragraph_download_text_filter(feature,paragraph_content_lines) {
 
             // Liste des propriétés des paragraphs
             let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
@@ -1064,51 +1062,117 @@ Vue.createApp({
             paragraphs_list = paragraphs_list.replace(/^\(|\)$/g, '');
             // Transformation en tableau
             paragraphs_list = paragraphs_list.split(',').map(e => e.trim().replace(/^'|'$/g, ''));
+            // Récupération du nombre de paragraphs
+            let n_paragraphs = paragraphs_list.length;
 
-            // Création de listes de 50 paragraph_id (url peut être trop longue si on ne fait qu'une liste)
-            let nb_boucles = Math.ceil(paragraphs_list.length/50);
-
-            // Initialisation du texte
-            let rows = '';
-
-            for (let i = 0; i < nb_boucles; i++) {
-
+            // Lancer tous les fetch en parallèle, pour récupérer les paragraphs 50 par 50
+            let batchSize = 50;
+            let nb_boucles = Math.ceil(n_paragraphs / batchSize);
+            let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
                 // Tableaux de 50 paragraph_id
                 let paragraphs_list_50 = paragraphs_list.slice(50*i, 50*(i+1));
-
                 // Partie filtre cql de la requête
                 let cqlFilter = "paragraph_id IN (" + paragraphs_list_50.map(id => `'${id}'`).join(",") + ")";
-
                 // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
                 let url = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23"
                 + "&outputFormat=application/json&CQL_FILTER=" + encodeURIComponent(cqlFilter);
-                let data = await fetch(url).then(res => res.json());
-                let features = new ol.format.GeoJSON().readFeatures(data, {
-                    featureProjection: 'EPSG:3857'
-                });
+                return fetch(url).then(res => res.json());
+            });
+
+            // Attendre d'avoir récupéré toutes les promesses
+            let results = await Promise.all(fetchPromises);
+
+            results.forEach((data, i) => {
+                let features = data.features || [];
 
                 // Pour chaque paragraph
-                features.forEach(feature => {
+                features.forEach(f => {
 
                     // Création d'une ligne de texte (paragraphs.csv)
                     // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                    let row = paragraph_download_properties.map(prop => {
-                        let value = feature.get(prop);
+                    const props = f.properties;
+                    const row = paragraph_download_properties.map(prop => {
+                        let value = props[prop];
+                        if (value == null) return ''; // gérer les null
                         if (paragraph_property_str.includes(prop)) {
                             value = String(value).replace(/"/g, '""');
                             return `"${value}"`;
-                        } 
-                        else {
-                            return String(value);
                         }
+                        return String(value);
                     }).join(',');
-                    rows += row + '\n';
+                    paragraph_content_lines.push(row);
 
                 });
 
-            }
+            });
 
-            return rows
+            return paragraph_content_lines;
+
+        },
+
+        // Création du texte de download de tous les paragraphs
+        // Pas utilisée
+        async paragraph_download_text_all() {
+
+            // Liste des propriétés des paragraphs
+            let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
+                "paragraph_id", "original_text", "disaster_label", "disaster_score", "hasard_type", "hasard_type_score", "nb_death", "score_death", "answer_death",
+                "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
+                "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
+                "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
+                "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
+                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "unnamed_column", "country", "wkt", "country_found"];
+            let paragraph_property_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
+
+            // Création du tableau pour le join final, initialisation du texte (header)
+            let paragraph_content_lines = [paragraph_download_properties.join(',')];
+
+            // Récupérer le nombre de paragraphs
+            let url_n_paragraphs = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23" 
+                + "&outputFormat=application/json&resultType=hits"; 
+            let xmlString = await fetch(url_n_paragraphs).then(r => r.text());
+            let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
+            let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
+            let n_paragraphs = parseInt(featureCollection.getAttribute("numberOfFeatures"));
+
+            // Lancer tous les fetch en parallèle, pour récupérer les paragraphs 50 par 50
+            let batchSize = 50;
+            let nb_boucles = Math.ceil(n_paragraphs / batchSize);
+            let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
+                let offset = 50 * i;
+                let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23`
+                    + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}`;
+                return fetch(url).then(res => res.json());
+            });
+
+            // Attendre d'avoir récupéré toutes les promesses
+            let results = await Promise.all(fetchPromises);
+
+            results.forEach((data, i) => {
+                let features = data.features || [];
+
+                // Pour chaque paragraph
+                features.forEach(f => {
+
+                    // Création d'une ligne de texte (paragraphs.csv)
+                    // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                    const props = f.properties;
+                    const row = paragraph_download_properties.map(prop => {
+                        let value = props[prop];
+                        if (value == null) return ''; // gérer les null
+                        if (paragraph_property_str.includes(prop)) {
+                            value = String(value).replace(/"/g, '""');
+                            return `"${value}"`;
+                        }
+                        return String(value);
+                    }).join(',');
+                    paragraph_content_lines.push(row);
+
+                });
+
+            });
+
+            return paragraph_content_lines.join('\n');
 
         },
 
@@ -1119,7 +1183,7 @@ Vue.createApp({
 
             // Définition du type de download
             let type = null;
-            if (this.download_all_e || this.download_all_e_p) {
+            if (this.download_all_e) {
                 type = 'all';
             }
             if (this.download_filter_e || this.download_filter_e_p) {
@@ -1150,11 +1214,12 @@ Vue.createApp({
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
                 "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "unnamed_column", "country", "wkt", "country_found"];
-            let paragraph_property_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
 
             // Initialisation du texte (header)
             let event_content = event_download_properties.join(',') + '\n';
-            let paragraph_content = paragraph_download_properties.join(',') + '\n';
+
+            // Création du tableau pour le join final, initialisation du texte (header)
+            let paragraph_content_lines = [paragraph_download_properties.join(',')];
 
             // Récupérer filtres
             let { cqlFilter, draw_filter } = this.set_cqlfilter_event(type);
@@ -1210,7 +1275,7 @@ Vue.createApp({
                     });
 
                     // Pour chaque event       
-                    features.forEach(feature => {
+                    for (let feature of features) {
 
                         // Création d'une ligne de texte (events.csv)
                         // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
@@ -1226,11 +1291,16 @@ Vue.createApp({
                         }).join(',');
                         event_content += row + '\n';
 
-                    });
+                        // Création du texte de paragraphs.csv
+                        if(this.download_filter_e_p) {
+                            paragraph_content_lines = await this.paragraph_download_text_filter(feature,paragraph_content_lines);
+                        }
+
+                    }
                     
                     // Affichage de la progression
                     this.download_progression = parseInt((i+1)*100/nb_boucles)
-                    console.log(`Page ${i + 1}/${nb_boucles} téléchargée`,`Download: ${parseInt((i+1)*100/nb_boucles)}%`);
+                    console.log(`Page ${i + 1}/${nb_boucles} téléchargée`,`Download: ${this.download_progression}%`);
 
                 }
 
@@ -1267,8 +1337,7 @@ Vue.createApp({
 
                         // Création du texte de paragraphs.csv
                         if(this.download_filter_e_p) {
-                            let rows = await this.create_paragraph_download_text(feature,paragraph_content);
-                            paragraph_content += rows;
+                            paragraph_content_lines = await this.paragraph_download_text_filter(feature,paragraph_content_lines);
                         }
 
                     }
@@ -1299,7 +1368,8 @@ Vue.createApp({
             link.click();
 
             // Téléchargement des paragraphs
-            if (this.download_all_e_p || this.download_filter_e_p) {
+            if (this.download_filter_e_p) {
+                let paragraph_content = paragraph_content_lines.join('\n');
                 let blob = new Blob([paragraph_content], { type: 'text/csv;charset=utf-8;' });
                 let urlBlob = URL.createObjectURL(blob);
                 let link = document.createElement("a");
