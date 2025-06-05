@@ -360,7 +360,6 @@
                 <hr style='margin:5px;' />
 
                 <p>Download: {{download_progression}} %</p>
-                <p v-if="no_event">No event matches the criteria!</p>
 
                 <br>
 

@@ -249,7 +249,6 @@ Vue.createApp({
             download_filter_e_p: false,
             download_all_e: false,
             download_progression: 0,
-            no_event: false,
         };
     },
 
@@ -1044,7 +1043,7 @@ Vue.createApp({
         },
 
         // Création du texte de download des paragraphs liés à un event
-        async paragraph_download_text_filter(feature,paragraph_content_lines) {
+        async paragraph_download_text_filter(feature,paragraph_content_lines,source) {
 
             // Liste des propriétés des paragraphs
             let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
@@ -1057,7 +1056,13 @@ Vue.createApp({
             let paragraph_property_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
 
             // Récupérer les valeurs des paragraphs_id
-            let paragraphs_list = feature.get('paragraphs_list');
+            let paragraphs_list;
+            if (source === 'event layer') {
+                paragraphs_list = feature.get('paragraphs_list')
+            }
+            if (source === 'geoserver') {
+                paragraphs_list = feature.properties.paragraphs_list;
+            }
             // Nettoyage de la chaîne pour enlever les parenthèses extérieures
             paragraphs_list = paragraphs_list.replace(/^\(|\)$/g, '');
             // Transformation en tableau
@@ -1090,8 +1095,8 @@ Vue.createApp({
 
                     // Création d'une ligne de texte (paragraphs.csv)
                     // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                    const props = f.properties;
-                    const row = paragraph_download_properties.map(prop => {
+                    let props = f.properties;
+                    let row = paragraph_download_properties.map(prop => {
                         let value = props[prop];
                         if (value == null) return ''; // gérer les null
                         if (paragraph_property_str.includes(prop)) {
@@ -1156,8 +1161,8 @@ Vue.createApp({
 
                     // Création d'une ligne de texte (paragraphs.csv)
                     // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                    const props = f.properties;
-                    const row = paragraph_download_properties.map(prop => {
+                    let props = f.properties;
+                    let row = paragraph_download_properties.map(prop => {
                         let value = props[prop];
                         if (value == null) return ''; // gérer les null
                         if (paragraph_property_str.includes(prop)) {
@@ -1179,7 +1184,8 @@ Vue.createApp({
         // Download
         async download() {
 
-            this.no_event = false;
+            let debut = Date.now();
+            console.log("Début :", debut);
 
             // Définition du type de download
             let type = null;
@@ -1192,7 +1198,7 @@ Vue.createApp({
 
             // Si aucun mode de download n'est choisi
             if (type === null) {
-                console.log('veuillez choisir un mode de download')
+                alert("No download mode selected!");
                 return;
             }
 
@@ -1215,10 +1221,8 @@ Vue.createApp({
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
                 "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "unnamed_column", "country", "wkt", "country_found"];
 
-            // Initialisation du texte (header)
-            let event_content = event_download_properties.join(',') + '\n';
-
-            // Création du tableau pour le join final, initialisation du texte (header)
+            // Création des tableaux pour le join final, initialisation des textes (header)
+            let event_content_lines = [event_download_properties.join(',')];
             let paragraph_content_lines = [paragraph_download_properties.join(',')];
 
             // Récupérer filtres
@@ -1226,8 +1230,7 @@ Vue.createApp({
 
             // Si la liste des hazard type est vide
             if (cqlFilter === 'No event') {
-                console.log('pas de résultat')
-                this.no_event = true;
+                alert("No event matches the criteria!");
                 return;
             }
 
@@ -1251,14 +1254,14 @@ Vue.createApp({
 
                 // Si aucun event ne correspond aux critères
                 if (n_events === 0) {
-                    console.log('pas de résultat')
-                    this.no_event = true;
+                    alert("No event matches the criteria!");
                     return;
                 }
-                
-                // On récupère les events 50 par 50
-                let nb_boucles = Math.ceil(n_events / 50);
-                for (let i = 0; i < nb_boucles; i++) {
+
+                // Lancer tous les fetch en parallèle, pour récupérer les events 50 par 50
+                let batchSize = 50;
+                let nb_boucles = Math.ceil(n_events / batchSize);
+                let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
                     let offset = 50 * i;
                     let url;
                     if (type == 'all') {
@@ -1268,98 +1271,101 @@ Vue.createApp({
                     if (type == 'filter') {
                         url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23` 
                         + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}` + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
-                    }           
-                    let data = await fetch(url).then(res => res.json());
-                    let features = new ol.format.GeoJSON().readFeatures(data, {
-                        featureProjection: 'EPSG:3857'
-                    });
+                    }  
+                    return fetch(url).then(res => res.json());
+                });
 
-                    // Pour chaque event       
-                    for (let feature of features) {
+                // Attendre d'avoir récupéré toutes les promesses
+                let results = await Promise.all(fetchPromises);
+
+                let compteur_pages = 0;
+                for (data of results) {
+                    let features = data.features || [];
+
+                    // Pour chaque event
+                    for (let f of features) {
 
                         // Création d'une ligne de texte (events.csv)
                         // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                        let props = f.properties;
                         let row = event_download_properties.map(prop => {
-                            let value = feature.get(prop);
+                            let value = props[prop];
+                            if (value == null) return ''; // gérer les null
                             if (event_property_str.includes(prop)) {
                                 value = String(value).replace(/"/g, '""');
                                 return `"${value}"`;
-                            } 
-                            else {
-                                return String(value);
                             }
+                            return String(value);
                         }).join(',');
-                        event_content += row + '\n';
+                        event_content_lines.push(row);
 
                         // Création du texte de paragraphs.csv
                         if(this.download_filter_e_p) {
-                            paragraph_content_lines = await this.paragraph_download_text_filter(feature,paragraph_content_lines);
+                            paragraph_content_lines = await this.paragraph_download_text_filter(f,paragraph_content_lines,'geoserver');
                         }
 
-                    }
-                    
-                    // Affichage de la progression
-                    this.download_progression = parseInt((i+1)*100/nb_boucles)
-                    console.log(`Page ${i + 1}/${nb_boucles} téléchargée`,`Download: ${this.download_progression}%`);
+                    };
 
-                }
+                    // Affichage de la progression
+                    compteur_pages += 1
+                    this.download_progression = parseInt(compteur_pages*100/nb_boucles)
+
+                };
 
             }
             
             // Si on filtre selon un polygone
             if (draw_filter == 1) {
 
-                let compteur_features = 0;
-                let compteur_features_visibles = 0;
-                let nb_total_features = this.events_layer.getSource().getFeatures().length;
+                let compteur_events = 0;
+                let compteur_events_visibles = 0;
+                let nb_total_events = this.events_layer.getSource().getFeatures().length;
 
                 // On récupère les events de la couche events 1 par 1
-                for (let feature of this.events_layer.getSource().getFeatures()) {
-                    compteur_features += 1;
+                for (let f of this.events_layer.getSource().getFeatures()) {
+                    compteur_events += 1;
 
                     // Pour chaque event correspondant aux critères
-                    if (feature.get('visible')) {
-                        compteur_features_visibles += 1;
-                        
+                    if (f.get('visible')) {
+                        compteur_events_visibles += 1;
+
                         // Création d'une ligne de texte (events.csv)
                         // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
                         let row = event_download_properties.map(prop => {
-                            let value = feature.get(prop);
+                            let value = f.get(prop);
+                            if (value == null) return ''; // gérer les null
                             if (event_property_str.includes(prop)) {
                                 value = String(value).replace(/"/g, '""');
                                 return `"${value}"`;
-                            } 
-                            else {
-                                return String(value);
                             }
+                            return String(value);
                         }).join(',');
-                        event_content += row + '\n';
+                        event_content_lines.push(row);
 
                         // Création du texte de paragraphs.csv
                         if(this.download_filter_e_p) {
-                            paragraph_content_lines = await this.paragraph_download_text_filter(feature,paragraph_content_lines);
+                            paragraph_content_lines = await this.paragraph_download_text_filter(f,paragraph_content_lines,'event layer');
                         }
 
                     }
 
                     // Affichage de la progression
-                    if (compteur_features_visibles > 0) {
-                        this.download_progression = parseInt(compteur_features*100/nb_total_features);
-                        console.log(`Download: ${this.download_progression}%`);
+                    if (compteur_events_visibles > 0) {
+                        this.download_progression = parseInt(compteur_events*100/nb_total_events);
                     }
 
                 }
 
                 // Si aucun event ne correspond aux critères
-                if (compteur_features_visibles == 0) {
-                    console.log('pas de résultat')
-                    this.no_event = true;
+                if (compteur_events_visibles == 0) {
+                    alert("No event matches the criteria!");
                     return;
                 }
 
             }
 
             // Téléchargement des events
+            let event_content = event_content_lines.join('\n');
             let blob = new Blob([event_content], { type: 'text/csv;charset=utf-8;' });
             let urlBlob = URL.createObjectURL(blob);
             let link = document.createElement("a");
@@ -1377,6 +1383,11 @@ Vue.createApp({
                 link.download = "paragraphs.csv";
                 link.click();
             }
+
+            let fin = Date.now();
+            console.log("Fin :", fin);
+            let temps = fin - debut;
+            console.log("Temps total (ms) :", temps);
 
         },
 
