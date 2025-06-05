@@ -395,6 +395,28 @@ Vue.createApp({
 
         },
 
+        // Permet de compter le nombre d'event par pays
+        // Pas utilisée
+        async count_n_event_country() {
+
+            let n_events_country = [];
+            for (c of this.countries_list) {
+                let cqlFilter = "country_found = '" + c + "'";
+                let url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
+                    + "&outputFormat=application/json&resultType=hits" + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
+                let xmlString = await fetch(url_n_events).then(r => r.text());
+                let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
+                let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
+                let n_events = parseInt(featureCollection.getAttribute("numberOfFeatures"));
+                n_events_country.push([c,n_events])
+            }
+            let n_events_country_sort = n_events_country.sort((a, b) => {
+                return b[1] - a[1];
+            });
+            return n_events_country_sort;
+
+        },
+
         // Crée le texte en récupérant les infos sur l'event, change le style de l'event
         affichage_selection_event (feature) {
 
@@ -1261,6 +1283,12 @@ Vue.createApp({
                     return;
                 }
 
+                // Si trop d'events correspondent aux critères (>10000)
+                if (n_events > 10000) {
+                    alert("To many events, use more filters!");
+                    return;
+                }
+
                 // Affichage de la progression du download
                 this.show_fetch_progression = true;
                 this.show_download_progression = true;
@@ -1374,6 +1402,12 @@ Vue.createApp({
                         this.download_progression = parseInt(compteur_events*100/nb_total_events);
                     }
 
+                    // Si trop d'events correspondent aux critères (>10000)
+                    if (compteur_events_visibles > 10000) {
+                        alert("To many events, use more filters!");
+                        return;
+                    }
+
                 }
 
                 // Si aucun event ne correspond aux critères
@@ -1389,29 +1423,44 @@ Vue.createApp({
             }
 
             // Téléchargement des events
-            let event_content = event_content_lines.join('\n');
-            let blob = new Blob([event_content], { type: 'text/csv;charset=utf-8;' });
-            let urlBlob = URL.createObjectURL(blob);
-            let link = document.createElement("a");
-            link.href = urlBlob;
-            link.download = "events.csv";
-            link.click();
+            this.creation_csv(event_content_lines, "events.csv");
 
             // Téléchargement des paragraphs
             if (this.download_filter_e_p) {
-                let paragraph_content = paragraph_content_lines.join('\n');
-                let blob = new Blob([paragraph_content], { type: 'text/csv;charset=utf-8;' });
-                let urlBlob = URL.createObjectURL(blob);
-                let link = document.createElement("a");
-                link.href = urlBlob;
-                link.download = "paragraphs.csv";
-                link.click();
+                this.creation_csv(paragraph_content_lines, "paragraphs.csv");
             }
 
             let fin = Date.now();
             console.log("Fin :", fin);
             let temps = fin - debut;
             console.log("Temps total (ms) :", temps);
+
+        },
+
+        // Crée le csv à partir du texte
+        creation_csv(contentLines, filename) {
+
+            let content = contentLines.join('\n');
+            
+            // Estimer la taille (UTF-8 → environ 1 à 4 octets par caractère, ici on part sur 2 comme moyenne)
+            let estimated_size = new TextEncoder().encode(content).length;
+
+            console.log(estimated_size)
+            // Limite à ~500 Mo
+            let size_max = 1000 * 1024 * 1024;
+
+            // Message d'erreur si le fichier dépasse la taille limite
+            if (estimated_size > size_max) {
+                alert(`Erreur : Le fichier ${filename} est trop volumineux pour être généré.`);
+                return;
+            }
+
+            let blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            let urlBlob = URL.createObjectURL(blob);
+            let link = document.createElement("a");
+            link.href = urlBlob;
+            link.download = filename;
+            link.click();
 
         },
 
