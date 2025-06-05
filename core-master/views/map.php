@@ -357,10 +357,13 @@
                     </div>     
                 </div>
 
-                <hr style='margin:5px;' />
+                <hr style='margin:5px;' v-if="show_download_progression" />
 
-                <p>Download: {{download_progression}} %</p>
-
+                <div id="progress" class="padding largeur_min">
+                    <div v-if="show_fetch_progression">Fetch data: {{fetch_progression}}%</div>
+                    <div v-if="show_download_progression">Prepare download: {{download_progression}}%</div>
+                </div>
+                
                 <br>
 
                 <div class="flexrow space_evenly padding">

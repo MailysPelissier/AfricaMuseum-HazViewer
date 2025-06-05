@@ -248,6 +248,9 @@ Vue.createApp({
             download_filter_e: true,
             download_filter_e_p: false,
             download_all_e: false,
+            show_fetch_progression: false,
+            show_download_progression: false,
+            fetch_progression: 0,
             download_progression: 0,
         };
     },
@@ -1258,9 +1261,14 @@ Vue.createApp({
                     return;
                 }
 
+                // Affichage de la progression du download
+                this.show_fetch_progression = true;
+                this.show_download_progression = true;
+
                 // Lancer tous les fetch en parallèle, pour récupérer les events 50 par 50
                 let batchSize = 50;
                 let nb_boucles = Math.ceil(n_events / batchSize);
+                let completed = 0;
                 let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
                     let offset = 50 * i;
                     let url;
@@ -1272,7 +1280,12 @@ Vue.createApp({
                         url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23` 
                         + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}` + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
                     }  
-                    return fetch(url).then(res => res.json());
+                    return fetch(url).then(res => res.json())
+                    .then(data => {
+                        completed++;
+                        this.fetch_progression = Math.round((completed / nb_boucles) * 100);
+                        return data;
+                    });
                 });
 
                 // Attendre d'avoir récupéré toutes les promesses
@@ -1306,11 +1319,17 @@ Vue.createApp({
 
                     };
 
-                    // Affichage de la progression
+                    // Calcul de la progression
                     compteur_pages += 1
                     this.download_progression = parseInt(compteur_pages*100/nb_boucles)
 
                 };
+
+                // Désaffichage de la progression du download
+                this.show_fetch_progression = false;
+                this.show_download_progression = false;
+                this.fetch_progression = 0;
+                this.download_progression = 0;
 
             }
             
@@ -1349,8 +1368,9 @@ Vue.createApp({
 
                     }
 
-                    // Affichage de la progression
+                    // Calcul et affichage de la progression du download
                     if (compteur_events_visibles > 0) {
+                        this.show_download_progression = true;
                         this.download_progression = parseInt(compteur_events*100/nb_total_events);
                     }
 
@@ -1361,6 +1381,10 @@ Vue.createApp({
                     alert("No event matches the criteria!");
                     return;
                 }
+
+                // Désaffichage de la progression du download
+                this.show_download_progression = false;
+                this.download_progression = 0;
 
             }
 
