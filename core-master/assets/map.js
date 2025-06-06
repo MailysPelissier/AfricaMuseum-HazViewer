@@ -1069,7 +1069,7 @@ Vue.createApp({
         },
 
         // Création du texte de download des paragraphs liés à un event
-        async paragraph_download_text_filter(feature,paragraph_content_lines,source) {
+        async paragraph_download_text_filter(feature,paragraph_content_lines,seen_paragraph_id,source) {
 
             // Liste des propriétés des paragraphs
             let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
@@ -1119,9 +1119,18 @@ Vue.createApp({
                 // Pour chaque paragraph
                 features.forEach(f => {
 
+                    let props = f.properties;
+                    let paragraph_id = props.paragraph_id;
+
+                    // Si ce paragraphe a déjà été ajouté, on passe
+                    if (seen_paragraph_id.has(paragraph_id)) {
+                        return;
+                    }
+                    // Marquer comme traité
+                    seen_paragraph_id.add(paragraph_id);
+
                     // Création d'une ligne de texte (paragraphs.csv)
                     // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                    let props = f.properties;
                     let row = paragraph_download_properties.map(prop => {
                         let value = props[prop];
                         if (value == null) return ''; // gérer les null
@@ -1248,6 +1257,9 @@ Vue.createApp({
             let event_content_lines = [event_download_properties.join(',')];
             let paragraph_content_lines = [paragraph_download_properties.join(',')];
 
+            // Liste permettent d'éviter les paragraphs en double
+            let seen_paragraph_id = new Set();
+
             // Récupérer filtres
             let { cqlFilter, draw_filter } = this.set_cqlfilter_event(type);
 
@@ -1344,7 +1356,7 @@ Vue.createApp({
 
                         // Création du texte de paragraphs.csv
                         if(this.download_filter_p || this.download_filter_e_p) {
-                            paragraph_content_lines = await this.paragraph_download_text_filter(f,paragraph_content_lines,'geoserver');
+                            paragraph_content_lines = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'geoserver');
                         }
 
                     };
@@ -1412,7 +1424,7 @@ Vue.createApp({
 
                         // Création du texte de paragraphs.csv
                         if(this.download_filter_p || this.download_filter_e_p) {
-                            paragraph_content_lines = await this.paragraph_download_text_filter(f,paragraph_content_lines,'event layer');
+                            paragraph_content_lines = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'event layer');
                         }
 
                     }
