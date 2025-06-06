@@ -35,17 +35,17 @@ html, body {
     grid-row: 2;
 }
 
-#outil_filtrage_div {
+.bouton_1 {
     top: .5em;
     left: .5em;
 }
 
-#changer_style_div {
+.bouton_2 {
     top: .5em;
     left: 9em;
 }
 
-#download_div {
+.bouton_3 {
     top: .5em;
     left: 17.5em;
 }

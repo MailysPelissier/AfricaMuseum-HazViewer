@@ -409,15 +409,15 @@
 
         <div id=popup_clic class="popup petit_popup scroll_box"></div>
 
-        <div id=outil_filtrage_div class='ol-unselectable ol-control'>
+        <div id=outil_filtrage_div class='bouton_1 ol-unselectable ol-control'>
             <button class=open_form_button @click="setup_filter_form">Filter</button>
         </div>
 
-        <div id=changer_style_div class='ol-unselectable ol-control'>
+        <div id=changer_style_div class='bouton_2 ol-unselectable ol-control'>
             <button class=open_form_button @click=setup_changer_style_form>Change style</button>
         </div>
 
-        <div id=download_div class='ol-unselectable ol-control'>
+        <div id=download_div class='bouton_3 ol-unselectable ol-control'>
             <button class=open_form_button @click=setup_download_form>Download data</button>
         </div>
  
