@@ -60,9 +60,19 @@ Vue.createApp({
             paragraph_text: '', // Texte sur les paragraphs (bas droite de l'écran)
             selected_paragraph: null, // Permet de conserver le paragraph sélectionné
             event_id: '', // Permet de récupérer l'event
+            selected_event: null, // Permet de garder l'event
             other_information: false, // Affichage des informations supplémentaires ou non (inactif par défaut)
             location_information: false, // Affichage des informations de localisation ou non (inactif par défaut)
             number_information: false, // Affichage des informations statistiques ou non (inactif par défaut)  
+            // Affichage popup download
+            show_download_form: false,
+            download_e: true,
+            download_p: false,
+            download_e_p: false,
+            show_fetch_progression: false,
+            show_download_progression: false,
+            fetch_progression: 0,
+            download_progression: 0,
         };
     },
 
@@ -93,21 +103,20 @@ Vue.createApp({
                     featureProjection: 'EPSG:3857'
                 });
 
-                let selected_event
                 features.forEach(event => {
-                    // L'event est ajouté à la couche selected event
-                    selected_event = event;
+                    // L'event est sauvegardé et ajouté à la couche selected event
+                    this.selected_event = event;
                     this.selected_event_layer.getSource().addFeature(event);
                 });
 
                 // Afficher le texte sur l'event
-                this.affichage_selection_event(selected_event)
+                this.affichage_selection_event(this.selected_event)
 
                 // Afficher la bbox de l'event
-                this.affichage_bbox_event(selected_event);
+                this.affichage_bbox_event(this.selected_event);
 
                 // Afficher les paragraphs liés à l'event
-                this.affichage_paragraphs_geoserver(selected_event);
+                this.affichage_paragraphs_geoserver(this.selected_event);
 
             })
             
@@ -449,6 +458,216 @@ Vue.createApp({
 
         },
 
+        // Affiche le form de download
+        setup_download_form() {
+            this.show_download_form = !this.show_download_form;
+        },
+
+        // Permet d'avoir une seule checkbox sélectionnée pour le choix du mode de download
+        checkbox_download(checkbox_name) {
+            let checkbox_list = ['download_e', 'download_p', 'download_e_p']
+            for (let checkbox of checkbox_list) {
+                if (checkbox_name != checkbox) {
+                    this[checkbox] = false;
+                }
+            }
+        },
+
+        // Création du texte de download des paragraphs liés à un event
+        async paragraph_download_text_filter(feature) {
+
+            // Liste des propriétés des paragraphs
+            let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
+                "paragraph_id", "original_text", "disaster_label", "disaster_score", "hasard_type", "hasard_type_score", "nb_death", "score_death", "answer_death",
+                "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
+                "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
+                "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
+                "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
+                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "unnamed_column", "country", "wkt", "country_found"];
+            let paragraph_property_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
+
+            // Création du tableau pour le join final, initialisation du texte (header)
+            let paragraph_content_lines = [paragraph_download_properties.join(',')];
+
+            // Liste permettent d'éviter les paragraphs en double
+            let seen_paragraph_id = new Set();
+
+            // Récupérer les valeurs des paragraphs_id
+            let paragraphs_list = feature.get('paragraphs_list')
+
+            // Nettoyage de la chaîne pour enlever les parenthèses extérieures
+            paragraphs_list = paragraphs_list.replace(/^\(|\)$/g, '');
+            // Transformation en tableau
+            paragraphs_list = paragraphs_list.split(',').map(e => e.trim().replace(/^'|'$/g, ''));
+            // Récupération du nombre de paragraphs
+            let n_paragraphs = paragraphs_list.length;
+
+            // Lancer tous les fetch en parallèle, pour récupérer les paragraphs 50 par 50
+            let batchSize = 50;
+            let nb_boucles = Math.ceil(n_paragraphs / batchSize);
+            let completed = 0;
+            let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
+                // Tableaux de 50 paragraph_id
+                let paragraphs_list_50 = paragraphs_list.slice(50*i, 50*(i+1));
+                // Partie filtre cql de la requête
+                let cqlFilter = "paragraph_id IN (" + paragraphs_list_50.map(id => `'${id}'`).join(",") + ")";
+                // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
+                let url = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23"
+                + "&outputFormat=application/json&CQL_FILTER=" + encodeURIComponent(cqlFilter);
+                return fetch(url).then(res => res.json())
+                .then(data => {
+                    completed++;
+                    this.fetch_progression = Math.round((completed / nb_boucles) * 100);
+                    return data;
+                });
+            });
+
+            // Attendre d'avoir récupéré toutes les promesses
+            let results = await Promise.all(fetchPromises);
+
+            let compteur_pages = 0;
+            results.forEach((data, i) => {
+                let features = data.features || [];
+
+                // Pour chaque paragraph
+                features.forEach(f => {
+
+                    let props = f.properties;
+                    let paragraph_id = props.paragraph_id;
+
+                    // Si ce paragraphe a déjà été ajouté, on passe
+                    if (seen_paragraph_id.has(paragraph_id)) {
+                        return;
+                    }
+                    // Marquer comme traité
+                    seen_paragraph_id.add(paragraph_id);
+
+                    // Création d'une ligne de texte (paragraphs.csv)
+                    // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                    let row = paragraph_download_properties.map(prop => {
+                        let value = props[prop];
+                        if (value == null) return ''; // gérer les null
+                        if (paragraph_property_str.includes(prop)) {
+                            value = String(value).replace(/"/g, '""');
+                            return `"${value}"`;
+                        }
+                        return String(value);
+                    }).join(',');
+                    paragraph_content_lines.push(row);
+
+                });
+
+                // Calcul de la progression
+                compteur_pages += 1
+                this.download_progression = parseInt(compteur_pages*100/nb_boucles)
+
+            });
+
+            return paragraph_content_lines;
+
+        },
+
+        // Download
+        async download() {
+
+            // Si aucun mode de download n'est choisi
+            if (!(this.download_e || this.download_p || this.download_e_p)) {
+                alert("No download mode selected!");
+                return;
+            }
+
+            // Liste des propriétés des events
+            let event_download_properties = ["id_integer", "event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
+                "event_time", "bbox_event", "n_languages", "n_source_countries", "paragraphs_list", "articles_list", "n_paragraphs", "n_articles", 
+                "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
+                "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
+                "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
+                "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", 
+                "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
+                "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
+                "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "wkt", "country_found"];
+            let event_property_str = ["bbox_event", "paragraphs_list", "articles_list"];
+
+            // Création du tableau pour le join final, initialisation du texte (header)
+            let event_content_lines = [event_download_properties.join(',')];
+
+            // Affichage de la progression du download
+            this.show_fetch_progression = true;
+            this.show_download_progression = true;
+
+            // Récupération de l'event
+            let f = this.selected_event;
+
+            // Création d'une ligne de texte (event.csv)
+            // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+            if(this.download_e || this.download_e_p) {
+                let row = event_download_properties.map(prop => {
+                    let value = f.get(prop);
+                    if (value == null) return ''; // gérer les null
+                    if (event_property_str.includes(prop)) {
+                        value = String(value).replace(/"/g, '""');
+                        return `"${value}"`;
+                    }
+                    return String(value);
+                }).join(',');
+                event_content_lines.push(row);
+            }
+
+            // Création du texte de paragraphs.csv
+            if(this.download_p || this.download_e_p) {
+                paragraph_content_lines = await this.paragraph_download_text_filter(f);
+            }
+                
+            // Désaffichage de la progression du download
+            this.show_fetch_progression = false;
+            this.show_download_progression = false;
+            this.fetch_progression = 0;
+            this.download_progression = 0;
+
+            // Téléchargement des events
+            if(this.download_e || this.download_e_p) {
+                this.creation_csv(event_content_lines, "event.csv");
+            }
+
+            // Téléchargement des paragraphs
+            if(this.download_p || this.download_e_p) {
+                this.creation_csv(paragraph_content_lines, "paragraphs.csv");
+            }
+
+        },
+
+        // Crée le csv à partir du texte
+        creation_csv(contentLines, filename) {
+
+            try {
+
+                let content = contentLines.join('\n');
+
+                // Essayer de créer le blob et de le télécharger
+                let blob;
+                try {
+                    blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+                } catch (err) {
+                    // Message d'erreur si le fichier est trop volumineux
+                    alert(`Error: The file ${filename} is too large to generate.`);
+                    return;
+                }
+                let urlBlob = URL.createObjectURL(blob);
+                let link = document.createElement("a");
+                link.href = urlBlob;
+                link.download = filename;
+                link.click();
+
+                // Nettoyage
+                setTimeout(() => URL.revokeObjectURL(urlBlob), 1000);
+
+            } catch (err) {
+                // Message d'erreur si le fichier est trop volumineux
+                alert(`Error: The file ${filename} is too large to generate.`);
+            }
+
+        },
+
     },
 
     mounted() {
@@ -582,6 +801,12 @@ Vue.createApp({
             positioning: "bottom-center"
         });
         this.map.addOverlay(var_popup_clic);
+
+        // Bouton download
+        var download_control = new ol.control.Control({
+            element: document.getElementById("download_div"),
+        });
+        this.map.addControl(download_control);
 
         // Scale line
         var scaleline = new ol.control.ScaleLine({

@@ -18,6 +18,44 @@
         <div id="app" data-event_id="<?php echo htmlspecialchars($event_id, ENT_QUOTES, 'UTF-8'); ?>"></div>
 
         <div id="map" class="margin">
+
+            <div id="form_download" class="form popup scroll_box" v-if="show_download_form">
+
+                <div id="top_form" class="flexrow space_between padding">
+                    <h5>Download data</h5>
+                    <button class="vertical_center" @click="setup_download_form">&#215;</button>
+                </div> 
+
+                <br>
+
+                <div class="padding largeur_min">
+                    <div id="event">
+                        <label>Event: <input type="checkbox" v-model="download_e" @click=checkbox_download(download_e)></label>
+                    </div> 
+                    <div id="paragraphs">
+                        <label>Paragraphs: <input type="checkbox" v-model="download_p" @click=checkbox_download(download_p)></label>
+                    </div>  
+                    <div id="event_paragraphs">
+                        <label>Event and paragraphs: <input type="checkbox" v-model="download_e_p" @click=checkbox_download(download_e_p)></label>
+                    </div>    
+                </div>
+
+                <hr style='margin:5px;' v-if="show_download_progression" />
+
+                <div id="progress" class="padding largeur_min">
+                    <div v-if="show_fetch_progression">Fetch data: {{fetch_progression}}%</div>
+                    <div v-if="show_download_progression">Prepare download: {{download_progression}}%</div>
+                </div>
+                
+                <br>
+
+                <div class="flexrow space_evenly padding">
+                    <button id="download" @click="download">Download</button>
+                    <button id="cancel" @click="setup_download_form">Close</button>
+                </div>
+
+            </div>
+
         </div>
 
         <div id=event_data_zoom_event_scroll_box class="scroll_box margin padding">
@@ -53,6 +91,10 @@
         <div id=popup_pointermove class="popup petit_popup scroll_box"></div>
 
         <div id=popup_clic class="popup petit_popup scroll_box"></div>
+
+        <div id=download_div class='bouton_1 ol-unselectable ol-control'>
+            <button class=open_form_button @click=setup_download_form>Download data</button>
+        </div>
 
         <div id="scaleline_div"></div>
 
