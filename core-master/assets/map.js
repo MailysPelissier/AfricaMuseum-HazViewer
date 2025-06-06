@@ -246,6 +246,7 @@ Vue.createApp({
             // Affichage popup download
             show_download_form: false,
             download_filter_e: true,
+            download_filter_p: false,
             download_filter_e_p: false,
             download_all_e: false,
             show_fetch_progression: false,
@@ -983,7 +984,7 @@ Vue.createApp({
 
         // Permet d'avoir une seule checkbox sélectionnée pour le choix du mode de download
         checkbox_download(checkbox_name) {
-            let checkbox_list = ['download_filter_e', 'download_filter_e_p', 'download_all_e']
+            let checkbox_list = ['download_filter_e', 'download_filter_p', 'download_filter_e_p', 'download_all_e']
             for (let checkbox of checkbox_list) {
                 if (checkbox_name != checkbox) {
                     this[checkbox] = false;
@@ -1209,15 +1210,12 @@ Vue.createApp({
         // Download
         async download() {
 
-            let debut = Date.now();
-            console.log("Début :", debut);
-
             // Définition du type de download
             let type = null;
             if (this.download_all_e) {
                 type = 'all';
             }
-            if (this.download_filter_e || this.download_filter_e_p) {
+            if (this.download_filter_e || this.download_filter_p || this.download_filter_e_p) {
                 type = 'filter';
             }
 
@@ -1283,10 +1281,12 @@ Vue.createApp({
                     return;
                 }
 
-                // Si trop d'events correspondent aux critères (>10000)
-                if (n_events > 10000) {
-                    alert("To many events, use more filters!");
-                    return;
+                // Si on veut télécharger des paragraphs et que trop d'events correspondent aux critères (>10000)
+                if (this.download_filter_p || this.download_filter_e_p) {
+                    if (n_events > 10000) {
+                        alert("To many events, use more filters!");
+                        return;
+                    }
                 }
 
                 // Affichage de la progression du download
@@ -1328,20 +1328,22 @@ Vue.createApp({
 
                         // Création d'une ligne de texte (events.csv)
                         // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                        let props = f.properties;
-                        let row = event_download_properties.map(prop => {
-                            let value = props[prop];
-                            if (value == null) return ''; // gérer les null
-                            if (event_property_str.includes(prop)) {
-                                value = String(value).replace(/"/g, '""');
-                                return `"${value}"`;
-                            }
-                            return String(value);
-                        }).join(',');
-                        event_content_lines.push(row);
+                        if(this.download_all_e || this.download_filter_e || this.download_filter_e_p) {
+                            let props = f.properties;
+                            let row = event_download_properties.map(prop => {
+                                let value = props[prop];
+                                if (value == null) return ''; // gérer les null
+                                if (event_property_str.includes(prop)) {
+                                    value = String(value).replace(/"/g, '""');
+                                    return `"${value}"`;
+                                }
+                                return String(value);
+                            }).join(',');
+                            event_content_lines.push(row);
+                        }
 
                         // Création du texte de paragraphs.csv
-                        if(this.download_filter_e_p) {
+                        if(this.download_filter_p || this.download_filter_e_p) {
                             paragraph_content_lines = await this.paragraph_download_text_filter(f,paragraph_content_lines,'geoserver');
                         }
 
@@ -1364,56 +1366,61 @@ Vue.createApp({
             // Si on filtre selon un polygone
             if (draw_filter == 1) {
 
-                let compteur_events = 0;
-                let compteur_events_visibles = 0;
-                let nb_total_events = this.events_layer.getSource().getFeatures().length;
+                // Récupérer le nombre d'events
+                let event_features = this.events_layer.getSource().getFeatures();
+                let n_events_visibles = event_features.filter(f => f.get('visible') === true).length;
+                let nb_total_events = event_features.length;
 
+                // Si aucun event ne correspond aux critères
+                if (n_events_visibles === 0) {
+                    alert("No event matches the criteria!");
+                    return;
+                }
+
+                // Si on veut télécharger des paragraphs et que trop d'events correspondent aux critères (>10000)
+                if (this.download_filter_p || this.download_filter_e_p) {
+                    if (n_events_visibles > 10000) {
+                        alert("To many events, use more filters!");
+                        return;
+                    }
+                }
+
+                // Affichage de la progression du download
+                this.show_download_progression = true;
+
+                let compteur_events = 0;
                 // On récupère les events de la couche events 1 par 1
                 for (let f of this.events_layer.getSource().getFeatures()) {
-                    compteur_events += 1;
 
                     // Pour chaque event correspondant aux critères
                     if (f.get('visible')) {
-                        compteur_events_visibles += 1;
 
                         // Création d'une ligne de texte (events.csv)
                         // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                        let row = event_download_properties.map(prop => {
-                            let value = f.get(prop);
-                            if (value == null) return ''; // gérer les null
-                            if (event_property_str.includes(prop)) {
-                                value = String(value).replace(/"/g, '""');
-                                return `"${value}"`;
-                            }
-                            return String(value);
-                        }).join(',');
-                        event_content_lines.push(row);
+                        if(this.download_all_e || this.download_filter_e || this.download_filter_e_p) {
+                            let row = event_download_properties.map(prop => {
+                                let value = f.get(prop);
+                                if (value == null) return ''; // gérer les null
+                                if (event_property_str.includes(prop)) {
+                                    value = String(value).replace(/"/g, '""');
+                                    return `"${value}"`;
+                                }
+                                return String(value);
+                            }).join(',');
+                            event_content_lines.push(row);
+                        }
 
                         // Création du texte de paragraphs.csv
-                        if(this.download_filter_e_p) {
+                        if(this.download_filter_p || this.download_filter_e_p) {
                             paragraph_content_lines = await this.paragraph_download_text_filter(f,paragraph_content_lines,'event layer');
                         }
 
                     }
 
-                    // Calcul et affichage de la progression du download
-                    if (compteur_events_visibles > 0) {
-                        this.show_download_progression = true;
-                        this.download_progression = parseInt(compteur_events*100/nb_total_events);
-                    }
-
-                    // Si trop d'events correspondent aux critères (>10000)
-                    if (compteur_events_visibles > 10000) {
-                        alert("To many events, use more filters!");
-                        return;
-                    }
-
-                }
-
-                // Si aucun event ne correspond aux critères
-                if (compteur_events_visibles == 0) {
-                    alert("No event matches the criteria!");
-                    return;
+                    // Calcul de la progression du download
+                    compteur_events += 1;
+                    this.download_progression = parseInt(compteur_events*100/nb_total_events);
+                    
                 }
 
                 // Désaffichage de la progression du download
@@ -1423,44 +1430,46 @@ Vue.createApp({
             }
 
             // Téléchargement des events
-            this.creation_csv(event_content_lines, "events.csv");
-
-            // Téléchargement des paragraphs
-            if (this.download_filter_e_p) {
-                this.creation_csv(paragraph_content_lines, "paragraphs.csv");
+            if(this.download_all_e || this.download_filter_e || this.download_filter_e_p) {
+                this.creation_csv(event_content_lines, "events.csv");
             }
 
-            let fin = Date.now();
-            console.log("Fin :", fin);
-            let temps = fin - debut;
-            console.log("Temps total (ms) :", temps);
+            // Téléchargement des paragraphs
+            if(this.download_filter_p || this.download_filter_e_p) {
+                this.creation_csv(paragraph_content_lines, "paragraphs.csv");
+            }
 
         },
 
         // Crée le csv à partir du texte
         creation_csv(contentLines, filename) {
 
-            let content = contentLines.join('\n');
-            
-            // Estimer la taille (UTF-8 → environ 1 à 4 octets par caractère, ici on part sur 2 comme moyenne)
-            let estimated_size = new TextEncoder().encode(content).length;
+            try {
 
-            console.log(estimated_size)
-            // Limite à ~500 Mo
-            let size_max = 1000 * 1024 * 1024;
+                let content = contentLines.join('\n');
 
-            // Message d'erreur si le fichier dépasse la taille limite
-            if (estimated_size > size_max) {
-                alert(`Erreur : Le fichier ${filename} est trop volumineux pour être généré.`);
-                return;
+                // Essayer de créer le blob et de le télécharger
+                let blob;
+                try {
+                    blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+                } catch (err) {
+                    // Message d'erreur si le fichier est trop volumineux
+                    alert(`Error: The file ${filename} is too large to generate.`);
+                    return;
+                }
+                let urlBlob = URL.createObjectURL(blob);
+                let link = document.createElement("a");
+                link.href = urlBlob;
+                link.download = filename;
+                link.click();
+
+                // Nettoyage
+                setTimeout(() => URL.revokeObjectURL(urlBlob), 1000);
+
+            } catch (err) {
+                // Message d'erreur si le fichier est trop volumineux
+                alert(`Error: The file ${filename} is too large to generate.`);
             }
-
-            let blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
-            let urlBlob = URL.createObjectURL(blob);
-            let link = document.createElement("a");
-            link.href = urlBlob;
-            link.download = filename;
-            link.click();
 
         },
 

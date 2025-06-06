@@ -210,6 +210,60 @@
 
                 <hr style='margin:5px' />
 
+                <button id="location_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_location_filter'])">
+                    <h6>Location</h6>
+                    <div class="vertical_center" v-if="!show_location_filter">&#62;</div>
+                    <div class="vertical_center" v-if="show_location_filter">&#60;</div>
+                </button>
+                
+                <div id="location_filter" class="flexrow space_between padding largeur_min" v-if="show_location_filter">
+                    <div class="vertical_center">
+                        <button class='back_button' @click="change_true_false(['show_location_filter'])">&#60;</button>
+                    </div>
+                    <div id="location_field" class="margin">
+                        <div class="title">Location filter:</div>
+                        <ul>
+                            <div class="flexrow margin">
+                                <li id="countries">Country:</li>
+                                <div class=flexcolumn>
+                                    <input class="margin_left" type="text" v-model="substring_country" @input="input_search_country"/>
+                                    <select class="margin_left" v-model="chosen_country">
+                                        <option value="All">---All---</option>
+                                        <option v-for="country in research_country_list" :value="country">{{country}}</option> 
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flexrow space_between margin">
+                                <li id="draw">Choose area (draw):</li>
+                                <button @click="add_draw" v-if=draw_actif>Stop drawing</button>
+                                <button @click="add_draw" v-if=!draw_actif>Draw</button>
+                                <button @click="reset_draw">Reset draw</button>
+                            </div>
+                            <div class="flexrow space_between margin">
+                                <li id="bbox">Choose extent:</li>
+                                <button @click="extent_polygon">Show extent</button>
+                                <button @click="reset_extent">Reset extent</button>
+                            </div>
+                            <div>
+                                <li style="list-style-type:none">
+                                    <ul>
+                                        <div class="margin" v-for="coord in extent_filter">
+                                            <li>{{coord.label}}</li>
+                                            <div>
+                                                <label>Min: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.min" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
+                                                <label class="margin_left">Max: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.max" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
+                                            </div>
+                                        </div>
+                                    </ul>
+                                </li>
+                            </div>
+                        </ul>
+                    </div>  
+                    <div class='back_button'></div>
+                </div>
+
+                <hr style='margin:5px' />
+
                 <button id="casualties_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_casualties_filter'])">
                     <h6>Casualties</h6>
                     <div class="vertical_center" v-if="!show_casualties_filter">&#62;</div>
@@ -265,60 +319,6 @@
                     <div class='back_button'></div>
                 </div>
 
-                <hr style='margin:5px' />
-
-                <button id="location_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_location_filter'])">
-                    <h6>Location</h6>
-                    <div class="vertical_center" v-if="!show_location_filter">&#62;</div>
-                    <div class="vertical_center" v-if="show_location_filter">&#60;</div>
-                </button>
-                
-                <div id="location_filter" class="flexrow space_between padding largeur_min" v-if="show_location_filter">
-                    <div class="vertical_center">
-                        <button class='back_button' @click="change_true_false(['show_location_filter'])">&#60;</button>
-                    </div>
-                    <div id="location_field" class="margin">
-                        <div class="title">Location filter:</div>
-                        <ul>
-                            <div class="flexrow margin">
-                                <li id="countries">Country:</li>
-                                <div class=flexcolumn>
-                                    <input class="margin_left" type="text" v-model="substring_country" @input="input_search_country"/>
-                                    <select class="margin_left" v-model="chosen_country">
-                                        <option value="All">---All---</option>
-                                        <option v-for="country in research_country_list" :value="country">{{country}}</option> 
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="flexrow space_between margin">
-                                <li id="draw">Choose area (draw):</li>
-                                <button @click="add_draw" v-if=draw_actif>Stop drawing</button>
-                                <button @click="add_draw" v-if=!draw_actif>Draw</button>
-                                <button @click="reset_draw">Reset draw</button>
-                            </div>
-                            <div class="flexrow space_between margin">
-                                <li id="bbox">Choose extent:</li>
-                                <button @click="extent_polygon">Show extent</button>
-                                <button @click="reset_extent">Reset extent</button>
-                            </div>
-                            <div>
-                                <li style="list-style-type:none">
-                                    <ul>
-                                        <div class="margin" v-for="coord in extent_filter">
-                                            <li>{{coord.label}}</li>
-                                            <div>
-                                                <label>Min: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.min" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
-                                                <label class="margin_left">Max: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.max" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
-                                            </div>
-                                        </div>
-                                    </ul>
-                                </li>
-                            </div>
-                        </ul>
-                    </div>  
-                    <div class='back_button'></div>
-                </div>
-
                 <br>
 
                 <div class="flexrow space_evenly padding">
@@ -342,6 +342,9 @@
                     <div class="title">Download filter:</div>
                     <div id="events">
                         <label>Events: <input type="checkbox" v-model="download_filter_e" @click=checkbox_download(download_filter_e)></label>
+                    </div> 
+                    <div id="paragraphs">
+                        <label>Paragraphs: <input type="checkbox" v-model="download_filter_p" @click=checkbox_download(download_filter_p)></label>
                     </div>  
                     <div id="events_paragraphs">
                         <label>Events and paragraphs: <input type="checkbox" v-model="download_filter_e_p" @click=checkbox_download(download_filter_e_p)></label>
