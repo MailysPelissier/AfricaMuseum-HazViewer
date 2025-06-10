@@ -15,71 +15,78 @@ shp2pgsql -s 4326 -c -D -i -I C:\Mailys\data\ne_10m_admin_0_countries\ne_10m_adm
 
 Events v3 :
 
+-- Table: public.events2020_23
+
 DROP TABLE IF EXISTS public.events2020_23;
 
 CREATE TABLE IF NOT EXISTS public.events2020_23
 (
-	id_integer integer,
-    	event_id character varying COLLATE pg_catalog."default",
-	hazard_type character varying COLLATE pg_catalog."default",
-	disaster_score real,
-	hasard_type_score real,
-	latitude real,
-    	longitude real,
-	event_time timestamp without time zone,
-	bbox_event character varying COLLATE pg_catalog."default",
-	n_languages real,
-	n_source_countries real,
-	paragraphs_list character varying COLLATE pg_catalog."default",
-	articles_list character varying COLLATE pg_catalog."default",
-	n_paragraphs real,
-	n_articles real,
-	start_time timestamp without time zone,
-	end_time timestamp without time zone,
-	duration integer,
-	mostfreq_death real,
-	n_mostfreq_death real,
-	time_mostfreq_death real,
-	max_death real,
-	n_max_death real,
-	time_max_death real,
-	median_death real,
-	mostfreq_homeless real,
-	n_mostfreq_homeless real,
-	time_mostfreq_homeless real,
-	max_homeless real,
-	n_max_homeless real,
-	time_max_homeless real,
-	median_homeless real,
-	mostfreq_injured real,
-	n_mostfreq_injured real,
-	time_mostfreq_injured real,
-	max_injured real,
-	n_max_injured real,
-	time_max_injured real,
-	median_injured real,
-	mostfreq_affected real,
-	n_mostfreq_affected real,
-	time_mostfreq_affected real,
-	max_affected real,
-	n_max_affected real,
-	time_max_affected real,
-	median_affected real,
-	mostfreq_missing real,
-	n_mostfreq_missing real,
-	time_mostfreq_missing real,
-	max_missing real,
-	n_max_missing real,
-	time_max_missing real,
-	median_missing real,
-	mostfreq_evacuated real,
-	n_mostfreq_evacuated real,
-	time_mostfreq_evacuated real,
-	max_evacuated real,
-	n_max_evacuated real,
-	time_max_evacuated real,
-	median_evacuated real,
-	country character varying COLLATE pg_catalog."default"
+    id_integer integer,
+    event_id character varying COLLATE pg_catalog."default",
+    hazard_type character varying COLLATE pg_catalog."default",
+    disaster_score real,
+    hasard_type_score real,
+    latitude real,
+    longitude real,
+    event_time timestamp without time zone,
+    bbox_event character varying COLLATE pg_catalog."default",
+    n_languages real,
+    n_source_countries real,
+    paragraphs_list character varying COLLATE pg_catalog."default",
+    articles_list character varying COLLATE pg_catalog."default",
+    n_paragraphs real,
+    n_articles real,
+    start_time timestamp without time zone,
+    end_time timestamp without time zone,
+    duration integer,
+    mostfreq_death real,
+    n_mostfreq_death real,
+    time_mostfreq_death real,
+    max_death real,
+    n_max_death real,
+    time_max_death real,
+    median_death real,
+    mostfreq_homeless real,
+    n_mostfreq_homeless real,
+    time_mostfreq_homeless real,
+    max_homeless real,
+    n_max_homeless real,
+    time_max_homeless real,
+    median_homeless real,
+    mostfreq_injured real,
+    n_mostfreq_injured real,
+    time_mostfreq_injured real,
+    max_injured real,
+    n_max_injured real,
+    time_max_injured real,
+    median_injured real,
+    mostfreq_affected real,
+    n_mostfreq_affected real,
+    time_mostfreq_affected real,
+    max_affected real,
+    n_max_affected real,
+    time_max_affected real,
+    median_affected real,
+    mostfreq_missing real,
+    n_mostfreq_missing real,
+    time_mostfreq_missing real,
+    max_missing real,
+    n_max_missing real,
+    time_max_missing real,
+    median_missing real,
+    mostfreq_evacuated real,
+    n_mostfreq_evacuated real,
+    time_mostfreq_evacuated real,
+    max_evacuated real,
+    n_max_evacuated real,
+    time_max_evacuated real,
+    median_evacuated real,
+    country character varying COLLATE pg_catalog."default",
+    wkt character varying COLLATE pg_catalog."default",
+    geom geometry(Point,4326),
+    primary_key integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    country_found character varying COLLATE pg_catalog."default",
+    CONSTRAINT events2020_23_pkey PRIMARY KEY (primary_key)
 )
 
 TABLESPACE pg_default;
@@ -87,6 +94,15 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.events2020_23
     OWNER to postgres;
 
+-- Index: events2020_23_geom_idx
+
+DROP INDEX IF EXISTS public.events2020_23_geom_idx;
+
+CREATE INDEX IF NOT EXISTS events2020_23_geom_idx
+    ON public.events2020_23 USING gist
+    (geom)
+    WITH (buffering=auto)
+    TABLESPACE pg_default;
 
 COPY events2020_23(id_integer,event_id,hazard_type,disaster_score,hasard_type_score,latitude,longitude,event_time,bbox_event,n_languages,n_source_countries,paragraphs_list,articles_list,n_paragraphs,n_articles,start_time,end_time,duration,mostfreq_death,n_mostfreq_death,time_mostfreq_death,max_death,n_max_death,time_max_death,median_death,mostfreq_homeless,n_mostfreq_homeless,time_mostfreq_homeless,max_homeless,n_max_homeless,time_max_homeless,median_homeless,mostfreq_injured,n_mostfreq_injured,time_mostfreq_injured,max_injured,n_max_injured,time_max_injured,median_injured,mostfreq_affected,n_mostfreq_affected,time_mostfreq_affected,max_affected,n_max_affected,time_max_affected,median_affected,mostfreq_missing,n_mostfreq_missing,time_mostfreq_missing,max_missing,n_max_missing,time_max_missing,median_missing,mostfreq_evacuated,n_mostfreq_evacuated,time_mostfreq_evacuated,max_evacuated,n_max_evacuated,time_max_evacuated,median_evacuated,country)
 FROM 'C:/Mailys/data/S20200101000000_E20240101000000_GDELT_Events_v3.csv'
@@ -94,41 +110,14 @@ DELIMITER ','
 CSV HEADER
 QUOTE '"';
 
-
-ALTER TABLE IF EXISTS public.events2020_23
-    ADD COLUMN wkt character varying;
-
-ALTER TABLE IF EXISTS public.events2020_23
-    ADD COLUMN geom geometry(Point,4326);
-
-update events2020_23 set wkt=concat('POINT (',longitude,' ',latitude,')');
-update events2020_23 set geom=ST_GeomFromText(wkt);
-
-ALTER TABLE IF EXISTS public.events2020_23
-    ADD COLUMN primary_key integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 );
-
-ALTER TABLE events2020_23 ADD PRIMARY KEY (primary_key);
-
-ALTER TABLE events2020_23 ADD COLUMN country_found character varying COLLATE pg_catalog."default";
-
+UPDATE events2020_23 SET wkt=concat('POINT (',longitude,' ',latitude,')');
+UPDATE events2020_23 SET geom=ST_GeomFromText(wkt);
 UPDATE events2020_23 SET country_found = c.admin FROM countries c WHERE ST_Contains(c.geom, events2020_23.geom);
 
 
--- DROP INDEX IF EXISTS public.event2020_23_geom_index;
-
-CREATE INDEX IF NOT EXISTS event2020_23_geom_index
-    ON public.events2020_23 USING btree
-    (geom ASC NULLS LAST)
-    WITH (deduplicate_items=True)
-    TABLESPACE pg_default;
-
-
-SELECT * FROM public.events2020_23
-LIMIT 100
-
-
-
 Paragraphs v3 :
+
+-- Table: public.paragraphs2020_23
 
 DROP TABLE IF EXISTS public.paragraphs2020_23;
 
@@ -189,14 +178,37 @@ CREATE TABLE IF NOT EXISTS public.paragraphs2020_23
     nb_evacuated_min real,
     nb_evacuated_max real,
     unnamed_column real,
-    country character varying COLLATE pg_catalog."default"
+    country character varying COLLATE pg_catalog."default",
+    wkt character varying COLLATE pg_catalog."default",
+    geom geometry(Point,4326),
+    primary_key integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    country_found character varying COLLATE pg_catalog."default",
+    CONSTRAINT paragraphs2020_23_pkey PRIMARY KEY (primary_key)
 )
 
 TABLESPACE pg_default;
 
 ALTER TABLE IF EXISTS public.paragraphs2020_23
     OWNER to postgres;
+	
+-- Index: paragraphs2020_23_geom_idx
 
+DROP INDEX IF EXISTS public.paragraphs2020_23_geom_idx;
+
+CREATE INDEX IF NOT EXISTS paragraphs2020_23_geom_idx
+    ON public.paragraphs2020_23 USING gist
+    (geom)
+    WITH (buffering=auto)
+    TABLESPACE pg_default;
+	
+-- Index: paragraphs2020_23_paragraph_id_idx
+
+DROP INDEX IF EXISTS public.paragraphs2020_23_paragraph_id_idx;
+
+CREATE INDEX IF NOT EXISTS paragraphs2020_23_paragraph_id_idx
+    ON public.paragraphs2020_23 USING btree
+    (paragraph_id ASC NULLS LAST)
+    TABLESPACE pg_default;
 
 COPY paragraphs2020_23(article_id,title,extracted_text,paragraph_time,article_language,source_country,domain_url,paragraph_id,original_text,disaster_label,disaster_score,hasard_type,hasard_type_score,nb_death,score_death,answer_death,nb_homeless,score_homeless,answer_homeless,nb_injured,score_injured,answer_injured,nb_affected,score_affected,answer_affected,nb_missing,score_missing,answer_missing,nb_evacuated,score_evacuated,answer_evacuated,publication_time,extracted_location,ner_score,latitude,longitude,std_dev,min_lat,max_lat,min_lon,max_lon,n_locations,nb_death_min,nb_death_max,nb_homeless_min,nb_homeless_max,nb_injured_min,nb_injured_max,nb_affected_min,nb_affected_max,nb_missing_min,nb_missing_max,nb_evacuated_min,nb_evacuated_max,unnamed_column,country)
 FROM 'C:/Mailys/data/S20200101000000_E20240101000000_GDELT_Paragraphs_v3.csv'
@@ -204,43 +216,139 @@ DELIMITER ','
 CSV HEADER
 QUOTE '"';
 
-
-delete from paragraphs2020_23 where longitude is null;
-
-ALTER TABLE IF EXISTS public.paragraphs2020_23
-    ADD COLUMN wkt character varying;
-
-ALTER TABLE IF EXISTS public.paragraphs2020_23
-    ADD COLUMN geom geometry(Point,4326);
-
-update paragraphs2020_23 set wkt=concat('POINT (',longitude,' ',latitude,')');
-update paragraphs2020_23 set geom=ST_GeomFromText(wkt);
-
-ALTER TABLE IF EXISTS public.paragraphs2020_23
-    ADD COLUMN primary_key integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 );
-
-ALTER TABLE paragraphs2020_23 ADD PRIMARY KEY (primary_key);
-
-ALTER TABLE paragraphs2020_23 ADD COLUMN country_found character varying COLLATE pg_catalog."default";
-
+DELETE FROM paragraphs2020_23 WHERE longitude IS NULL;
+UPDATE paragraphs2020_23 SET wkt=concat('POINT (',longitude,' ',latitude,')');
+UPDATE paragraphs2020_23 SET geom=ST_GeomFromText(wkt);
 UPDATE paragraphs2020_23 SET country_found = c.admin FROM countries c WHERE ST_Contains(c.geom, paragraphs2020_23.geom);
 
 
--- DROP INDEX IF EXISTS public.paragraphs2020_23_id_index;
+Table de jointure :
 
-CREATE INDEX IF NOT EXISTS paragraphs2020_23_id_index
-    ON public.paragraphs2020_23 USING btree
-    (paragraph_id ASC NULLS LAST)
+-- Table: public.event_paragraphs
+
+DROP TABLE IF EXISTS public.event_paragraphs;
+
+CREATE TABLE IF NOT EXISTS public.event_paragraphs
+(
+    event_id character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    paragraph_id character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT event_paragraphs_pkey PRIMARY KEY (event_id, paragraph_id)
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.event_paragraphs
+    OWNER to postgres;
+
+-- Index: event_paragraphs_event_id_idx
+
+DROP INDEX IF EXISTS public.event_paragraphs_event_id_idx;
+
+CREATE INDEX IF NOT EXISTS event_paragraphs_event_id_idx
+    ON public.event_paragraphs USING btree
+    (event_id COLLATE pg_catalog."default" ASC NULLS LAST)
+    WITH (deduplicate_items=True)
     TABLESPACE pg_default;
 
--- DROP INDEX IF EXISTS public.paragraph2020_23_geom_index;
+-- Index: event_paragraphs_paragraph_id_idx
 
-CREATE INDEX IF NOT EXISTS paragraph2020_23_geom_index
-    ON public.paragraphs2020_23 USING gist
+DROP INDEX IF EXISTS public.event_paragraphs_paragraph_id_idx;
+
+CREATE INDEX IF NOT EXISTS event_paragraphs_paragraph_id_idx
+    ON public.event_paragraphs USING btree
+    (paragraph_id COLLATE pg_catalog."default" ASC NULLS LAST)
+    WITH (deduplicate_items=True)
+    TABLESPACE pg_default;
+
+INSERT INTO event_paragraphs (event_id, paragraph_id)
+SELECT event_id, UNNEST(string_to_array(regexp_replace(paragraphs_list,'''|\(|\)|\s','','g'),',')::varchar[])
+FROM public.events2020_23;
+
+
+Table events :
+
+-- Table: public.events
+
+DROP TABLE IF EXISTS public.events;
+
+-- Enlever colonnes inutiles : id_integer, wkt, paragraphs_list, articles_list
+SELECT event_id, hazard_type, disaster_score, hasard_type_score, latitude, longitude, event_time, bbox_event, n_languages, n_source_countries, n_paragraphs, n_articles, start_time, end_time, duration, mostfreq_death, n_mostfreq_death, time_mostfreq_death, max_death, n_max_death, time_max_death, median_death, mostfreq_homeless, n_mostfreq_homeless, time_mostfreq_homeless, max_homeless, n_max_homeless, time_max_homeless, median_homeless, mostfreq_injured, n_mostfreq_injured, time_mostfreq_injured, max_injured, n_max_injured, time_max_injured, median_injured, mostfreq_affected, n_mostfreq_affected, time_mostfreq_affected, max_affected, n_max_affected, time_max_affected, median_affected, mostfreq_missing, n_mostfreq_missing, time_mostfreq_missing, max_missing, n_max_missing, time_max_missing, median_missing, mostfreq_evacuated, n_mostfreq_evacuated, time_mostfreq_evacuated, max_evacuated, n_max_evacuated, time_max_evacuated, median_evacuated, country, geom, primary_key, country_found
+INTO events
+FROM public.events2020_23;
+
+-- Index: events_geom_idx
+
+DROP INDEX IF EXISTS public.events_geom_idx;
+
+CREATE INDEX IF NOT EXISTS events_geom_idx
+    ON public.events USING gist
     (geom)
     WITH (buffering=auto)
     TABLESPACE pg_default;
 
 
-SELECT * FROM public.paragraphs2020_23
-LIMIT 100
+
+SELECT p.*
+FROM paragraphs2020_23 p
+JOIN event_paragraphs ep ON p.paragraph_id = ep.paragraph_id
+WHERE ep.event_id = '20200218E933CT20250417122827';
+
+
+1. Utiliser des virtual tables (vues SQL) dans GeoServer
+
+GeoServer permet de créer une couche basée sur une vue SQL avec jointure dans le fichier virtual table. Tu définis toi-même une jointure SQL entre tables.
+Exemple :
+
+SELECT 
+    e.event_id,
+    p.paragraph_id,
+    p.text
+FROM 
+    events2020_23_array e
+JOIN 
+    paragraphs2020_23 p 
+ON 
+    p.paragraph_id = ANY(e.paragraphs_array)
+
+Ensuite tu publies cette requête comme une nouvelle couche dans GeoServer (via featuretype -> SQL view), et tu peux interroger cette couche directement comme une couche GeoServer classique.
+
+👉 C'est la meilleure solution si tu veux vraiment encapsuler la logique de jointure côté GeoServer.
+2. Utiliser WFS 2.0 avec Join (complexe et rarement utilisé)
+
+GeoServer WFS 2.0 peut supporter des requêtes complexes avec jointures en XML comme ci-dessous :
+
+<wfs:Query typeNames="webGIS:paragraphs2020_23">
+    <fes:Filter>
+        <fes:PropertyIsEqualTo>
+            <fes:ValueReference>paragraph_id</fes:ValueReference>
+            <fes:ValueReference>webGIS:events2020_23_array/paragraphs_array</fes:ValueReference>
+        </fes:PropertyIsEqualTo>
+    </fes:Filter>
+</wfs:Query>
+
+⚠️ Ce n’est pas supporté en CQL, et c’est compliqué à implémenter via des appels AJAX ou dans des interfaces simples.
+3. viewparams : transmettre des variables à une requête SQL préconfigurée
+
+Si tu définis une vue SQL dans GeoServer comme :
+
+SELECT * FROM paragraphs2020_23 WHERE paragraph_id = ANY(
+    SELECT paragraphs_array FROM events2020_23_array WHERE event_id = :eventid
+)
+
+Tu peux ensuite l'appeler comme :
+
+let url = "http://localhost:8080/geoserver/webGIS/ows?" +
+    "service=WFS&version=1.1.0&request=GetFeature" +
+    "&typeName=webGIS:paragraphs_from_event" + // la vue
+    "&outputFormat=application/json" +
+    "&viewparams=" + encodeURIComponent("eventid:20220628E8979CT20250417122827");
+
+Oui, tu peux faire des jointures entre couches dans GeoServer en configurant une vue SQL (virtual table). C’est la façon propre et maintenable de gérer ta logique de lien entre events et paragraphs.
+
+Souhaites-tu que je t’aide à :
+
+    Rédiger la SQL complète pour la vue ?
+
+    Créer le fichier virtual table pour GeoServer ?
+
+    Lister les étapes dans GeoServer pour configurer cette couche ?
