@@ -403,8 +403,8 @@ Vue.createApp({
             let n_events_country = [];
             for (c of this.countries_list) {
                 let cqlFilter = "country_found = '" + c + "'";
-                let url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
-                    + "&outputFormat=application/json&resultType=hits" + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
+                let url_n_events = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` 
+                    + `&outputFormat=application/json` + `&resultType=hits` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
                 let xmlString = await fetch(url_n_events).then(r => r.text());
                 let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
                 let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
@@ -1078,7 +1078,7 @@ Vue.createApp({
                 "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
-                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "unnamed_column", "country", "wkt", "country_found"];
+                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
             let paragraph_property_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
 
             // Récupérer les valeurs des paragraphs_id
@@ -1105,8 +1105,8 @@ Vue.createApp({
                 // Partie filtre cql de la requête
                 let cqlFilter = "paragraph_id IN (" + paragraphs_list_50.map(id => `'${id}'`).join(",") + ")";
                 // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
-                let url = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23"
-                + "&outputFormat=application/json&CQL_FILTER=" + encodeURIComponent(cqlFilter);
+                let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23`
+                    + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
                 return fetch(url).then(res => res.json());
             });
 
@@ -1161,15 +1161,15 @@ Vue.createApp({
                 "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
-                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "unnamed_column", "country", "wkt", "country_found"];
+                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
             let paragraph_property_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
 
             // Création du tableau pour le join final, initialisation du texte (header)
             let paragraph_content_lines = [paragraph_download_properties.join(',')];
 
             // Récupérer le nombre de paragraphs
-            let url_n_paragraphs = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23" 
-                + "&outputFormat=application/json&resultType=hits"; 
+            let url_n_paragraphs = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23`
+                + `&outputFormat=application/json` + `&resultType=hits`; 
             let xmlString = await fetch(url_n_paragraphs).then(r => r.text());
             let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
             let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
@@ -1181,7 +1181,7 @@ Vue.createApp({
             let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
                 let offset = 50 * i;
                 let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23`
-                    + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}`;
+                    + `&outputFormat=application/json` + `&maxFeatures=50&startIndex=${offset}`;
                 return fetch(url).then(res => res.json());
             });
 
@@ -1235,23 +1235,23 @@ Vue.createApp({
             }
 
             // Liste des propriétés
-            let event_download_properties = ["id_integer", "event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
-                "event_time", "bbox_event", "n_languages", "n_source_countries", "paragraphs_list", "articles_list", "n_paragraphs", "n_articles", 
+            let event_download_properties = ["event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
+                "event_time", "bbox_event", "n_languages", "n_source_countries", "paragraphs_list", "n_paragraphs", "n_articles", 
                 "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
                 "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
                 "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
                 "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", 
                 "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
                 "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
-                "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "wkt", "country_found"];
-            let event_property_str = ["bbox_event", "paragraphs_list", "articles_list"];
+                "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
+            let event_property_str = ["bbox_event", "paragraphs_list"];
             let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
                 "paragraph_id", "original_text", "disaster_label", "disaster_score", "hasard_type", "hasard_type_score", "nb_death", "score_death", "answer_death",
                 "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
                 "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
-                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "unnamed_column", "country", "wkt", "country_found"];
+                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
 
             // Création des tableaux pour le join final, initialisation des textes (header)
             let event_content_lines = [event_download_properties.join(',')];
@@ -1275,13 +1275,13 @@ Vue.createApp({
                 // Récupérer le nombre d'events
                 let url_n_events;
                 if (type == 'all') {
-                    url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
-                    + "&outputFormat=application/json&resultType=hits";
+                    url_n_events = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
+                        + `&outputFormat=application/json` + `&resultType=hits`;
                 }
                 if (type == 'filter' && cqlFilter !== 'No event') {
-                    url_n_events = "http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23" 
-                    + "&outputFormat=application/json&resultType=hits" + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
-                }     
+                    url_n_events = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
+                        + `&outputFormat=application/json` + `&resultType=hits` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+                }   
                 let xmlString = await fetch(url_n_events).then(r => r.text());
                 let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
                 let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
@@ -1313,13 +1313,13 @@ Vue.createApp({
                     let offset = 50 * i;
                     let url;
                     if (type == 'all') {
-                        url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23` 
-                        + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}`;
+                        url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` 
+                            + `&outputFormat=application/json` + `&maxFeatures=50&startIndex=${offset}`;
                     }
                     if (type == 'filter') {
-                        url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23` 
-                        + `&outputFormat=application/json&maxFeatures=50&startIndex=${offset}` + "&CQL_FILTER=" + encodeURIComponent(cqlFilter);
-                    }  
+                        url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` 
+                            + `&outputFormat=application/json` + `&maxFeatures=50&startIndex=${offset}` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+                    }
                     return fetch(url).then(res => res.json())
                     .then(data => {
                         completed++;
@@ -1615,9 +1615,8 @@ Vue.createApp({
             source: new ol.source.Vector({
                 format: new ol.format.GeoJSON(),
                 url: function(extent) {
-                    return 'http://localhost:8080/geoserver/webGIS/ows?' +
-                        'service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events2020_23&' +
-                        'outputFormat=application/json&bbox=' + extent.join(',') + ',EPSG:3857';
+                    return `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
+                        + `&outputFormat=application/json` + `&bbox=` + extent.join(',') + `,EPSG:3857`;
                 },
                 strategy: ol.loadingstrategy.bbox
             }),
