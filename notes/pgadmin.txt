@@ -286,69 +286,37 @@ CREATE INDEX IF NOT EXISTS events_geom_idx
     WITH (buffering=auto)
     TABLESPACE pg_default;
 
+ALTER TABLE events ADD PRIMARY KEY (primary_key);
 
 
-SELECT p.*
-FROM paragraphs2020_23 p
-JOIN event_paragraphs ep ON p.paragraph_id = ep.paragraph_id
-WHERE ep.event_id = '20200218E933CT20250417122827';
+Table paragraphs :
 
+-- Table: public.paragraphs
 
-1. Utiliser des virtual tables (vues SQL) dans GeoServer
+DROP TABLE IF EXISTS public.paragraphs;
 
-GeoServer permet de créer une couche basée sur une vue SQL avec jointure dans le fichier virtual table. Tu définis toi-même une jointure SQL entre tables.
-Exemple :
+-- Enlever colonnes inutiles : unnamed_column, wkt
+SELECT article_id, title, extracted_text, paragraph_time, article_language, source_country, domain_url, paragraph_id, original_text, disaster_label, disaster_score, hasard_type, hasard_type_score, nb_death, score_death, answer_death, nb_homeless, score_homeless, answer_homeless, nb_injured, score_injured, answer_injured, nb_affected, score_affected, answer_affected, nb_missing, score_missing, answer_missing, nb_evacuated, score_evacuated, answer_evacuated, publication_time, extracted_location, ner_score, latitude, longitude, std_dev, min_lat, max_lat, min_lon, max_lon, n_locations, nb_death_min, nb_death_max, nb_homeless_min, nb_homeless_max, nb_injured_min, nb_injured_max, nb_affected_min ,nb_affected_max, nb_missing_min, nb_missing_max, nb_evacuated_min, nb_evacuated_max, country, geom, primary_key, country_found
+INTO paragraphs
+FROM public.paragraphs2020_23;
 
-SELECT 
-    e.event_id,
-    p.paragraph_id,
-    p.text
-FROM 
-    events2020_23_array e
-JOIN 
-    paragraphs2020_23 p 
-ON 
-    p.paragraph_id = ANY(e.paragraphs_array)
+-- Index: paragraphs_geom_idx
 
-Ensuite tu publies cette requête comme une nouvelle couche dans GeoServer (via featuretype -> SQL view), et tu peux interroger cette couche directement comme une couche GeoServer classique.
+DROP INDEX IF EXISTS public.paragraphs_geom_idx;
 
-👉 C'est la meilleure solution si tu veux vraiment encapsuler la logique de jointure côté GeoServer.
-2. Utiliser WFS 2.0 avec Join (complexe et rarement utilisé)
+CREATE INDEX IF NOT EXISTS paragraphs_geom_idx
+    ON public.paragraphs USING gist
+    (geom)
+    WITH (buffering=auto)
+    TABLESPACE pg_default;
 
-GeoServer WFS 2.0 peut supporter des requêtes complexes avec jointures en XML comme ci-dessous :
+-- Index: paragraphs_paragraph_id_idx
 
-<wfs:Query typeNames="webGIS:paragraphs2020_23">
-    <fes:Filter>
-        <fes:PropertyIsEqualTo>
-            <fes:ValueReference>paragraph_id</fes:ValueReference>
-            <fes:ValueReference>webGIS:events2020_23_array/paragraphs_array</fes:ValueReference>
-        </fes:PropertyIsEqualTo>
-    </fes:Filter>
-</wfs:Query>
+DROP INDEX IF EXISTS public.paragraphs_paragraph_id_idx;
 
-⚠️ Ce n’est pas supporté en CQL, et c’est compliqué à implémenter via des appels AJAX ou dans des interfaces simples.
-3. viewparams : transmettre des variables à une requête SQL préconfigurée
+CREATE INDEX IF NOT EXISTS paragraphs_paragraph_id_idx
+    ON public.paragraphs USING btree
+    (paragraph_id ASC NULLS LAST)
+    TABLESPACE pg_default;
 
-Si tu définis une vue SQL dans GeoServer comme :
-
-SELECT * FROM paragraphs2020_23 WHERE paragraph_id = ANY(
-    SELECT paragraphs_array FROM events2020_23_array WHERE event_id = :eventid
-)
-
-Tu peux ensuite l'appeler comme :
-
-let url = "http://localhost:8080/geoserver/webGIS/ows?" +
-    "service=WFS&version=1.1.0&request=GetFeature" +
-    "&typeName=webGIS:paragraphs_from_event" + // la vue
-    "&outputFormat=application/json" +
-    "&viewparams=" + encodeURIComponent("eventid:20220628E8979CT20250417122827");
-
-Oui, tu peux faire des jointures entre couches dans GeoServer en configurant une vue SQL (virtual table). C’est la façon propre et maintenable de gérer ta logique de lien entre events et paragraphs.
-
-Souhaites-tu que je t’aide à :
-
-    Rédiger la SQL complète pour la vue ?
-
-    Créer le fichier virtual table pour GeoServer ?
-
-    Lister les étapes dans GeoServer pour configurer cette couche ?
+ALTER TABLE paragraphs ADD PRIMARY KEY (primary_key);

@@ -15,9 +15,33 @@ Geoserver v2.27.1
 
 Créer d’abord un nouveau Workspace (webGIS)
 Créer un Store, lié à votre base PostGIS (webGIS)
-Créer les layers (la géométrie est utilisée automatiquement)
+Créer les layers (la géométrie est utilisée automatiquement) (events)
 Layer : 
 Declared SRS: EPSG:4326
 Bounding Boxes : cliquer sur Compute from SRS bounds puis sur Compute from native bounds
-layer events2020_23 et paragraphs2020_23
 Vérifier que ça fonctionne avec le layer preview
+
+GeoServer permet de créer des couches virtuelles (virtual tables) avec des paramètres dynamiques (si PostGIS en back-end).
+%event_id% est un paramètre dans la couche virtuelle. Cela permet des appels comme :
+.../wfs?typename=my_layer&viewparams=event_id:1
+Cela permet d'éviter une répétition des mêmes paragraphs si un même paragraph est lié à plusieurs event_id.
+Les Virtual Tables sont des couches basées sur des requêtes SQL paramétrées (via viewparams). Cette méthode : évite les redondances, n’extrait que les données nécessaires, est beaucoup plus légère et rapide et est scalable même avec beaucoup d’événements et de paragraphes
+Cela retourne uniquement les paragraphs liés à l’event_id 1, sans surcharge mémoire ni duplication excessive.
+Utiliser des virtual tables (vues SQL) dans GeoServer
+GeoServer permet de créer une couche basée sur une vue SQL avec jointure dans le fichier virtual table. Tu définis toi-même une jointure SQL entre tables.
+Ensuite tu publies cette requête comme une nouvelle couche dans GeoServer (via featuretype -> SQL view), et tu peux interroger cette couche directement comme une couche GeoServer classique.
+
+Créer une virtual table pour accéder aux paragraphs à partir de l'event_id auxquels ils sont liés (vue_paragraphs):
+Dans New layer, choisir le store webGIS
+Cliquer sur Configure new SQL view
+SQL statement : 
+SELECT p.*
+FROM paragraphs p
+JOIN event_paragraphs ep ON p.paragraph_id = ep.paragraph_id
+WHERE ep.event_id = '%event_id%'
+SQL view parameters :
+Cliquer sur Guess parameters from SQL
+Paramètre: Name: event_id Default value:19530131E0CT20250417122827 Validation: ^[\w\d\s]+$
+Attributes : Cliquer sur Refresh
+Refaire les bbox à la main : -180 -90 180 90
+
