@@ -35,13 +35,15 @@ Créer une virtual table pour accéder aux paragraphs à partir de l'event_id au
 Dans New layer, choisir le store webGIS
 Cliquer sur Configure new SQL view
 SQL statement : 
-SELECT p.*
+SELECT (p.paragraph_id || '_' || ep.event_id) AS composite_id, p.*
 FROM paragraphs p
 JOIN event_paragraphs ep ON p.paragraph_id = ep.paragraph_id
 WHERE ep.event_id = '%event_id%'
 SQL view parameters :
 Cliquer sur Guess parameters from SQL
 Paramètre: Name: event_id Default value:19530131E0CT20250417122827 Validation: ^[\w\d\s]+$
-Attributes : Cliquer sur Refresh
+Attributes : 
+Cliquer sur Refresh
+Sélectionner composite_id pour être l'identifier (clé primaire)
 Refaire les bbox à la main : -180 -90 180 90
 
