@@ -112,7 +112,7 @@ Vue.createApp({
                 this.affichage_bbox_event(this.selected_event);
 
                 // Afficher les paragraphs liés à l'event
-                this.affichage_paragraphs_geoserver(this.selected_event);
+                this.affichage_paragraphs_geoserver();
 
             })
             
@@ -256,51 +256,71 @@ Vue.createApp({
         },
 
         // Affichage des paragraphs correspondant à l'event (depuis Geoserver)
-        affichage_paragraphs_geoserver(feature) {
+        async affichage_paragraphs_geoserver() {
 
-            // // Récupérer les valeurs des paragraphs_id
-            // let paragraphs_list = feature.get('paragraphs_list');
-            // // Nettoyage de la chaîne pour enlever les parenthèses extérieures
-            // paragraphs_list = paragraphs_list.replace(/^\(|\)$/g, '');
-            // // Transformation en tableau
-            // paragraphs_list = paragraphs_list.split(',').map(e => e.trim().replace(/^'|'$/g, ''));
+            // Récupérer le nombre de paragraphs
+            let url_n_paragraphs = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs`
+                + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}` + `&resultType=hits`;
+            let xmlString = await fetch(url_n_paragraphs).then(r => r.text());
+            let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
+            let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
+            let n_paragraphs = parseInt(featureCollection.getAttribute("numberOfFeatures"));
 
-            // // Création de listes de 50 paragraph_id (url peut être trop longue si on ne fait qu'une liste)
-            // let nb_boucles = Math.ceil(paragraphs_list.length/50);
-
-            // for (let i = 0; i < nb_boucles; i++) {
-
-            //     // Tableaux de 50 paragraph_id
-            //     let paragraphs_list_50 = paragraphs_list.slice(50*i, 50*(i+1));
-                // Partie filtre cql de la requête
-                // let cqlFilter = "paragraph_id IN (" + paragraphs_list_50.map(id => `'${id}'`).join(",") + ")";
-
-                let cqlFilter = "event_id = '" + this.event_id + "'";
-
-
-                // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
-                // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs`
-                //     + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+            // Lancer tous les fetch en parallèle, pour récupérer les paragraphs 50 par 50
+            let batchSize = 50;
+            let nb_boucles = Math.ceil(n_paragraphs / batchSize);
+            // let completed = 0;
+            let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
+                let offset = 50 * i;
                 let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs`
-                    + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
-                    console.log(url)
-                fetch(url)
-                .then(result => result.json())
-                .then(json => {
+                + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}` + `&maxFeatures=50&startIndex=${offset}`;
+                console.log(url)
+                return fetch(url).then(res => res.json())
+                // .then(data => {
+                //     completed++;
+                //     this.fetch_progression = Math.round((completed / nb_boucles) * 100);
+                //     return data;
+                // });
+            });
 
-                    // Récupération des groupes de paragraphs
-                    let features = new ol.format.GeoJSON().readFeatures(json, {
-                        featureProjection: 'EPSG:3857'  // Pour afficher correctement sur la carte
-                    });
-
-                    // Chaque paragraph récupéré est ajouté à la couche paragraphs
-                    features.forEach(feature => {
-                        this.paragraphs_layer.getSource().addFeature(feature);
-                    });
-
+            // Attendre d'avoir récupéré toutes les promesses
+            let results = await Promise.all(fetchPromises);
+console.log(results)
+            // let compteur_pages = 0;
+            for (data of results) {
+console.log(data)
+                // Récupération des groupes de paragraphs
+                let features = new ol.format.GeoJSON().readFeatures(data, {
+                    dataProjection: 'EPSG:4326',         // Projection des données dans le GeoJSON
+                    featureProjection: 'EPSG:3857'       // Projection de la carte (Web Mercator)
                 });
 
-            // }
+                // Chaque paragraph récupéré est ajouté à la couche paragraphs
+                features.forEach(feature => {
+                    this.paragraphs_layer.getSource().addFeature(feature);
+                });
+            
+            }
+
+            // // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
+            // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs`
+            //     + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
+            // fetch(url)
+            // .then(result => result.json())
+            // .then(json => {
+                
+            //     // Récupération des groupes de paragraphs
+            //     let features = new ol.format.GeoJSON().readFeatures(json, {
+            //         dataProjection: 'EPSG:4326',         // Projection des données dans le GeoJSON
+            //         featureProjection: 'EPSG:3857'       // Projection de la carte (Web Mercator)
+            //     });
+
+            //     // Chaque paragraph récupéré est ajouté à la couche paragraphs
+            //     features.forEach(feature => {
+            //         this.paragraphs_layer.getSource().addFeature(feature);
+            //     });
+
+            // });
             
         },
 
@@ -490,38 +510,45 @@ Vue.createApp({
             // Liste permettent d'éviter les paragraphs en double
             let seen_paragraph_id = new Set();
 
-            // Récupérer les valeurs des paragraphs_id
-            let paragraphs_list = feature.get('paragraphs_list')
+            // // Récupérer les valeurs des paragraphs_id
+            // let paragraphs_list = feature.get('paragraphs_list')
 
-            // Nettoyage de la chaîne pour enlever les parenthèses extérieures
-            paragraphs_list = paragraphs_list.replace(/^\(|\)$/g, '');
-            // Transformation en tableau
-            paragraphs_list = paragraphs_list.split(',').map(e => e.trim().replace(/^'|'$/g, ''));
-            // Récupération du nombre de paragraphs
-            let n_paragraphs = paragraphs_list.length;
+            // // Nettoyage de la chaîne pour enlever les parenthèses extérieures
+            // paragraphs_list = paragraphs_list.replace(/^\(|\)$/g, '');
+            // // Transformation en tableau
+            // paragraphs_list = paragraphs_list.split(',').map(e => e.trim().replace(/^'|'$/g, ''));
+            // // Récupération du nombre de paragraphs
+            // let n_paragraphs = paragraphs_list.length;
 
-            // Lancer tous les fetch en parallèle, pour récupérer les paragraphs 50 par 50
-            let batchSize = 50;
-            let nb_boucles = Math.ceil(n_paragraphs / batchSize);
-            let completed = 0;
-            let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
-                // Tableaux de 50 paragraph_id
-                let paragraphs_list_50 = paragraphs_list.slice(50*i, 50*(i+1));
-                // Partie filtre cql de la requête
-                let cqlFilter = "paragraph_id IN (" + paragraphs_list_50.map(id => `'${id}'`).join(",") + ")";
-                // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
+            // // Lancer tous les fetch en parallèle, pour récupérer les paragraphs 50 par 50
+            // let batchSize = 50;
+            // let nb_boucles = Math.ceil(n_paragraphs / batchSize);
+            // let completed = 0;
+            // let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
+            //     // Tableaux de 50 paragraph_id
+            //     let paragraphs_list_50 = paragraphs_list.slice(50*i, 50*(i+1));
+            //     // Partie filtre cql de la requête
+            //     let cqlFilter = "paragraph_id IN (" + paragraphs_list_50.map(id => `'${id}'`).join(",") + ")";
+            //     // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
+            //     let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23`
+            //         + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+            //     return fetch(url).then(res => res.json())
+            //     .then(data => {
+            //         completed++;
+            //         this.fetch_progression = Math.round((completed / nb_boucles) * 100);
+            //         return data;
+            //     });
+            // });
+
+            // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
                 let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23`
                     + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
-                return fetch(url).then(res => res.json())
-                .then(data => {
-                    completed++;
-                    this.fetch_progression = Math.round((completed / nb_boucles) * 100);
-                    return data;
-                });
-            });
+                fetch(url)
+                .then(res => res.json())
 
-            // Attendre d'avoir récupéré toutes les promesses
-            let results = await Promise.all(fetchPromises);
+
+            // // Attendre d'avoir récupéré toutes les promesses
+            // let results = await Promise.all(fetchPromises);
 
             let compteur_pages = 0;
             results.forEach((data, i) => {
