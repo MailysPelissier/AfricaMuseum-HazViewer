@@ -225,9 +225,42 @@ UPDATE paragraphs2020_23 SET wkt=concat('POINT (',longitude,' ',latitude,')');
 UPDATE paragraphs2020_23 SET geom=ST_GeomFromText(wkt);
 UPDATE paragraphs2020_23 SET country_found = c.admin FROM countries c WHERE ST_Contains(c.geom, paragraphs2020_23.geom);
 
+DROP TABLE IF EXISTS public.paragraphs2020_23_clean;
+
+CREATE TABLE paragraphs2020_23_clean AS
+SELECT DISTINCT ON (paragraph_id) *
+FROM paragraphs2020_23
+ORDER BY paragraph_id, primary_key;
+
+DROP TABLE paragraphs2020_23;
+
+ALTER TABLE paragraphs2020_23_clean
+RENAME TO paragraphs2020_23;
+
+-- Index: paragraphs2020_23_geom_idx
+
+DROP INDEX IF EXISTS public.paragraphs2020_23_geom_idx;
+
+CREATE INDEX IF NOT EXISTS paragraphs2020_23_geom_idx
+    ON public.paragraphs2020_23 USING gist
+    (geom)
+    WITH (buffering=auto)
+    TABLESPACE pg_default;
+	
+-- Index: paragraphs2020_23_paragraph_id_idx
+
+DROP INDEX IF EXISTS public.paragraphs2020_23_paragraph_id_idx;
+
+CREATE INDEX IF NOT EXISTS paragraphs2020_23_paragraph_id_idx
+    ON public.paragraphs2020_23 USING btree
+    (paragraph_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+
 
 
 -- Table: public.event_paragraphs
+
+DROP MATERIALIZED VIEW IF EXISTS vue_paragraphs;
 
 DROP TABLE IF EXISTS public.event_paragraphs;
 
@@ -319,3 +352,21 @@ CREATE INDEX IF NOT EXISTS paragraphs_paragraph_id_idx
     TABLESPACE pg_default;
 
 ALTER TABLE paragraphs ADD PRIMARY KEY (primary_key);
+
+
+
+-- Materialized view : public.vue_paragraphs
+
+DROP MATERIALIZED VIEW IF EXISTS vue_paragraphs;
+
+CREATE MATERIALIZED VIEW vue_paragraphs AS
+SELECT 
+    (p.paragraph_id || '_' || ep.event_id) AS composite_id, ep.event_id, p.*
+FROM 
+    paragraphs p
+JOIN 
+    event_paragraphs ep ON p.paragraph_id = ep.paragraph_id;
+
+CREATE UNIQUE INDEX idx_vue_paragraphs_id ON vue_paragraphs(composite_id);
+
+CREATE INDEX idx_vue_paragraphs_geom ON vue_paragraphs USING GIST(geom);

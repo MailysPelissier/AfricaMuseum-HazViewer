@@ -46,4 +46,3 @@ Attributes :
 Cliquer sur Refresh
 Sélectionner composite_id pour être l'identifier (clé primaire)
 Refaire les bbox à la main : -180 -90 180 90
-
