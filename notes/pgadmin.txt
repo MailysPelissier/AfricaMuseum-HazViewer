@@ -12,12 +12,14 @@ cd C:\Program Files\PostgreSQL\17\bin
 shp2pgsql -s 4326 -c -D -i -I C:\Mailys\data\ne_10m_admin_0_countries\ne_10m_admin_0_countries.shp countries | psql -h localhost -U postgres -d webGIS
 
 Tables :
-- Events v3
-- Paragraphs v3
-- Table de jointure
+- Events v3 (21964)
+- Paragraphs v3 (1529769)
+- Table de jointure (2210199)
 - Table events --> Enlever colonnes inutiles : id_integer, wkt, paragraphs_list, articles_list
 - Table paragraphs --> Enlever colonnes inutiles : unnamed_column, wkt
 
+Vue matérialisée :
+- Vue paragraphs pg
 
 
 -- Table: public.events2020_23
@@ -227,12 +229,12 @@ UPDATE paragraphs2020_23 SET country_found = c.admin FROM countries c WHERE ST_C
 
 DROP TABLE IF EXISTS public.paragraphs2020_23_clean;
 
-CREATE TABLE paragraphs2020_23_clean AS
+CREATE TABLE IF NOT EXISTS paragraphs2020_23_clean AS
 SELECT DISTINCT ON (paragraph_id) *
 FROM paragraphs2020_23
 ORDER BY paragraph_id, primary_key;
 
-DROP TABLE paragraphs2020_23;
+DROP TABLE IF EXISTS paragraphs2020_23;
 
 ALTER TABLE paragraphs2020_23_clean
 RENAME TO paragraphs2020_23;
@@ -260,7 +262,7 @@ CREATE INDEX IF NOT EXISTS paragraphs2020_23_paragraph_id_idx
 
 -- Table: public.event_paragraphs
 
-DROP MATERIALIZED VIEW IF EXISTS vue_paragraphs;
+DROP MATERIALIZED VIEW IF EXISTS vue_paragraphs_pg;
 
 DROP TABLE IF EXISTS public.event_paragraphs;
 
@@ -355,11 +357,11 @@ ALTER TABLE paragraphs ADD PRIMARY KEY (primary_key);
 
 
 
--- Materialized view : public.vue_paragraphs
+-- Materialized view : public.vue_paragraphs_pg
 
-DROP MATERIALIZED VIEW IF EXISTS vue_paragraphs;
+DROP MATERIALIZED VIEW IF EXISTS vue_paragraphs_pg;
 
-CREATE MATERIALIZED VIEW vue_paragraphs AS
+CREATE MATERIALIZED VIEW IF NOT EXISTS vue_paragraphs_pg AS
 SELECT 
     (p.paragraph_id || '_' || ep.event_id) AS composite_id, ep.event_id, p.*
 FROM 
@@ -367,6 +369,30 @@ FROM
 JOIN 
     event_paragraphs ep ON p.paragraph_id = ep.paragraph_id;
 
-CREATE UNIQUE INDEX idx_vue_paragraphs_id ON vue_paragraphs(composite_id);
+-- Index: vue_paragraphs_pg_composite_id_idx
 
-CREATE INDEX idx_vue_paragraphs_geom ON vue_paragraphs USING GIST(geom);
+DROP INDEX IF EXISTS public.vue_paragraphs_pg_composite_id_idx;
+
+CREATE UNIQUE INDEX IF NOT EXISTS vue_paragraphs_pg_composite_id_idx
+    ON public.vue_paragraphs_pg USING btree
+    (composite_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+-- Index: vue_paragraphs_pg_geom_idx
+
+DROP INDEX IF EXISTS public.vue_paragraphs_pg_geom_idx;
+
+CREATE INDEX IF NOT EXISTS vue_paragraphs_pg_geom_idx
+    ON public.vue_paragraphs_pg USING gist
+    (geom)
+    WITH (buffering=auto)
+    TABLESPACE pg_default;
+
+-- Index: vue_paragraphs_pg_event_id_idx
+
+DROP INDEX IF EXISTS public.vue_paragraphs_pg_event_id_idx;
+
+CREATE INDEX IF NOT EXISTS vue_paragraphs_pg_event_id_idx
+    ON public.vue_paragraphs_pg USING btree
+    (event_id ASC NULLS LAST)
+    TABLESPACE pg_default;
