@@ -1236,7 +1236,7 @@ Vue.createApp({
 
             // Liste des propriétés
             let event_download_properties = ["event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
-                "event_time", "bbox_event", "n_languages", "n_source_countries", "paragraphs_list", "n_paragraphs", "n_articles", 
+                "event_time", "bbox_event", "n_languages", "n_source_countries", "n_paragraphs", "n_articles", 
                 "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
                 "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
                 "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
@@ -1244,7 +1244,7 @@ Vue.createApp({
                 "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
                 "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
                 "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
-            let event_property_str = ["bbox_event", "paragraphs_list"];
+            let event_property_str = ["bbox_event"];
             let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
                 "paragraph_id", "original_text", "disaster_label", "disaster_score", "hasard_type", "hasard_type_score", "nb_death", "score_death", "answer_death",
                 "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 

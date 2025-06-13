@@ -256,41 +256,20 @@ Vue.createApp({
         },
 
         // Affichage des paragraphs correspondant à l'event (depuis Geoserver)
-        async affichage_paragraphs_geoserver() {
+        affichage_paragraphs_geoserver() {
 
-            // Récupérer le nombre de paragraphs
-            let url_n_paragraphs = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs`
-                + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}` + `&resultType=hits`;
-            let xmlString = await fetch(url_n_paragraphs).then(r => r.text());
-            let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
-            let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
-            let n_paragraphs = parseInt(featureCollection.getAttribute("numberOfFeatures"));
-
-            // Lancer tous les fetch en parallèle, pour récupérer les paragraphs 50 par 50
-            let batchSize = 50;
-            let nb_boucles = Math.ceil(n_paragraphs / batchSize);
-            // let completed = 0;
-            let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
-                let offset = 50 * i;
-                let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs`
-                + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}` + `&maxFeatures=50&startIndex=${offset}`;
-                console.log(url)
-                return fetch(url).then(res => res.json())
-                // .then(data => {
-                //     completed++;
-                //     this.fetch_progression = Math.round((completed / nb_boucles) * 100);
-                //     return data;
-                // });
-            });
-
-            // Attendre d'avoir récupéré toutes les promesses
-            let results = await Promise.all(fetchPromises);
-console.log(results)
-            // let compteur_pages = 0;
-            for (data of results) {
-console.log(data)
+            // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
+            // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_geo`
+            //     + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
+            let cqlFilter = "event_id = '" + this.event_id + "'";
+            let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
+                + `&outputFormat=application/json`  + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+            fetch(url)
+            .then(result => result.json())
+            .then(json => {
+                
                 // Récupération des groupes de paragraphs
-                let features = new ol.format.GeoJSON().readFeatures(data, {
+                let features = new ol.format.GeoJSON().readFeatures(json, {
                     dataProjection: 'EPSG:4326',         // Projection des données dans le GeoJSON
                     featureProjection: 'EPSG:3857'       // Projection de la carte (Web Mercator)
                 });
@@ -299,28 +278,8 @@ console.log(data)
                 features.forEach(feature => {
                     this.paragraphs_layer.getSource().addFeature(feature);
                 });
-            
-            }
 
-            // // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
-            // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs`
-            //     + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
-            // fetch(url)
-            // .then(result => result.json())
-            // .then(json => {
-                
-            //     // Récupération des groupes de paragraphs
-            //     let features = new ol.format.GeoJSON().readFeatures(json, {
-            //         dataProjection: 'EPSG:4326',         // Projection des données dans le GeoJSON
-            //         featureProjection: 'EPSG:3857'       // Projection de la carte (Web Mercator)
-            //     });
-
-            //     // Chaque paragraph récupéré est ajouté à la couche paragraphs
-            //     features.forEach(feature => {
-            //         this.paragraphs_layer.getSource().addFeature(feature);
-            //     });
-
-            // });
+            });
             
         },
 
@@ -492,7 +451,7 @@ console.log(data)
         },
 
         // Création du texte de download des paragraphs liés à un event
-        async paragraph_download_text_filter(feature) {
+        async paragraph_download_text_filter() {
 
             // Liste des propriétés des paragraphs
             let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
@@ -510,55 +469,26 @@ console.log(data)
             // Liste permettent d'éviter les paragraphs en double
             let seen_paragraph_id = new Set();
 
-            // // Récupérer les valeurs des paragraphs_id
-            // let paragraphs_list = feature.get('paragraphs_list')
-
-            // // Nettoyage de la chaîne pour enlever les parenthèses extérieures
-            // paragraphs_list = paragraphs_list.replace(/^\(|\)$/g, '');
-            // // Transformation en tableau
-            // paragraphs_list = paragraphs_list.split(',').map(e => e.trim().replace(/^'|'$/g, ''));
-            // // Récupération du nombre de paragraphs
-            // let n_paragraphs = paragraphs_list.length;
-
-            // // Lancer tous les fetch en parallèle, pour récupérer les paragraphs 50 par 50
-            // let batchSize = 50;
-            // let nb_boucles = Math.ceil(n_paragraphs / batchSize);
-            // let completed = 0;
-            // let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
-            //     // Tableaux de 50 paragraph_id
-            //     let paragraphs_list_50 = paragraphs_list.slice(50*i, 50*(i+1));
-            //     // Partie filtre cql de la requête
-            //     let cqlFilter = "paragraph_id IN (" + paragraphs_list_50.map(id => `'${id}'`).join(",") + ")";
-            //     // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
-            //     let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23`
-            //         + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
-            //     return fetch(url).then(res => res.json())
-            //     .then(data => {
-            //         completed++;
-            //         this.fetch_progression = Math.round((completed / nb_boucles) * 100);
-            //         return data;
-            //     });
-            // });
-
-            // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
-                let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23`
-                    + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
-                fetch(url)
-                .then(res => res.json())
-
-
-            // // Attendre d'avoir récupéré toutes les promesses
-            // let results = await Promise.all(fetchPromises);
-
-            let compteur_pages = 0;
-            results.forEach((data, i) => {
-                let features = data.features || [];
+            // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
+            // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_geo`
+            //     + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
+            let cqlFilter = "event_id = '" + this.event_id + "'";
+            let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
+                + `&outputFormat=application/json`  + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+            await fetch(url)
+            .then(result => result.json())
+            .then(json => {
+                
+                // Récupération des groupes de paragraphs
+                let features = new ol.format.GeoJSON().readFeatures(json, {
+                    dataProjection: 'EPSG:4326',         // Projection des données dans le GeoJSON
+                    featureProjection: 'EPSG:3857'       // Projection de la carte (Web Mercator)
+                });
 
                 // Pour chaque paragraph
                 features.forEach(f => {
 
-                    let props = f.properties;
-                    let paragraph_id = props.paragraph_id;
+                    let paragraph_id = f.get('paragraph_id');
 
                     // Si ce paragraphe a déjà été ajouté, on passe
                     if (seen_paragraph_id.has(paragraph_id)) {
@@ -570,7 +500,7 @@ console.log(data)
                     // Création d'une ligne de texte (paragraphs.csv)
                     // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
                     let row = paragraph_download_properties.map(prop => {
-                        let value = props[prop];
+                        let value = f.get(prop);
                         if (value == null) return ''; // gérer les null
                         if (paragraph_property_str.includes(prop)) {
                             value = String(value).replace(/"/g, '""');
@@ -581,10 +511,6 @@ console.log(data)
                     paragraph_content_lines.push(row);
 
                 });
-
-                // Calcul de la progression
-                compteur_pages += 1
-                this.download_progression = parseInt(compteur_pages*100/nb_boucles)
 
             });
 
@@ -603,7 +529,7 @@ console.log(data)
 
             // Liste des propriétés des events
             let event_download_properties = ["event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
-                "event_time", "bbox_event", "n_languages", "n_source_countries", "paragraphs_list", "n_paragraphs", "n_articles", 
+                "event_time", "bbox_event", "n_languages", "n_source_countries", "n_paragraphs", "n_articles", 
                 "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
                 "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
                 "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
@@ -611,7 +537,7 @@ console.log(data)
                 "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
                 "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
                 "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
-            let event_property_str = ["bbox_event", "paragraphs_list"];
+            let event_property_str = ["bbox_event"];
 
             // Création du tableau pour le join final, initialisation du texte (header)
             let event_content_lines = [event_download_properties.join(',')];
@@ -639,8 +565,9 @@ console.log(data)
             }
 
             // Création du texte de paragraphs.csv
+            let paragraph_content_lines
             if(this.download_p || this.download_e_p) {
-                paragraph_content_lines = await this.paragraph_download_text_filter(f);
+                paragraph_content_lines = await this.paragraph_download_text_filter();
             }
                 
             // Désaffichage de la progression du download
