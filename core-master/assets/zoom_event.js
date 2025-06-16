@@ -259,9 +259,11 @@ Vue.createApp({
         affichage_paragraphs_geoserver() {
 
             // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
+            // Requête vue virtuelle geoserver
             // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_geo`
             //     + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
-            let cqlFilter = "event_id = '" + this.event_id + "'";
+            // Requête vue matérialisée postgres
+            let cqlFilter = `event_id = '${this.event_id}'`;
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
                 + `&outputFormat=application/json`  + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
             fetch(url)
@@ -470,25 +472,24 @@ Vue.createApp({
             let seen_paragraph_id = new Set();
 
             // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
+            // Requête vue virtuelle geoserver
             // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_geo`
             //     + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
-            let cqlFilter = "event_id = '" + this.event_id + "'";
+            // Requête vue matérialisée postgres
+            let cqlFilter = `event_id = '${this.event_id}'`
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
-                + `&outputFormat=application/json`  + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+                + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
             await fetch(url)
             .then(result => result.json())
             .then(json => {
                 
                 // Récupération des groupes de paragraphs
-                let features = new ol.format.GeoJSON().readFeatures(json, {
-                    dataProjection: 'EPSG:4326',         // Projection des données dans le GeoJSON
-                    featureProjection: 'EPSG:3857'       // Projection de la carte (Web Mercator)
-                });
+                let features = json.features;
 
                 // Pour chaque paragraph
                 features.forEach(f => {
 
-                    let paragraph_id = f.get('paragraph_id');
+                    let paragraph_id = f.properties.paragraph_id;
 
                     // Si ce paragraphe a déjà été ajouté, on passe
                     if (seen_paragraph_id.has(paragraph_id)) {
@@ -500,7 +501,7 @@ Vue.createApp({
                     // Création d'une ligne de texte (paragraphs.csv)
                     // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
                     let row = paragraph_download_properties.map(prop => {
-                        let value = f.get(prop);
+                        let value = f.properties[prop];
                         if (value == null) return ''; // gérer les null
                         if (paragraph_property_str.includes(prop)) {
                             value = String(value).replace(/"/g, '""');
@@ -542,9 +543,9 @@ Vue.createApp({
             // Création du tableau pour le join final, initialisation du texte (header)
             let event_content_lines = [event_download_properties.join(',')];
 
-            // Affichage de la progression du download
-            this.show_fetch_progression = true;
-            this.show_download_progression = true;
+            // // Affichage de la progression du download
+            // this.show_fetch_progression = true;
+            // this.show_download_progression = true;
 
             // Récupération de l'event
             let f = this.selected_event;
@@ -570,11 +571,11 @@ Vue.createApp({
                 paragraph_content_lines = await this.paragraph_download_text_filter();
             }
                 
-            // Désaffichage de la progression du download
-            this.show_fetch_progression = false;
-            this.show_download_progression = false;
-            this.fetch_progression = 0;
-            this.download_progression = 0;
+            // // Désaffichage de la progression du download
+            // this.show_fetch_progression = false;
+            // this.show_download_progression = false;
+            // this.fetch_progression = 0;
+            // this.download_progression = 0;
 
             // Téléchargement des events
             if(this.download_e || this.download_e_p) {

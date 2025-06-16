@@ -402,7 +402,7 @@ Vue.createApp({
 
             let n_events_country = [];
             for (c of this.countries_list) {
-                let cqlFilter = "country_found = '" + c + "'";
+                let cqlFilter = `country_found = '${c}'`;
                 let url_n_events = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` 
                     + `&outputFormat=application/json` + `&resultType=hits` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
                 let xmlString = await fetch(url_n_events).then(r => r.text());
@@ -1081,31 +1081,74 @@ Vue.createApp({
                 "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
             let paragraph_property_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
 
-            // Récupérer les valeurs des paragraphs_id
-            let paragraphs_list;
+            // Récupérer les valeurs d'event_id
+            let event_id;
             if (source === 'event layer') {
-                paragraphs_list = feature.get('paragraphs_list')
+                event_id = feature.get('event_id');
             }
             if (source === 'geoserver') {
-                paragraphs_list = feature.properties.paragraphs_list;
+                event_id = feature.properties.event_id;
             }
-            // Nettoyage de la chaîne pour enlever les parenthèses extérieures
-            paragraphs_list = paragraphs_list.replace(/^\(|\)$/g, '');
-            // Transformation en tableau
-            paragraphs_list = paragraphs_list.split(',').map(e => e.trim().replace(/^'|'$/g, ''));
-            // Récupération du nombre de paragraphs
-            let n_paragraphs = paragraphs_list.length;
+
+            // // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
+            // // Requête vue virtuelle geoserver
+            // // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_geo`
+            // //     + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
+            // // Requête vue matérialisée postgres
+            // let cqlFilter = `event_id = '${event_id}'`
+            // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
+            //     + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+            // await fetch(url)
+            // .then(result => result.json())
+            // .then(json => {
+                
+            //     // Récupération des groupes de paragraphs
+            //     let features = json.features;
+
+            //     // Pour chaque paragraph
+            //     features.forEach(f => {
+
+            //         let paragraph_id = f.properties.paragraph_id;
+
+            //         // Si ce paragraphe a déjà été ajouté, on passe
+            //         if (seen_paragraph_id.has(paragraph_id)) {
+            //             return;
+            //         }
+            //         // Marquer comme traité
+            //         seen_paragraph_id.add(paragraph_id);
+
+            //         // Création d'une ligne de texte (paragraphs.csv)
+            //         // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+            //         let row = paragraph_download_properties.map(prop => {
+            //             let value = f.properties[prop];
+            //             if (value == null) return ''; // gérer les null
+            //             if (paragraph_property_str.includes(prop)) {
+            //                 value = String(value).replace(/"/g, '""');
+            //                 return `"${value}"`;
+            //             }
+            //             return String(value);
+            //         }).join(',');
+            //         paragraph_content_lines.push(row);
+
+            //     });
+
+            // });
+
+            let cqlFilter = `event_id = '${event_id}'`
+
+            let url_n_paragraphs = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
+                + `&outputFormat=application/json` + `&resultType=hits` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+            let xmlString = await fetch(url_n_paragraphs).then(r => r.text());
+            let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
+            let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
+            let n_paragraphs = parseInt(featureCollection.getAttribute("numberOfFeatures"));
 
             // Lancer tous les fetch en parallèle, pour récupérer les paragraphs 50 par 50
             let batchSize = 50;
             let nb_boucles = Math.ceil(n_paragraphs / batchSize);
             let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
-                // Tableaux de 50 paragraph_id
-                let paragraphs_list_50 = paragraphs_list.slice(50*i, 50*(i+1));
-                // Partie filtre cql de la requête
-                let cqlFilter = "paragraph_id IN (" + paragraphs_list_50.map(id => `'${id}'`).join(",") + ")";
                 // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
-                let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23`
+                let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
                     + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
                 return fetch(url).then(res => res.json());
             });
@@ -1119,8 +1162,7 @@ Vue.createApp({
                 // Pour chaque paragraph
                 features.forEach(f => {
 
-                    let props = f.properties;
-                    let paragraph_id = props.paragraph_id;
+                    let paragraph_id = f.properties.paragraph_id;
 
                     // Si ce paragraphe a déjà été ajouté, on passe
                     if (seen_paragraph_id.has(paragraph_id)) {
@@ -1132,7 +1174,7 @@ Vue.createApp({
                     // Création d'une ligne de texte (paragraphs.csv)
                     // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
                     let row = paragraph_download_properties.map(prop => {
-                        let value = props[prop];
+                        let value = f.properties[prop];
                         if (value == null) return ''; // gérer les null
                         if (paragraph_property_str.includes(prop)) {
                             value = String(value).replace(/"/g, '""');
@@ -1146,7 +1188,7 @@ Vue.createApp({
 
             });
 
-            return paragraph_content_lines;
+            return { paragraph_content_lines, seen_paragraph_id };
 
         },
 
@@ -1196,9 +1238,8 @@ Vue.createApp({
 
                     // Création d'une ligne de texte (paragraphs.csv)
                     // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                    let props = f.properties;
                     let row = paragraph_download_properties.map(prop => {
-                        let value = props[prop];
+                        let value = f.properties[prop];
                         if (value == null) return ''; // gérer les null
                         if (paragraph_property_str.includes(prop)) {
                             value = String(value).replace(/"/g, '""');
@@ -1218,6 +1259,9 @@ Vue.createApp({
 
         // Download
         async download() {
+
+            d = Date.now()
+            console.log('d',d)
 
             // Définition du type de download
             let type = null;
@@ -1341,9 +1385,8 @@ Vue.createApp({
                         // Création d'une ligne de texte (events.csv)
                         // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
                         if(this.download_all_e || this.download_filter_e || this.download_filter_e_p) {
-                            let props = f.properties;
                             let row = event_download_properties.map(prop => {
-                                let value = props[prop];
+                                let value = f.properties[prop];
                                 if (value == null) return ''; // gérer les null
                                 if (event_property_str.includes(prop)) {
                                     value = String(value).replace(/"/g, '""');
@@ -1356,7 +1399,7 @@ Vue.createApp({
 
                         // Création du texte de paragraphs.csv
                         if(this.download_filter_p || this.download_filter_e_p) {
-                            paragraph_content_lines = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'geoserver');
+                            ({ paragraph_content_lines, seen_paragraph_id } = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'geoserver'));
                         }
 
                     };
@@ -1372,6 +1415,11 @@ Vue.createApp({
                 this.show_download_progression = false;
                 this.fetch_progression = 0;
                 this.download_progression = 0;
+
+                f = Date.now()
+                console.log('f',f)
+                t = f-d
+                console.log('t',t)
 
             }
             
@@ -1424,7 +1472,7 @@ Vue.createApp({
 
                         // Création du texte de paragraphs.csv
                         if(this.download_filter_p || this.download_filter_e_p) {
-                            paragraph_content_lines = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'event layer');
+                            ({ paragraph_content_lines, seen_paragraph_id } = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'event layer'));
                         }
 
                     }
