@@ -71,7 +71,7 @@ Vue.createApp({
             download_e_p: false,
             show_fetch_progression: false,
             show_download_progression: false,
-            fetch_progression: 0,
+            fetch_progression: 'Fetch data in progress...',
             download_progression: 0,
         };
     },
@@ -84,10 +84,8 @@ Vue.createApp({
             // Récupération de l'event_id depuis le php
             this.event_id = document.getElementById('app').dataset.event_id;
 
-            // Partie filtre cql de la requête
-            let cqlFilter = `event_id = '${this.event_id}'`;
-
             // Requête vers le geoserver, on récupère l'event
+            let cqlFilter = `event_id = '${this.event_id}'`;
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
                 + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
             fetch(url)
@@ -99,8 +97,8 @@ Vue.createApp({
                     featureProjection: 'EPSG:3857'
                 });
 
+                // L'event est sauvegardé et ajouté à la couche selected event
                 features.forEach(event => {
-                    // L'event est sauvegardé et ajouté à la couche selected event
                     this.selected_event = event;
                     this.selected_event_layer.getSource().addFeature(event);
                 });
@@ -258,6 +256,9 @@ Vue.createApp({
         // Affichage des paragraphs correspondant à l'event (depuis Geoserver)
         affichage_paragraphs_geoserver() {
 
+            // Affichage du popup qui indique que les données chargent
+            document.getElementById("loading_popup").style.display = "block";
+
             // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
             // Requête vue virtuelle geoserver
             // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_geo`
@@ -281,8 +282,13 @@ Vue.createApp({
                     this.paragraphs_layer.getSource().addFeature(feature);
                 });
 
-            });
-            
+            })
+            .then(data => {
+                // Désffichage du popup qui indique que les données chargent
+                document.getElementById("loading_popup").style.display = "none";
+                return data;
+            })
+       
         },
 
         // Crée le texte en récupérant les infos sur le paragraph, change le style du paragraph
@@ -479,41 +485,49 @@ Vue.createApp({
             let cqlFilter = `event_id = '${this.event_id}'`
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
                 + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
-            await fetch(url)
-            .then(result => result.json())
-            .then(json => {
+            let result = await fetch(url);
+            let json = await result.json();
+            this.fetch_progression = 'Fetch data completed!';
                 
-                // Récupération des groupes de paragraphs
-                let features = json.features;
+            // Récupération des groupes de paragraphs
+            let features = json.features;
 
-                // Pour chaque paragraph
-                features.forEach(f => {
+            // Pour chaque paragraph
+            let compteur_features = 0;
+            for (let f of features) {
 
-                    let paragraph_id = f.properties.paragraph_id;
+                let paragraph_id = f.properties.paragraph_id;
 
-                    // Si ce paragraphe a déjà été ajouté, on passe
-                    if (seen_paragraph_id.has(paragraph_id)) {
-                        return;
+                // Si ce paragraphe a déjà été ajouté, on passe
+                if (seen_paragraph_id.has(paragraph_id)) {
+                    return;
+                }
+                // Marquer comme traité
+                seen_paragraph_id.add(paragraph_id);
+
+                // Création d'une ligne de texte (paragraphs.csv)
+                // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                let row = paragraph_download_properties.map(prop => {
+                    let value = f.properties[prop];
+                    if (value == null) return ''; // gérer les null
+                    if (paragraph_property_str.includes(prop)) {
+                        value = String(value).replace(/"/g, '""');
+                        return `"${value}"`;
                     }
-                    // Marquer comme traité
-                    seen_paragraph_id.add(paragraph_id);
+                    return String(value);
+                }).join(',');
+                paragraph_content_lines.push(row);
 
-                    // Création d'une ligne de texte (paragraphs.csv)
-                    // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                    let row = paragraph_download_properties.map(prop => {
-                        let value = f.properties[prop];
-                        if (value == null) return ''; // gérer les null
-                        if (paragraph_property_str.includes(prop)) {
-                            value = String(value).replace(/"/g, '""');
-                            return `"${value}"`;
-                        }
-                        return String(value);
-                    }).join(',');
-                    paragraph_content_lines.push(row);
+                // Calcul de la progression
+                compteur_features += 1;
+                this.download_progression = parseInt(compteur_features*100/features.length);
 
-                });
+                // Forcer une pause très courte pour mettre à jour le DOM
+                if (compteur_features % 100 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                }
 
-            });
+            };
 
             return paragraph_content_lines;
 
@@ -543,9 +557,9 @@ Vue.createApp({
             // Création du tableau pour le join final, initialisation du texte (header)
             let event_content_lines = [event_download_properties.join(',')];
 
-            // // Affichage de la progression du download
-            // this.show_fetch_progression = true;
-            // this.show_download_progression = true;
+            // Affichage de la progression du download
+            this.show_fetch_progression = true;
+            this.show_download_progression = true;
 
             // Récupération de l'event
             let f = this.selected_event;
@@ -571,11 +585,11 @@ Vue.createApp({
                 paragraph_content_lines = await this.paragraph_download_text_filter();
             }
                 
-            // // Désaffichage de la progression du download
-            // this.show_fetch_progression = false;
-            // this.show_download_progression = false;
-            // this.fetch_progression = 0;
-            // this.download_progression = 0;
+            // Désaffichage de la progression du download
+            this.show_fetch_progression = false;
+            this.show_download_progression = false;
+            this.fetch_progression = 'Fetch data in progress...';
+            this.download_progression = 0;
 
             // Téléchargement des events
             if(this.download_e || this.download_e_p) {

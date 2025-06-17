@@ -19,6 +19,8 @@
 
         <div id="map" class="margin">
 
+            <div id=loading_popup class="popup center_popup">Loading...</div>
+
             <div id="form_download" class="form popup scroll_box" v-if="show_download_form">
 
                 <div id="top_form" class="flexrow space_between padding">
@@ -43,7 +45,7 @@
                 <hr style='margin:5px;' v-if="show_download_progression" />
 
                 <div id="progress" class="padding largeur_min">
-                    <div v-if="show_fetch_progression">Fetch data: {{fetch_progression}}%</div>
+                    <div v-if="show_fetch_progression">{{fetch_progression}}</div>
                     <div v-if="show_download_progression">Prepare download: {{download_progression}}%</div>
                 </div>
                 

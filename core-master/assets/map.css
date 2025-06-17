@@ -79,6 +79,16 @@ html, body {
     max-height: 90%;
 }
 
+.center_popup {
+    top: 0.5em; 
+    left: 50%;
+    transform: translate(-50%, 0);
+    z-index: 1000;
+    display: block; 
+    padding: 10px; 
+    border-radius: 8px;
+}
+
 .back_button {
     width: 3em;
     height: 3em;
