@@ -1090,170 +1090,48 @@ Vue.createApp({
                 event_id = feature.properties.event_id;
             }
 
-            // // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
-            // // Requête vue virtuelle geoserver
-            // // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_geo`
-            // //     + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
-            // // Requête vue matérialisée postgres
-            // let cqlFilter = `event_id = '${event_id}'`
-            // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
-            //     + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
-            // await fetch(url)
-            // .then(result => result.json())
-            // .then(json => {
-                
-            //     // Récupération des groupes de paragraphs
-            //     let features = json.features;
-
-            //     // Pour chaque paragraph
-            //     features.forEach(f => {
-
-            //         let paragraph_id = f.properties.paragraph_id;
-
-            //         // Si ce paragraphe a déjà été ajouté, on passe
-            //         if (seen_paragraph_id.has(paragraph_id)) {
-            //             return;
-            //         }
-            //         // Marquer comme traité
-            //         seen_paragraph_id.add(paragraph_id);
-
-            //         // Création d'une ligne de texte (paragraphs.csv)
-            //         // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-            //         let row = paragraph_download_properties.map(prop => {
-            //             let value = f.properties[prop];
-            //             if (value == null) return ''; // gérer les null
-            //             if (paragraph_property_str.includes(prop)) {
-            //                 value = String(value).replace(/"/g, '""');
-            //                 return `"${value}"`;
-            //             }
-            //             return String(value);
-            //         }).join(',');
-            //         paragraph_content_lines.push(row);
-
-            //     });
-
-            // });
-
+            // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
+            // Requête vue virtuelle geoserver
+            // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_geo`
+            //     + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
+            // Requête vue matérialisée postgres
             let cqlFilter = `event_id = '${event_id}'`
+            let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
+                + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+            let result = await fetch(url);
+            let json = await result.json();
+                
+            // Récupération des groupes de paragraphs
+            let features = json.features;
 
-            let url_n_paragraphs = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
-                + `&outputFormat=application/json` + `&resultType=hits` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
-            let xmlString = await fetch(url_n_paragraphs).then(r => r.text());
-            let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
-            let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
-            let n_paragraphs = parseInt(featureCollection.getAttribute("numberOfFeatures"));
+            // Pour chaque paragraph
+            for (let f of features) {
 
-            // Lancer tous les fetch en parallèle, pour récupérer les paragraphs 50 par 50
-            let batchSize = 50;
-            let nb_boucles = Math.ceil(n_paragraphs / batchSize);
-            let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
-                // Requête vers le geoserver, on récupère seulement les paragraphs de l'event, par groupe de 50
-                let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
-                    + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
-                return fetch(url).then(res => res.json());
-            });
+                let paragraph_id = f.properties.paragraph_id;
 
-            // Attendre d'avoir récupéré toutes les promesses
-            let results = await Promise.all(fetchPromises);
+                // Si ce paragraphe a déjà été ajouté, on passe
+                if (seen_paragraph_id.has(paragraph_id)) {
+                    continue;
+                }
+                // Marquer comme traité
+                seen_paragraph_id.add(paragraph_id);
 
-            results.forEach((data, i) => {
-                let features = data.features || [];
-
-                // Pour chaque paragraph
-                features.forEach(f => {
-
-                    let paragraph_id = f.properties.paragraph_id;
-
-                    // Si ce paragraphe a déjà été ajouté, on passe
-                    if (seen_paragraph_id.has(paragraph_id)) {
-                        return;
+                // Création d'une ligne de texte (paragraphs.csv)
+                // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                let row = paragraph_download_properties.map(prop => {
+                    let value = f.properties[prop];
+                    if (value == null) return ''; // gérer les null
+                    if (paragraph_property_str.includes(prop)) {
+                        value = String(value).replace(/"/g, '""');
+                        return `"${value}"`;
                     }
-                    // Marquer comme traité
-                    seen_paragraph_id.add(paragraph_id);
+                    return String(value);
+                }).join(',');
+                paragraph_content_lines.push(row);
 
-                    // Création d'une ligne de texte (paragraphs.csv)
-                    // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                    let row = paragraph_download_properties.map(prop => {
-                        let value = f.properties[prop];
-                        if (value == null) return ''; // gérer les null
-                        if (paragraph_property_str.includes(prop)) {
-                            value = String(value).replace(/"/g, '""');
-                            return `"${value}"`;
-                        }
-                        return String(value);
-                    }).join(',');
-                    paragraph_content_lines.push(row);
-
-                });
-
-            });
+            };
 
             return { paragraph_content_lines, seen_paragraph_id };
-
-        },
-
-        // Création du texte de download de tous les paragraphs
-        // Pas utilisée
-        async paragraph_download_text_all() {
-
-            // Liste des propriétés des paragraphs
-            let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
-                "paragraph_id", "original_text", "disaster_label", "disaster_score", "hasard_type", "hasard_type_score", "nb_death", "score_death", "answer_death",
-                "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
-                "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
-                "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
-                "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
-                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
-            let paragraph_property_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
-
-            // Création du tableau pour le join final, initialisation du texte (header)
-            let paragraph_content_lines = [paragraph_download_properties.join(',')];
-
-            // Récupérer le nombre de paragraphs
-            let url_n_paragraphs = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23`
-                + `&outputFormat=application/json` + `&resultType=hits`; 
-            let xmlString = await fetch(url_n_paragraphs).then(r => r.text());
-            let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
-            let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
-            let n_paragraphs = parseInt(featureCollection.getAttribute("numberOfFeatures"));
-
-            // Lancer tous les fetch en parallèle, pour récupérer les paragraphs 50 par 50
-            let batchSize = 50;
-            let nb_boucles = Math.ceil(n_paragraphs / batchSize);
-            let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
-                let offset = 50 * i;
-                let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs2020_23`
-                    + `&outputFormat=application/json` + `&maxFeatures=50&startIndex=${offset}`;
-                return fetch(url).then(res => res.json());
-            });
-
-            // Attendre d'avoir récupéré toutes les promesses
-            let results = await Promise.all(fetchPromises);
-
-            results.forEach((data, i) => {
-                let features = data.features || [];
-
-                // Pour chaque paragraph
-                features.forEach(f => {
-
-                    // Création d'une ligne de texte (paragraphs.csv)
-                    // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                    let row = paragraph_download_properties.map(prop => {
-                        let value = f.properties[prop];
-                        if (value == null) return ''; // gérer les null
-                        if (paragraph_property_str.includes(prop)) {
-                            value = String(value).replace(/"/g, '""');
-                            return `"${value}"`;
-                        }
-                        return String(value);
-                    }).join(',');
-                    paragraph_content_lines.push(row);
-
-                });
-
-            });
-
-            return paragraph_content_lines.join('\n');
 
         },
 

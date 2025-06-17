@@ -500,7 +500,7 @@ Vue.createApp({
 
                 // Si ce paragraphe a déjà été ajouté, on passe
                 if (seen_paragraph_id.has(paragraph_id)) {
-                    return;
+                    continue;
                 }
                 // Marquer comme traité
                 seen_paragraph_id.add(paragraph_id);
