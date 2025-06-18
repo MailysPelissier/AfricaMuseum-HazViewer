@@ -489,7 +489,7 @@ Vue.createApp({
             let json = await result.json();
             this.fetch_progression = 'Fetch data completed!';
                 
-            // Récupération des groupes de paragraphs
+            // Récupération des paragraphs
             let features = json.features;
 
             // Pour chaque paragraph

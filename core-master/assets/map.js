@@ -1138,9 +1138,6 @@ Vue.createApp({
         // Download
         async download() {
 
-            d = Date.now()
-            console.log('d',d)
-
             // Définition du type de download
             let type = null;
             if (this.download_all_e) {
@@ -1194,20 +1191,23 @@ Vue.createApp({
             // Si on ne filtre pas selon un polygone
             if (draw_filter == 0) {
 
-                // Récupérer le nombre d'events
-                let url_n_events;
+                // Requête vers le geoserver, on récupère seulement les events correspondant aux filtres
+                let url;
                 if (type == 'all') {
-                    url_n_events = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
-                        + `&outputFormat=application/json` + `&resultType=hits`;
+                    url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
+                        + `&outputFormat=application/json`;
                 }
                 if (type == 'filter' && cqlFilter !== 'No event') {
-                    url_n_events = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
-                        + `&outputFormat=application/json` + `&resultType=hits` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
-                }   
-                let xmlString = await fetch(url_n_events).then(r => r.text());
-                let xmlDoc = new DOMParser().parseFromString(xmlString, "application/xml");
-                let featureCollection = xmlDoc.querySelector("wfs\\:FeatureCollection, FeatureCollection");
-                let n_events = parseInt(featureCollection.getAttribute("numberOfFeatures"));
+                    url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
+                        + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+                }  
+                let result = await fetch(url);
+                let json = await result.json();
+                this.fetch_progression = 'Fetch data completed!';
+
+                // Récupération des events
+                let features = json.features;
+                let n_events = features.length;
 
                 // Si aucun event ne correspond aux critères
                 if (n_events === 0) {
@@ -1227,64 +1227,38 @@ Vue.createApp({
                 this.show_fetch_progression = true;
                 this.show_download_progression = true;
 
-                // Lancer tous les fetch en parallèle, pour récupérer les events 50 par 50
-                let batchSize = 50;
-                let nb_boucles = Math.ceil(n_events / batchSize);
-                let completed = 0;
-                let fetchPromises = Array.from({length: nb_boucles}, (_, i) => {
-                    let offset = 50 * i;
-                    let url;
-                    if (type == 'all') {
-                        url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` 
-                            + `&outputFormat=application/json` + `&maxFeatures=50&startIndex=${offset}`;
+                // Pour chaque event
+                let compteur_features = 0;
+                for (let f of features) {
+
+                    // Création d'une ligne de texte (events.csv)
+                    // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                    if(this.download_all_e || this.download_filter_e || this.download_filter_e_p) {
+                        let row = event_download_properties.map(prop => {
+                            let value = f.properties[prop];
+                            if (value == null) return ''; // gérer les null
+                            if (event_property_str.includes(prop)) {
+                                value = String(value).replace(/"/g, '""');
+                                return `"${value}"`;
+                            }
+                            return String(value);
+                        }).join(',');
+                        event_content_lines.push(row);
                     }
-                    if (type == 'filter') {
-                        url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` 
-                            + `&outputFormat=application/json` + `&maxFeatures=50&startIndex=${offset}` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+
+                    // Création du texte de paragraphs.csv
+                    if(this.download_filter_p || this.download_filter_e_p) {
+                        ({ paragraph_content_lines, seen_paragraph_id } = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'geoserver'));
                     }
-                    return fetch(url).then(res => res.json())
-                    .then(data => {
-                        completed++;
-                        this.fetch_progression = Math.round((completed / nb_boucles) * 100);
-                        return data;
-                    });
-                });
-
-                // Attendre d'avoir récupéré toutes les promesses
-                let results = await Promise.all(fetchPromises);
-
-                let compteur_pages = 0;
-                for (data of results) {
-                    let features = data.features || [];
-
-                    // Pour chaque event
-                    for (let f of features) {
-
-                        // Création d'une ligne de texte (events.csv)
-                        // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                        if(this.download_all_e || this.download_filter_e || this.download_filter_e_p) {
-                            let row = event_download_properties.map(prop => {
-                                let value = f.properties[prop];
-                                if (value == null) return ''; // gérer les null
-                                if (event_property_str.includes(prop)) {
-                                    value = String(value).replace(/"/g, '""');
-                                    return `"${value}"`;
-                                }
-                                return String(value);
-                            }).join(',');
-                            event_content_lines.push(row);
-                        }
-
-                        // Création du texte de paragraphs.csv
-                        if(this.download_filter_p || this.download_filter_e_p) {
-                            ({ paragraph_content_lines, seen_paragraph_id } = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'geoserver'));
-                        }
-
-                    };
 
                     // Calcul de la progression
-                    compteur_pages += 1
-                    this.download_progression = parseInt(compteur_pages*100/nb_boucles)
+                    compteur_features += 1;
+                    this.download_progression = parseInt(compteur_features*100/features.length);
+
+                    // Forcer une pause très courte pour mettre à jour le DOM
+                    if (compteur_features % 100 === 0) {
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                    }
 
                 };
 
@@ -1293,11 +1267,6 @@ Vue.createApp({
                 this.show_download_progression = false;
                 this.fetch_progression = 0;
                 this.download_progression = 0;
-
-                f = Date.now()
-                console.log('f',f)
-                t = f-d
-                console.log('t',t)
 
             }
             
@@ -1358,6 +1327,11 @@ Vue.createApp({
                     // Calcul de la progression du download
                     compteur_events += 1;
                     this.download_progression = parseInt(compteur_events*100/nb_total_events);
+
+                    // Forcer une pause très courte pour mettre à jour le DOM
+                    if (compteur_features % 100 === 0) {
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                    }
                     
                 }
 
