@@ -283,7 +283,7 @@ Vue.createApp({
     methods: {
 
         // Calcul de l'emprise de l'écran
-        // Pas utilisée pour l'instant
+        // Pas utilisée
         emprise_ecran () {
 
             // Récupération de l'emprise de l'écran
@@ -302,65 +302,6 @@ Vue.createApp({
 
             return { min_lon, min_lat, max_lon, max_lat };
 
-        },
-
-        // Ajout des events à la couche events par pg_connect, selon la bbox
-        // Pas utilisée pour l'instant
-        ajout_events_postgres () {
-
-            let { min_lon, min_lat, max_lon, max_lat } = this.emprise_ecran();
-
-            // Requête vers la bdd, on récupère seulement les events dans la bbox
-            url = "/postgres/events?min_lon=" + min_lon + '&min_lat=' + min_lat + '&max_lon=' + max_lon + '&max_lat=' + max_lat;
-            fetch(url)
-            .then( (result) => {
-                return result.json();
-            })
-            .then( (json) => {
-
-                // Pour chaque event récupéré :
-                for (let i = 0; i < json.length; i++) {
-
-                    // Récupération de l'identifiant
-                    let event_id = json[i].event_id;
-
-                    // Si l'event n'est pas déjà dans la couche :
-                    let exists = this.events_layer.getSource().getFeatureById(event_id);
-                    if (!exists) {  
-
-                        // Création de la feature à l'aide de ses coordonnées (projection en 3857)
-                        let new_event = new ol.Feature(new ol.geom.Point(ol.proj.fromLonLat([json[i].longitude,json[i].latitude])));
-
-                        // Stockage de l'identifiant
-                        new_event.setId(event_id);
-
-                        // Récupération et stockage des propriétés
-                        for (let key in json[i]) {
-                            if (json[i].hasOwnProperty(key)) {
-                                new_event.set(key, json[i][key]);
-                            }
-                        }
-
-                        // Création de la propriété country_found
-                        let country = this.get_country(new_event);
-                        new_event.set('country_found',country);
-
-                        // Dates du filtre en format y-m-d
-                        let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
-                        let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
-
-                        // Propriété visibilité dépend des filtres
-                        this.set_feature_visibility(new_event, start_date_ymd, end_date_ymd);
-
-                        // Ajout à la couche events
-                        this.events_layer.getSource().addFeature(new_event); 
-
-                    }      
-
-                };
-            
-            });
-        
         },
 
         // Ajout des events à la couche events par geoservices, selon la bbox
@@ -1445,7 +1386,7 @@ Vue.createApp({
             target: 'map',
             view: new ol.View({
                 center: ol.proj.fromLonLat([4.517, 50.830]),
-                zoom: 15,
+                zoom: 7,
             }),
             layers: [
                 new ol.layer.Tile({
