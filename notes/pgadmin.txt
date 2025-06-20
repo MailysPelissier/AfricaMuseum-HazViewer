@@ -400,6 +400,30 @@ CREATE INDEX IF NOT EXISTS vue_paragraphs_pg_event_id_idx
 
 
 
+-- Table: public.citizen_observer_coord_territoires
+
+DROP TABLE IF EXISTS public.citizen_observer_coord_territoires;
+
+CREATE TABLE IF NOT EXISTS public.citizen_observer_coord_territoires
+(
+territoire character varying COLLATE pg_catalog."default",
+latitude real,
+longitude real
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.citizen_observer_coord_territoires
+    OWNER to postgres;
+
+COPY citizen_observer_coord_territoires (territoire, latitude, longitude)
+FROM 'C:/Mailys/data/territoires_coord.csv'
+DELIMITER ';' 
+CSV HEADER
+QUOTE '"';
+
+
+
 -- Table: public.citizen_observer
 
 DROP TABLE IF EXISTS public.citizen_observer;
@@ -431,8 +455,8 @@ to_delete_22 character varying COLLATE pg_catalog."default",
 to_delete_23 character varying COLLATE pg_catalog."default",
 latitude real,
 longitude real,
-altitude real,
-precision real,
+to_delete_26 character varying COLLATE pg_catalog."default",
+to_delete_27 character varying COLLATE pg_catalog."default",
 to_delete_28 character varying COLLATE pg_catalog."default",
 to_delete_29 character varying COLLATE pg_catalog."default",
 to_delete_30 character varying COLLATE pg_catalog."default",
@@ -656,6 +680,7 @@ to_delete_247 character varying COLLATE pg_catalog."default",
 to_delete_248 character varying COLLATE pg_catalog."default",
 to_delete_249 character varying COLLATE pg_catalog."default",
 to_delete_250 character varying COLLATE pg_catalog."default",
+donnees_georeferencees boolean,
 wkt character varying COLLATE pg_catalog."default",
 geom geometry(Point,4326),
 primary_key integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
@@ -668,7 +693,7 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.citizen_observer 
     OWNER to postgres;
 
-COPY citizen_observer (start_time, end_time, today, to_delete_4, to_delete_5, province, territoire, nom_collectivite_commune, nom_groupement_quartier, noms_villages, type_event, landslide_new_or_old, to_delete_13, to_delete_14, to_delete_15, to_delete_16, to_delete_17, to_delete_18, to_delete_19, to_delete_20, to_delete_21, to_delete_22, to_delete_23, latitude, longitude, altitude, precision, to_delete_28, to_delete_29, to_delete_30, to_delete_31, to_delete_32, to_delete_33, event_date, to_delete_35, to_delete_36, to_delete_37, inondation_duree_jours, to_delete_39, inondation_max_date, to_delete_41, to_delete_42, to_delete_43, inondation_apres, to_delete_45, to_delete_46, to_delete_47, to_delete_48, to_delete_49, to_delete_50, inondation_apres_autre, to_delete_52, to_delete_53, grele_duree_minutes, to_delete_55, to_delete_56, vents_violents_duree_jours, to_delete_58, vents_violents_max_date, to_delete_60, to_delete_61, vents_violents_avec_autre_event_bool, vents_violents_avec_autre_event, to_delete_64, to_delete_65, to_delete_66, to_delete_67, to_delete_68, to_delete_69, to_delete_70, to_delete_71, to_delete_72, to_delete_73, to_delete_74, to_delete_75, to_delete_76, tdt_duree, to_delete_78, to_delete_79, to_delete_80, to_delete_81, to_delete_82, to_delete_83, to_delete_84, to_delete_85, to_delete_86, to_delete_87, landslide_react_date_1, landslide_react_date_2, landslide_react_cause, landslide_react_cause_autre, landslide_react_signes_bool, landslide_react_signes, to_delete_94, to_delete_95, to_delete_96, to_delete_97, landslide_react_signes_autre, landslide_apres, to_delete_100, to_delete_101, to_delete_102, to_delete_103, to_delete_104, landslide_cause_habitants, to_delete_106, to_delete_107, to_delete_108, to_delete_109, to_delete_110, landslide_cause_habitants_autre, to_delete_112, to_delete_113, to_delete_114, to_delete_115, to_delete_116, to_delete_117, to_delete_118, to_delete_119, surprise_population, nb_morts, to_delete_122, nb_blesses, nb_sansabris, to_delete_125, impact_betail_bool, impact_betail_type, to_delete_128, to_delete_129, to_delete_130, to_delete_131, to_delete_132, to_delete_133, to_delete_134, to_delete_135, to_delete_136, to_delete_137, to_delete_138, impact_betail_autre, to_delete_140, impact_logement_bool, to_delete_142, to_delete_143, to_delete_144, to_delete_145, to_delete_146, to_delete_147, to_delete_148, to_delete_149, to_delete_150, to_delete_151, to_delete_152, to_delete_153, to_delete_154, to_delete_155, to_delete_156, to_delete_157, to_delete_158, to_delete_159, to_delete_160, to_delete_161, to_delete_162, to_delete_163, to_delete_164,to_delete_165, to_delete_166, to_delete_167, to_delete_168, to_delete_169, to_delete_170, to_delete_171, to_delete_172, to_delete_173, to_delete_174, to_delete_175, to_delete_176, to_delete_177, impact_routes_bool, to_delete_179, to_delete_180, to_delete_181, to_delete_182, to_delete_183, to_delete_184, to_delete_185, to_delete_186, to_delete_187, to_delete_188, to_delete_189, to_delete_190, to_delete_191, to_delete_192, to_delete_193, impact_ponts_bool, to_delete_195, to_delete_196, to_delete_197, to_delete_198, to_delete_199, to_delete_200, to_delete_201, to_delete_202, impact_autres_type, to_delete_204, to_delete_205, to_delete_206, to_delete_207, to_delete_208, to_delete_209, to_delete_210, impact_autres_autre, to_delete_212, to_delete_213, to_delete_214, to_delete_215, to_delete_216, to_delete_217, to_delete_218, impact_coupures_elec, impact_eau_consommation, to_delete_221, tdt_declenche_landslide, to_delete_223, impact_cultures_bool, impact_cultures_type, to_delete_226, to_delete_227, to_delete_228, to_delete_229, to_delete_230, to_delete_231, to_delete_232, to_delete_233, to_delete_234, to_delete_235, to_delete_236, to_delete_237, to_delete_238, to_delete_239, to_delete_240, to_delete_241, to_delete_242, to_delete_243, to_delete_244, validation_status, to_delete_246, to_delete_247, to_delete_248, to_delete_249, to_delete_250)
+COPY citizen_observer (start_time, end_time, today, to_delete_4, to_delete_5, province, territoire, nom_collectivite_commune, nom_groupement_quartier, noms_villages, type_event, landslide_new_or_old, to_delete_13, to_delete_14, to_delete_15, to_delete_16, to_delete_17, to_delete_18, to_delete_19, to_delete_20, to_delete_21, to_delete_22, to_delete_23, latitude, longitude, to_delete_26, to_delete_27, to_delete_28, to_delete_29, to_delete_30, to_delete_31, to_delete_32, to_delete_33, event_date, to_delete_35, to_delete_36, to_delete_37, inondation_duree_jours, to_delete_39, inondation_max_date, to_delete_41, to_delete_42, to_delete_43, inondation_apres, to_delete_45, to_delete_46, to_delete_47, to_delete_48, to_delete_49, to_delete_50, inondation_apres_autre, to_delete_52, to_delete_53, grele_duree_minutes, to_delete_55, to_delete_56, vents_violents_duree_jours, to_delete_58, vents_violents_max_date, to_delete_60, to_delete_61, vents_violents_avec_autre_event_bool, vents_violents_avec_autre_event, to_delete_64, to_delete_65, to_delete_66, to_delete_67, to_delete_68, to_delete_69, to_delete_70, to_delete_71, to_delete_72, to_delete_73, to_delete_74, to_delete_75, to_delete_76, tdt_duree, to_delete_78, to_delete_79, to_delete_80, to_delete_81, to_delete_82, to_delete_83, to_delete_84, to_delete_85, to_delete_86, to_delete_87, landslide_react_date_1, landslide_react_date_2, landslide_react_cause, landslide_react_cause_autre, landslide_react_signes_bool, landslide_react_signes, to_delete_94, to_delete_95, to_delete_96, to_delete_97, landslide_react_signes_autre, landslide_apres, to_delete_100, to_delete_101, to_delete_102, to_delete_103, to_delete_104, landslide_cause_habitants, to_delete_106, to_delete_107, to_delete_108, to_delete_109, to_delete_110, landslide_cause_habitants_autre, to_delete_112, to_delete_113, to_delete_114, to_delete_115, to_delete_116, to_delete_117, to_delete_118, to_delete_119, surprise_population, nb_morts, to_delete_122, nb_blesses, nb_sansabris, to_delete_125, impact_betail_bool, impact_betail_type, to_delete_128, to_delete_129, to_delete_130, to_delete_131, to_delete_132, to_delete_133, to_delete_134, to_delete_135, to_delete_136, to_delete_137, to_delete_138, impact_betail_autre, to_delete_140, impact_logement_bool, to_delete_142, to_delete_143, to_delete_144, to_delete_145, to_delete_146, to_delete_147, to_delete_148, to_delete_149, to_delete_150, to_delete_151, to_delete_152, to_delete_153, to_delete_154, to_delete_155, to_delete_156, to_delete_157, to_delete_158, to_delete_159, to_delete_160, to_delete_161, to_delete_162, to_delete_163, to_delete_164,to_delete_165, to_delete_166, to_delete_167, to_delete_168, to_delete_169, to_delete_170, to_delete_171, to_delete_172, to_delete_173, to_delete_174, to_delete_175, to_delete_176, to_delete_177, impact_routes_bool, to_delete_179, to_delete_180, to_delete_181, to_delete_182, to_delete_183, to_delete_184, to_delete_185, to_delete_186, to_delete_187, to_delete_188, to_delete_189, to_delete_190, to_delete_191, to_delete_192, to_delete_193, impact_ponts_bool, to_delete_195, to_delete_196, to_delete_197, to_delete_198, to_delete_199, to_delete_200, to_delete_201, to_delete_202, impact_autres_type, to_delete_204, to_delete_205, to_delete_206, to_delete_207, to_delete_208, to_delete_209, to_delete_210, impact_autres_autre, to_delete_212, to_delete_213, to_delete_214, to_delete_215, to_delete_216, to_delete_217, to_delete_218, impact_coupures_elec, impact_eau_consommation, to_delete_221, tdt_declenche_landslide, to_delete_223, impact_cultures_bool, impact_cultures_type, to_delete_226, to_delete_227, to_delete_228, to_delete_229, to_delete_230, to_delete_231, to_delete_232, to_delete_233, to_delete_234, to_delete_235, to_delete_236, to_delete_237, to_delete_238, to_delete_239, to_delete_240, to_delete_241, to_delete_242, to_delete_243, to_delete_244, validation_status, to_delete_246, to_delete_247, to_delete_248, to_delete_249, to_delete_250)
 FROM 'C:/Mailys/data/Formulaire_OC_2020_-_all_versions_-_labels_-_2025-05-22-09-35-22_sans-guillemets.csv'
 DELIMITER ';' 
 CSV HEADER
@@ -693,258 +718,19 @@ END $$;
 
 DELETE FROM citizen_observer WHERE validation_status != 'Approved';
 DELETE FROM citizen_observer WHERE validation_status IS NULL; 
+UPDATE citizen_observer SET donnees_georeferencees=false WHERE latitude IS null;
+UPDATE citizen_observer SET donnees_georeferencees=true WHERE donnees_georeferencees IS NULL;
+UPDATE citizen_observer
+SET latitude = citizen_observer_coord_territoires.latitude
+FROM citizen_observer_coord_territoires
+WHERE citizen_observer.territoire = citizen_observer_coord_territoires.territoire
+AND citizen_observer.donnees_georeferencees = false;
+UPDATE citizen_observer
+SET longitude = citizen_observer_coord_territoires.longitude
+FROM citizen_observer_coord_territoires
+WHERE citizen_observer.territoire = citizen_observer_coord_territoires.territoire
+AND citizen_observer.donnees_georeferencees = false;
 UPDATE citizen_observer SET wkt=concat('POINT (',longitude,' ',latitude,')');
 UPDATE citizen_observer SET geom=ST_GeomFromText(wkt);
 UPDATE citizen_observer SET country_found = c.admin FROM countries c WHERE ST_Contains(c.geom, citizen_observer.geom);
 
-
-"start";
-"end";
-"today";
-"deviceid";
-"Quel est votre identifiant?";
-"province";
-"territoire";
-"Nom de la collectivité/commune";
-"Nom du groupement/quartier";
-"Quel est/sont le(s) nom(s) du/des village(s)/cellule(s) affecté(es)?";
-"1. Quel type d'événement est suvenu?";
-"1.a. S'agit-il d'un nouveau glissement de terrain ou de la réactivation d'un glissement de terrain déjà existant?";
-"2. Avez vous pu vous rendre sur les lieux de l'événement?";
-"2.a. Si vous n'avez pas pu vous rendre sur les lieux de l'événement, expliquez pourquoi";
-"2.a. Si vous n'avez pas pu vous rendre sur les lieux de l'événement, expliquez pourquoi/trop grande insécurité";
-"2.a. Si vous n'avez pas pu vous rendre sur les lieux de l'événement, expliquez pourquoi/pas de moyen pour financer mon déplacement";
-"2.a. Si vous n'avez pas pu vous rendre sur les lieux de l'événement, expliquez pourquoi/trop grande distance par rapport à mon lieu de résidence";
-"2.a. Si vous n'avez pas pu vous rendre sur les lieux de l'événement, expliquez pourquoi/pas de possibilité de me déplacer (pas de transport)";
-"2.a. Si vous n'avez pas pu vous rendre sur les lieux de l'événement, expliquez pourquoi/un autre OC a été sur les lieux";
-"2.a. Si vous n'avez pas pu vous rendre sur les lieux de l'événement, expliquez pourquoi/malade, souffrant";
-"2.a. Si vous n'avez pas pu vous rendre sur les lieux de l'événement, expliquez pourquoi/autre raison";
-"2.b. Si autre raison, précisez laquelle";
-"3. Prenez un point GPS quand vous vous trouvez à un endroit affecté";
-"_3. Prenez un point GPS quand vous vous trouvez à un endroit affecté_latitude";
-"_3. Prenez un point GPS quand vous vous trouvez à un endroit affecté_longitude";
-"_3. Prenez un point GPS quand vous vous trouvez à un endroit affecté_altitude";
-"_3. Prenez un point GPS quand vous vous trouvez à un endroit affecté_precision";
-"3.a. Où le point GPS a-t-il été pris avec précision?";
-"4. Avez vous des photos de l'événement?";
-"4.a. Prenez ou enregistrez une première photo montrant la zone affectée";
-"4.b. Prenez ou enregistrez une deuxième photo montrant la zone affectée";
-"4.c. Si possible, prenez ou enregistrez une photo de l'escarpement du glissement de terrain";
-"5. Connaissez vous la date de survenue de l'événement?";
-"5.a. Indiquez la date de l'événement";
-"6. Connaissez vous le moment approximatif de la survenue ou du début de l'événement?";
-"7.1. Connaissez vous l'heure approximative à laquelle la foudre a frappée?";
-"7.1.a. Indiquez l'heure à laquelle la foudre a frappée";
-"7.1. Combien de jours a duré l'inondation (niveau de l'eau au dessus du niveau de son lit habituel)?";
-"7.2. Connaissez vous la date à laquelle l'eau a atteint son niveau le plus haut?";
-"7.2.a. Indiquez la date à laquelle l'eau a atteint son niveau le plus haut";
-"7.3. Connaissez vous l'heure approximative à laquelle l'eau a atteint son niveau le plus haut?";
-"7.3.a. Indiquez l'heure à laquelle l'eau a atteint son niveau le plus haut";
-"7.4. Donnez une estimation de la hauteur de l'eau atteinte dans les zones les plus inondées";
-"7.5. L'inondation est survenue pendant ou juste après (quelques heures jusqu'à quelques jours après)...";
-"7.5. L'inondation est survenue pendant ou juste après (quelques heures jusqu'à quelques jours après).../pluie prolongée (pluie continue pendant plus d'une journée)";
-"7.5. L'inondation est survenue pendant ou juste après (quelques heures jusqu'à quelques jours après).../pluie très intense qui durent de quelques heures à 1 jour maximum";
-"7.5. L'inondation est survenue pendant ou juste après (quelques heures jusqu'à quelques jours après).../tremblement de terre";
-"7.5. L'inondation est survenue pendant ou juste après (quelques heures jusqu'à quelques jours après).../glissement de terrain";
-"7.5. L'inondation est survenue pendant ou juste après (quelques heures jusqu'à quelques jours après).../autre événement";
-"7.5. L'inondation est survenue pendant ou juste après (quelques heures jusqu'à quelques jours après).../pas de réponse";
-"7.6. Vous indiquez qu'un autre événement a précédé l'inondation, pouvez vous préciser lequel?";
-"7.1. Connaissez vous l'heure approximative à laquelle la grêle est tombée?";
-"7.1.a. Indiquez l'heure à laquelle la grêle est tombée";
-"7.2. Pendant combien de minutes la grêle est elle tombée?";
-"7.3. Quelle était la taille des plus gros grêlons?";
-"7.4. Les grêlons se sont accumulés sur le sol sur une hauteur maximum de ...";
-"7.1. Combien de jours ont duré les vents violents?";
-"7.2. Connaissez vous la date à laquelle les vents ont été les plus violents?";
-"7.2.a. Indiquez la date à laquelle les vents ont été les plus violents";
-"7.3. Connaissez vous l'heure approximative à laquelle les vents ont été les plus violents?";
-"7.3.a. Indiquez l'heure à laquelle les vents ont été les plus violents";
-"7.4. Les vents violents sont ils survenus juste avant ou avec d'autres événements météorologiques?";
-"7.5. Vous indiquez que d'autres événements météorologiques sont survenus juste avant ou avec les vents violents: précisez le(s)quel(s) ";
-"7.5. Vous indiquez que d'autres événements météorologiques sont survenus juste avant ou avec les vents violents: précisez le(s)quel(s) /Pluie";
-"7.5. Vous indiquez que d'autres événements météorologiques sont survenus juste avant ou avec les vents violents: précisez le(s)quel(s) /Grêle";
-"7.5. Vous indiquez que d'autres événements météorologiques sont survenus juste avant ou avec les vents violents: précisez le(s)quel(s) /Tonnerre";
-"7.5. Vous indiquez que d'autres événements météorologiques sont survenus juste avant ou avec les vents violents: précisez le(s)quel(s) /Eclairs";
-"7.1. Connaissez vous l'heure approximative à laquelle le tremblement de terre est arrivé?";
-"7.1.a. Indiquez l'heure à laquelle le tremblement de terre est arrivé";
-"7.2. Des personnes se sont elles réveillées pendant le tremblement de terre?";
-"7.3. Si oui ou non pour d'autres raisons, précisez";
-"Maintenant, quelques questions par rapport à la perception et aux expériences pendant le tremblement de terre. Comme beaucoup de personnes auront probablement vécu ce tremblement de terre, les réponses aux questions ci-dessous pourrait différer d'une personne à l'autre. Par conséquent, cochez plusieurs réponses si nécessaires.";
-"7.4. Toutes les personnes ont-elles ressenti le tremblement de terre?";
-"7.5. Comment est-ce que la plupart des personnes ont décrit le tremblement de terre?";
-"7.6. Est-ce que certaines personnes ont entendu un bruit?";
-"7.7. Comment est-ce que la plupart des personnes qui ont entendu un bruit l'ont décrit? ";
-"7.8. Combien de temps approximativement la secousse a-t-elle duré?";
-"7.9. Comment la plupart des personnes ont-elles réagi au tremblement de terre?";
-"7.10. Pour la plupart des personnes, était-ce difficile de marcher pendant le séisme?";
-"7.11. Des objects dans la maison ont-ils bougé?";
-"7.12. Pouvez vous préciser le type d'objets qui ont bougé?";
-"7.12. Pouvez vous préciser le type d'objets qui ont bougé?/oui, les objets tels que les tables et les chaises ont un peu bougé";
-"7.12. Pouvez vous préciser le type d'objets qui ont bougé?/oui, les posters et les photos sont tombées des murs";
-"7.12. Pouvez vous préciser le type d'objets qui ont bougé?/oui, des objets non fixés dans la maison se sont renversés";
-"7.12. Pouvez vous préciser le type d'objets qui ont bougé?/impossible à dire";
-"7.1. Connaissez vous l'heure approximative à laquelle l'événement est survenu?";
-"7.1.a. Indiquez l'heure à laquelle l'événement est survenu";
-"7.2. Vous indiquez qu'il s'agit d'une réactivation, quand a eu lieu le PREMIER glissement de terrain?";
-"7.3. Vous indiquez qu'il n'y a pas de consensus entre les habitants sur la date à laquelle le PREMIER glissement de terrain s'est produit, quelles sont les différentes dates de la première occurrence mentionnées par les habitants?";
-"7.4.a. Vous indiquez qu'il s'agit d'une réactivation, la PREMIÈRE fois que ce glissement de terrain s'est déclenché, était-ce provoqué par...";
-"7.4.b. Si autre facteur déclencheur, précisez lequel";
-"7.5.a. Y avait-il des signes indiquant que la réactivitation pourrait se produire?";
-"7.5.b. S'il y avait des signes, indiquez lesquels";
-"7.5.b. S'il y avait des signes, indiquez lesquels/fissures";
-"7.5.b. S'il y avait des signes, indiquez lesquels/accumulation d'eau/stagnation de l'eau";
-"7.5.b. S'il y avait des signes, indiquez lesquels/un débit plus élevé de la source d'eau";
-"7.5.b. S'il y avait des signes, indiquez lesquels/autre";
-"7.5.c. Si autre, précisez ces signes";
-"7.6. Le récent glissement de terrain/réactivation s'est produit(e) pendant ou juste après....";
-"7.6. Le récent glissement de terrain/réactivation s'est produit(e) pendant ou juste après..../des précipitations courtes (de quelques heures à une journée au maximum) mais très intenses";
-"7.6. Le récent glissement de terrain/réactivation s'est produit(e) pendant ou juste après..../une pluie prolongée (pluie continue pendant plus d'une journée)";
-"7.6. Le récent glissement de terrain/réactivation s'est produit(e) pendant ou juste après..../un tremblement de terre";
-"7.6. Le récent glissement de terrain/réactivation s'est produit(e) pendant ou juste après..../aucun événément spécifique";
-"7.6. Le récent glissement de terrain/réactivation s'est produit(e) pendant ou juste après..../aucune idée";
-"7.7.a. Les habitants pensent que le glissement de terrain/réactivation a été causé(e) par...";
-"7.7.a. Les habitants pensent que le glissement de terrain/réactivation a été causé(e) par.../la pluie";
-"7.7.a. Les habitants pensent que le glissement de terrain/réactivation a été causé(e) par.../un tremblement de terre";
-"7.7.a. Les habitants pensent que le glissement de terrain/réactivation a été causé(e) par.../des esprits/magie/sorcellerie";
-"7.7.a. Les habitants pensent que le glissement de terrain/réactivation a été causé(e) par.../des influences humaines telles que la déforestation ou la construction";
-"7.7.a. Les habitants pensent que le glissement de terrain/réactivation a été causé(e) par.../une autre cause";
-"7.7.b. Si autre cause, précisez la/les cause(s) mentionnée(s) par les habitants";
-"7.8.a. Y a-t-il des interventions qui auraient pu déstabiliser la pente?";
-"7.8.b. S'il y a eu une autre intervention, précisez quelle(s) intervention(s) auraient pu déstabiliser la pente";
-"7.8.c. Quand la forêt a-t-elle été coupée?";
-"7.9.a. Quelle est la longueur maximale (en mètres) du glissement de terrain/réactivation?";
-"7.9.b. Quelle est la largeur maximale (en mètres) du glissement de terrain/réactivation?";
-"7.9.c. Quelle est la profondeur estimée (en mètres) du glissement de terrain/réactivation à l'escarpement?";
-"7.10. Quel type de matériaux est déplacé?";
-"7.10.a. Si plusieurs matériaux, précisez";
-"8. Par rapport à l'événement, qu'est-ce qui est le plus correct?";
-"9.a. Combien de décès et/ou de personnes disparues ont été causés par l'événement?";
-"9.b. Les victimes dormaient elles au moment de l'événement?";
-"10. Combien de personnes ont dû se rendre au centre de santé, du fait de blessures dues à l'événement?";
-"11. Combien de personnes ne dorment plus dans leur maison en raison de l'événement?";
-"11. Combien de ménages ne dorment plus dans leur maison en raison de l'événement?";
-"12.1. L'événement a t-il causé la mort de bétail?";
-"12.2. Vous indiquez que l'événement a tué du bétail: pouvez vous préciser quel type de bétail?";
-"12.2. Vous indiquez que l'événement a tué du bétail: pouvez vous préciser quel type de bétail?/vaches";
-"12.2. Vous indiquez que l'événement a tué du bétail: pouvez vous préciser quel type de bétail?/moutons";
-"12.2. Vous indiquez que l'événement a tué du bétail: pouvez vous préciser quel type de bétail?/chèvres";
-"12.2. Vous indiquez que l'événement a tué du bétail: pouvez vous préciser quel type de bétail?/volailles";
-"12.2. Vous indiquez que l'événement a tué du bétail: pouvez vous préciser quel type de bétail?/cochons";
-"12.2. Vous indiquez que l'événement a tué du bétail: pouvez vous préciser quel type de bétail?/autre";
-"12.3.a. Vous indiquez que des vaches ont été tuées: précisez combien";
-"12.3.b. Vous indiquez que des moutons ont été tués: précisez combien";
-"12.3.c. Vous indiquez que des chèvres ont été tuées: précisez combien";
-"12.3.d. Vous indiquez que des volailles ont été tuées: précisez combien";
-"12.3.e. Vous indiquez que des cochons ont été tués: précisez combien";
-"12.3.f. Vous indiquez que d'autres bétails ont été tués: pécisez quel type";
-"12.3.g Vous indiquez que d'autres types de bétail ont été tués: précisez combien";
-"13.1. Des maisons ont-elles été affectées par l'événement?";
-"13.2. Quelle(s) partie(s) des maisons affectées a/ont été particulièrement touchée(s)?";
-"13.2. Quelle(s) partie(s) des maisons affectées a/ont été particulièrement touchée(s)?/les murs";
-"13.2. Quelle(s) partie(s) des maisons affectées a/ont été particulièrement touchée(s)?/le toit";
-"13.2. Quelle(s) partie(s) des maisons affectées a/ont été particulièrement touchée(s)?/autre";
-"13.3. Si autre, précisez";
-"13.4. Vous indiquez que des maisons ont été affectées: quel(s) type(s) de maisons?";
-"13.4. Vous indiquez que des maisons ont été affectées: quel(s) type(s) de maisons?/maisons en matériaux non durables (boue, terre glaise, planches, etc)";
-"13.4. Vous indiquez que des maisons ont été affectées: quel(s) type(s) de maisons?/maisons en matériaux durables (brique, ciment, etc)";
-"13.5. Vous indiquez que des maisons en matériaux non durables ont été affectés: comment pouvez-vous décrire les dégâts?";
-"13.5. Vous indiquez que des maisons en matériaux non durables ont été affectés: comment pouvez-vous décrire les dégâts?/quelques maisons affectées, mais sans dégâts sévères aux murs";
-"13.5. Vous indiquez que des maisons en matériaux non durables ont été affectés: comment pouvez-vous décrire les dégâts?/quelques murs de maisons partiellement endommagés ou effondrés";
-"13.5. Vous indiquez que des maisons en matériaux non durables ont été affectés: comment pouvez-vous décrire les dégâts?/quelques maisons détruites et nécessitant d'être complètement reconstruites";
-"13.5.a. Si possible, prenez ou enregistrez une photo de maisons en matériaux non durables affectée";
-"13.5.b. Combien de maisons en matériaux non durables ont été affectées sans dégât sévère?";
-"13.5.c. Combien de maisons en matériaux non durables ont des murs endommagés ou effondrés, mais ne sont pas complètement détruites?";
-"13.5.d. Combien de maisons en matériaux non durables doivent être reconstruites avant que quelqu'un puisse l'occuper à nouveau?";
-"13.6. Vous indiquez que des maisons en matériaux durables ont été affectés: comment pouvez-vous décrire les dégâts?";
-"13.6. Vous indiquez que des maisons en matériaux durables ont été affectés: comment pouvez-vous décrire les dégâts?/quelques maisons affectées, mais sans dégâts sévères aux murs";
-"13.6. Vous indiquez que des maisons en matériaux durables ont été affectés: comment pouvez-vous décrire les dégâts?/quelques murs de maisons partiellement endommagés ou effondrés";
-"13.6. Vous indiquez que des maisons en matériaux durables ont été affectés: comment pouvez-vous décrire les dégâts?/quelques maisons détruites et nécessitant d'être complètement reconstruites";
-"13.6.a. Si possible, prenez ou enregistrez une photo de maisons en matériaux durable affectées";
-"13.6.b. Combien de maisons en matériaux durables ont été affectées sans dégât sévère?";
-"13.6.c. Combien de maisons en matériaux durables ont des murs endommagés ou effondrés, mais ne sont pas complètement détruites?";
-"13.6.d. Combien de maisons en matériaux durables doivent être reconstuites avant que quelqu'un puisse l'occuper à nouveau?";
-"13.7.a. Vous indiquez que les toits de certaines maisons ont été affectés: précisez quel type de toit ";
-"13.7.a. Vous indiquez que les toits de certaines maisons ont été affectés: précisez quel type de toit /toit en paille/chaume";
-"13.7.a. Vous indiquez que les toits de certaines maisons ont été affectés: précisez quel type de toit /toit en tôle";
-"13.7.a. Vous indiquez que les toits de certaines maisons ont été affectés: précisez quel type de toit /autre";
-"13.7.b. Si autre, précisez";
-"13.7.c. Si possible, prenez ou enregistrez une photo d'une maison au toit affecté  ";
-"13.8.a. Vous indiquez que les toits en paille ont été affectés: précisez de quelle manière";
-"13.8.b. Combien de toits en paille sont partiellement détruits et ont besoin de réparation?";
-"13.8.c. Combien de toits en paille sont complètement détruits et ont besoin d'être remplacés? ";
-"13.9.a. Vous indiquez que les toits en tôle ont été affectés: précisez de quelle manière";
-"13.9.b. Combien de toits en tôle sont partiellement détruits et ont besoin de réparation?";
-"13.9.c. Combien de toits en tôle sont complètement détruits et ont besoin d'être remplacés? ";
-"14.1.a. Des routes ont-elles été affectées par l'événement?";
-"14.1.b. Vous indiquez que des routes ont été affectées par l'événement: quel type de route?";
-"14.1.b. Vous indiquez que des routes ont été affectées par l'événement: quel type de route?/route en terre";
-"14.1.b. Vous indiquez que des routes ont été affectées par l'événement: quel type de route?/route asphaltée";
-"14.2.a. Vous indiquez que des routes en terre ont été affectées: de quelle manière ont-elles été affectées?";
-"14.2.b. Si autre dommage, indiquez quel(s) type(s) de dommage(s)";
-"14.2.c. Vous mentionnez que les routes en terre sont légèrement endommagées/fissurées : précisez combien de mètres de routes de terre sont endommagées/fissurées";
-"14.2.d. Vous indiquez que les routes en terre sont complètement détruites : précisez combien de mètres de routes en terre sont complètement détruits";
-"14.2.e. Vous indiquez que les routes en terre sont recouvertes de terre ou de débris : précisez combien de mètres de routes en terre sont recouverts";
-"14.3.a. Vous indiquez que des routes asphaltées ont été affectées: de quelle manière ont-elles été affectées?";
-"14.3.b Si autre dommage, indiquez quel(s) type(s) de dommage(s)";
-"14.3.c. Vous mentionnez que les routes asphaltées sont légèrement endommagées/fissurées : précisez combien de mètres de routes asphaltées sont endommagées/fissurées";
-"14.3.d. Vous indiquez que les routes asphaltées sont complètement détruites : précisez combien de mètres de routes asphaltées sont complètement détruits";
-"14.3.e. Vous indiquez que les routes asphaltées sont recouvertes de terre ou de débris : précisez combien de mètres de routes asphaltées sont recouverts";
-"14.4.a. L'endommagement de la/des route(s) a-t-il empêché des ménages d'être connectés au village, au marché ou à l'école?";
-"14.4.b. Vous indiquez que les ménages n'ont plus été connectés au village, au marché ou à l'école: précisez combien de temps";
-"15.1. Des ponts ont-ils été affectés par l'événement?";
-"15.2. Vous indiquez que un/des pont(s) a/ont été affecté(s) par l'événement: quel type de pont?";
-"15.2. Vous indiquez que un/des pont(s) a/ont été affecté(s) par l'événement: quel type de pont?/pont(s) pour les piétons";
-"15.2. Vous indiquez que un/des pont(s) a/ont été affecté(s) par l'événement: quel type de pont?/pont(s) pour les véhicules";
-"15.3. Combien de ponts pour piétons ont été affectés?";
-"15.4. Combien de ponts pour véhicules ont été affectés?";
-"15.5. Si possible, prenez ou enregistrez une photo du pont affecté";
-"15.6.a. L'endommagement du-des pont(s) a-t-il empêché des ménages d'être connectés au village, au marché ou à l'école?";
-"15.6.b. Vous indiquez que les ménages n'ont plus été connectés au village, au marché ou à l'école: précisez combien de temps";
-"16. Y'a-t-il eu d'autres infrastructures affectées?";
-"16. Y'a-t-il eu d'autres infrastructures affectées?/antennes de télécommunication";
-"16. Y'a-t-il eu d'autres infrastructures affectées?/poteaux électriques";
-"16. Y'a-t-il eu d'autres infrastructures affectées?/conduites d'eau";
-"16. Y'a-t-il eu d'autres infrastructures affectées?/citernes d'eau";
-"16. Y'a-t-il eu d'autres infrastructures affectées?/bâtiments publiques";
-"16. Y'a-t-il eu d'autres infrastructures affectées?/autres infrastructures";
-"16. Y'a-t-il eu d'autres infrastructures affectées?/non, rien d'autre affecté";
-"16.a. Si autre(s) infrastructure(s), précisez laquelle/lesquelles";
-"16.b. Si possible, prenez ou enregistrez une photo de l'antenne de télécommunication affectée";
-"16.c. Si possible, prenez ou enregistrez une photo des poteaux électriques affectés";
-"16.d. Si possible, prenez ou enregistrez une photo des conduites d'eau affectées";
-"16.e. Si possible, prenez ou enregistrez une photo des citernes d'eau";
-"16.f. Si possible, prenez ou enregistrez une photo des bâtiments publiques affectés";
-"16.g. Si possible, prenez ou enregistrez une photo de ces autres infrastructures affectées";
-"17.a. Est-ce qu'il y a l'électricité dans la région affectée?";
-"17.b. L'événement a-t-il entraîné des coupures d'électricité dans la région affectée?";
-"18.a. L'événement a-t-il causé la destruction/le dérangement de sources pour l'eau de consommation?";
-"18.b. L'eau des rivières et ruisseaux est elle devenue brune à la suite de l'événement?";
-"19. Y'a t-il eu déclenchement d'un glissement de terrain à la suite du tremblement de terre?";
-"Vous indiquez que ce tremblement de terre a déclenché des glissements de terrain: essayez d'atteindre tous ces glissements de terrain et de les inventorier en utilisant le formulaire des glissements de terrain";
-"20.1. Les cultures ont elles été affectées par l'événement?";
-"20.2. Quelles sont les cultures touchées par l'événement?";
-"20.2. Quelles sont les cultures touchées par l'événement?/cultures vivrières (par ex: manioc, haricots, etc)";
-"20.2. Quelles sont les cultures touchées par l'événement?/cultures de rente (par ex: cacao, café, thé)";
-"20.2. Quelles sont les cultures touchées par l'événement?/forêt/eucalyptus";
-"20.3. Vous mentionnez que les cultures vivrières ont été affectées: comment pouvez-vous décrire les dégâts?";
-"20.4.a Combien de mètres carré de cultures vivrières ont été complètement détruits?";
-"20.4.b Combien de mètres carré de cultures vivrières ont été partiellement endommagés mais peuvent encore être consommées?";
-"20.5. Vous mentionnez que les cultures de rente ont été affectées: comment pouvez-vous décrire les dégâts?";
-"20.6.a Combien de mètres carré de cultures de rente ont été complètement détruits?";
-"20.6.b Combien de mètres carré de cultures de rente ont été partiellement endommagés mais peuvent encore produire?";
-"20.7. Vous mentionnez que la forêt a été affectée: comment pouvez-vous décrire les dégâts?";
-"20.8.a Combien de mètres carré de forêt ont été complètement détruits?";
-"20.8.b Combien de mètres carré de forêt ont été partiellement endommagés mais peuvent encore produire?";
-"21. Selon vous, des recherches complémentaires sont-elles nécessaires pour comprendre l'extension complète de la catastrophe?";
-"_version_";
-"_version__001";
-"__version__";
-"_id";
-"_uuid";
-"_submission_time";
-"_validation_status";
-"_notes";
-"_status";
-"_submitted_by";
-"_tags";
-"_index"

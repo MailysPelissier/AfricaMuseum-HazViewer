@@ -15,7 +15,7 @@ Geoserver v2.27.1
 
 Créer d’abord un nouveau Workspace (webGIS)
 Créer un Store, lié à votre base PostGIS (webGIS)
-Créer les layers (la géométrie est utilisée automatiquement) (events, vue_paragaphs_geo, vue_paragraphs_pg)
+Créer les layers (la géométrie est utilisée automatiquement) (events, vue_paragaphs_geo, vue_paragraphs_pg, citizen_observer)
 Layer : 
 Declared SRS: EPSG:4326
 Bounding Boxes : cliquer sur Compute from SRS bounds puis sur Compute from native bounds
