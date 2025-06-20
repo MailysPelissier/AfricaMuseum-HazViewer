@@ -6,7 +6,8 @@ Vue.createApp({
             countries_layer: null, // Initialisation de la couche countries
             extent_layer: null, // Initialisation de la couche du polygone de l'extent
             draw_layer: null, // Initialisation de la couche de dessin
-            events_layer: null, // Initialisation de la couche events
+            events_hazminer_layer: null, // Initialisation de la couche events hazminer
+            events_co_layer: null, // Initialisation de la couche events citizen observer
             selected_event_layer: null, // Initialisation de la couche selected event
             localisation_layer: null, // Initialisation de la couche de géolocalisation
             // Propriétés principales des events
@@ -37,7 +38,7 @@ Vue.createApp({
                 "Time of most frequent missing", "Max missing", "Number of max missing", "Time of max missing", "Median missing", "Most frequent evacuated", 
                 "Number of most frequent evacuated", "Time of most frequent evacuated", "Max evacuated", "Number of max evacuated", "Time of max evacuated", 
                 "Median evacuated"],
-            event_main_text: 'Select an event to get more information!', // Texte sur les events (haut droite de l'écran)
+            event_main_text: '', // Texte sur les events (haut droite de l'écran)
             event_other_text: '', // Texte sur les events, partie optionnelle others (haut droite de l'écran)
             event_location_text: '', // Texte sur les events, partie optionnelle locations (haut droite de l'écran)
             event_number_text: '', // Texte sur les events, partie optionnelle numbers (haut droite de l'écran)
@@ -308,7 +309,7 @@ Vue.createApp({
         visibilite_features_ajoutees(feature) {
 
             // Si l'event n'est pas déjà dans la couche :
-            let exists = this.events_layer.getSource().getFeatureById(feature.getId());
+            let exists = this.events_hazminer_layer.getSource().getFeatureById(feature.getId());
             if (!exists.get('visible')) {
 
                 // Dates du filtre en format y-m-d
@@ -547,8 +548,9 @@ Vue.createApp({
         // Change le style des évènements
         change_style() {
 
-            // Appliquer le style à la couche events
-            this.events_layer.setStyle(this.creation_style());
+            // Appliquer le style aux couches events
+            this.events_hazminer_layer.setStyle(this.creation_style());
+            // this.events_co_layer.setStyle(this.creation_style());
 
             // Appliquer le style à la couche selected event (couleur imposée)
             this.selected_event_layer.setStyle(this.creation_style('rgba(0, 255, 0, 1)'));
@@ -699,7 +701,7 @@ Vue.createApp({
 
                     // Récupération des events dans l'emprise (bbox) du polygone
                     let features_polygon_extent = [];
-                    this.events_layer.getSource().forEachFeatureIntersectingExtent(polygon.getExtent(), (feature) => {
+                    this.events_hazminer_layer.getSource().forEachFeatureIntersectingExtent(polygon.getExtent(), (feature) => {
                         features_polygon_extent.push(feature);
                     });
 
@@ -794,7 +796,7 @@ Vue.createApp({
             }
 
             // Chaque event devient visible
-            for (let feature of this.events_layer.getSource().getFeatures()) {
+            for (let feature of this.events_hazminer_layer.getSource().getFeatures()) {
                 feature.set('visible',true);
             }
 
@@ -905,7 +907,7 @@ Vue.createApp({
             let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
 
             // Pour chaque feature, sa propriété visibilité est modifiée selon le filtre
-            for (let feature of this.events_layer.getSource().getFeatures()) {
+            for (let feature of this.events_hazminer_layer.getSource().getFeatures()) {
                 this.set_feature_visibility(feature, start_date_ymd, end_date_ymd);
             }
 
@@ -1215,7 +1217,7 @@ Vue.createApp({
             if (draw_filter == 1) {
 
                 // Récupérer le nombre d'events
-                let event_features = this.events_layer.getSource().getFeatures();
+                let event_features = this.events_hazminer_layer.getSource().getFeatures();
                 let n_events_visibles = event_features.filter(f => f.get('visible') === true).length;
                 let nb_total_events = event_features.length;
 
@@ -1238,7 +1240,7 @@ Vue.createApp({
 
                 let compteur_events = 0;
                 // On récupère les events de la couche events 1 par 1
-                for (let f of this.events_layer.getSource().getFeatures()) {
+                for (let f of this.events_hazminer_layer.getSource().getFeatures()) {
 
                     // Pour chaque event correspondant aux critères
                     if (f.get('visible')) {
@@ -1385,7 +1387,7 @@ Vue.createApp({
         this.map = new ol.Map({
             target: 'map',
             view: new ol.View({
-                center: ol.proj.fromLonLat([4.517, 50.830]),
+                center: ol.proj.fromLonLat([28.85, -0.1]),
                 zoom: 7,
             }),
             layers: [
@@ -1451,8 +1453,8 @@ Vue.createApp({
             this.map.removeInteraction(this.draw);
         });
  
-        // Création de la couche events (se remplit selon la bbox)
-        this.events_layer = new ol.layer.Vector({
+        // Création de la couche events hazminer (se remplit selon la bbox)
+        this.events_hazminer_layer = new ol.layer.Vector({
             source: new ol.source.Vector({
                 format: new ol.format.GeoJSON(),
                 url: function(extent) {
@@ -1471,15 +1473,45 @@ Vue.createApp({
             }),
             zIndex: 10,
         });
-        this.map.addLayer(this.events_layer);
+        this.map.addLayer(this.events_hazminer_layer);
 
         // À chaque ajout de nouvelles features, création de la variable visibilité selon les filtres actifs
-        this.events_layer.getSource().on('featuresloadend', event => {
+        this.events_hazminer_layer.getSource().on('featuresloadend', event => {
             let features = event.features;
             features.forEach((feature) => {
                 this.visibilite_features_ajoutees(feature)
             })
         });
+
+        // Création de la couche events citizen observer (se remplit selon la bbox)
+        this.events_co_layer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                format: new ol.format.GeoJSON(),
+                url: function(extent) {
+                    return `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer`
+                        + `&outputFormat=application/json` + `&bbox=` + extent.join(',') + `,EPSG:3857`;
+                },
+                strategy: ol.loadingstrategy.bbox
+            }),
+            style: new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 10,
+                    fill: new ol.style.Fill({
+                        color: 'rgba(255, 0, 0, 1)',
+                    }),
+                }),
+            }),
+            zIndex: 10,
+        });
+        this.map.addLayer(this.events_co_layer);
+
+        // // À chaque ajout de nouvelles features, création de la variable visibilité selon les filtres actifs
+        // this.events_co_layer.getSource().on('featuresloadend', event => {
+        //     let features = event.features;
+        //     features.forEach((feature) => {
+        //         this.visibilite_features_ajoutees(feature)
+        //     })
+        // });
 
         // Création de la couche event selectionné (vide)
         this.selected_event_layer = new ol.layer.Vector({
@@ -1550,10 +1582,8 @@ Vue.createApp({
         });
         this.map.addControl(scaleline);
 
-        // A chaque déplacement/zoom, ajout des events à la couche events selon la bbox (pas utilisé pour l'instant)
-        // Suppression du popup clic
+        // A chaque déplacement/zoom, suppression du popup clic
         this.map.on('moveend', () => {
-            // this.ajout_events();
             document.getElementById("popup_clic").style.display = "none";
         });
 
@@ -1564,7 +1594,7 @@ Vue.createApp({
         
             // Récupérer les features à partir des différentes couches
             this.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-                if (layer === this.events_layer) {
+                if (layer === this.events_hazminer_layer || layer === this.events_co_layer) {
                     event_features.push(feature);
                 }
             });
@@ -1589,7 +1619,7 @@ Vue.createApp({
         
             // Récupérer les features à partir des différentes couches
             this.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
-                if (layer === this.events_layer) {
+                if (layer === this.events_hazminer_layer || layer === this.events_co_layer) {
                     event_features.push(feature);
                 }
             });
@@ -1605,7 +1635,13 @@ Vue.createApp({
             else if (event_features.length > 1) {
                 let html_popup = 'Choose the event:<ul>'
                 event_features.forEach((event_feature, index) => {
-                    let ligne = event_feature.get('hazard_type') + ' - ' + event_feature.get('event_time').substring(0,10);
+                    let ligne;
+                    if (event_feature.get('hazard_type')) {
+                        ligne = event_feature.get('hazard_type') + ' - ' + event_feature.get('event_time').substring(0,10);
+                    }
+                    if (event_feature.get('type_event')) {
+                        ligne = event_feature.get('type_event') + ' - ' + event_feature.get('event_date').substring(0,10);
+                    }
                     html_popup += `<li><a href="#" id="event_link_${index}">${ligne}</a></li>`;
                 });
                 html_popup += '</ul>';

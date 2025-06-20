@@ -718,6 +718,7 @@ END $$;
 
 DELETE FROM citizen_observer WHERE validation_status != 'Approved';
 DELETE FROM citizen_observer WHERE validation_status IS NULL; 
+UPDATE citizen_observer SET event_date=today WHERE event_date IS NULL;
 UPDATE citizen_observer SET donnees_georeferencees=false WHERE latitude IS null;
 UPDATE citizen_observer SET donnees_georeferencees=true WHERE donnees_georeferencees IS NULL;
 UPDATE citizen_observer
