@@ -10,25 +10,25 @@ Vue.createApp({
             paragraphs_layer: null, // Initialisation de la couche paragraphs
             selected_paragraph_layer: null, // Initialisation de la couche selected paragraph
             // Propriétés principales des events
-            event_main_property: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
+            event_main_properties: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
                  "n_paragraphs", "n_articles"],
-            event_main_property_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
+            event_main_properties_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des events
-            event_other_property: ["country", "country_found", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
-            event_other_property_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Duration", "Disaster score", "Hasard type score"],
+            event_other_properties: ["country", "country_found", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
+            event_other_properties_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Duration", "Disaster score", "Hasard type score"],
             // Propriétés localisations des events
-            event_location_property: ["latitude", "longitude", "bbox_event"],
-            event_location_property_title: ["Latitude", "Longitude", "Bbox event"],
+            event_location_properties: ["latitude", "longitude", "bbox_event"],
+            event_location_properties_title: ["Latitude", "Longitude", "Bbox event"],
             // Propriétés statistiques des events (souvent null)
-            event_number_property: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
+            event_number_properties: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
                 "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
                 "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", 
                 "n_max_injured", "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", 
                 "max_affected", "n_max_affected", "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", 
                 "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", 
                 "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated"],
-            event_number_property_title: ["Most frequent death", "Number of most frequent death", "Time of most frequent death", "Max death", 
+            event_number_properties_title: ["Most frequent death", "Number of most frequent death", "Time of most frequent death", "Max death", 
                 "Number of max death", "Time of max death", "Median death", "Most frequent homeless", "Number of most frequent homeless", 
                 "Time of most frequent homeless", "Max homeless", "Number of max homeless", "Time of max homeless", "Median homeless", "Most frequent injured", 
                 "Number of most frequent injured", "Time of most frequent injured", "Max injured", "Number of max injured", "Time of max injured", 
@@ -38,17 +38,17 @@ Vue.createApp({
                 "Number of most frequent evacuated", "Time of most frequent evacuated", "Max evacuated", "Number of max evacuated", "Time of max evacuated", 
                 "Median evacuated"],
             // Propriétés principales des paragraphs
-            paragraph_main_property: ["title", "hasard_type", "publication_time", "paragraph_time", "nb_death", "nb_injured", "nb_affected",
+            paragraph_main_properties: ["title", "hasard_type", "publication_time", "paragraph_time", "nb_death", "nb_injured", "nb_affected",
                 "article_language"],
-            paragraph_main_property_title: ["Title", "Hasard type", "Publication time", "Paragraph time", "Number of death", "Number of injured", 
+            paragraph_main_properties_title: ["Title", "Hasard type", "Publication time", "Paragraph time", "Number of death", "Number of injured", 
                 "Number of affected", "Article language"],
             // Autres propriétés des paragraphs
-            paragraph_other_property: ["extracted_text", "original_text", "country", "country_found", "source_country", "domain_url", "extracted_location", 
+            paragraph_other_properties: ["extracted_text", "original_text", "country", "country_found", "source_country", "domain_url", "extracted_location", 
                 "ner_score", "n_locations", "disaster_label", "disaster_score", "hasard_type_score"],
             // Propriétés localisations des events
-            paragraph_location_property: ["latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon"],
+            paragraph_location_properties: ["latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon"],
             // Propriétés statistiques des paragraphs (souvent null)
-            paragraph_number_property: ["nb_death", "score_death", "answer_death", "nb_homeless", "score_homeless", "answer_homeless", 
+            paragraph_number_properties: ["nb_death", "score_death", "answer_death", "nb_homeless", "score_homeless", "answer_homeless", 
                 "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", "answer_affected", "nb_missing",
                 "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min",
@@ -125,23 +125,30 @@ Vue.createApp({
             this.event_location_text = '<ul>';
             this.event_number_text = '<ul>';
             // Les propriétés principales s'affichent tout le temps
-            for (let i = 0; i < this.event_main_property.length; i++) {
-                this.event_main_text += '<li>' + this.event_main_property_title[i] + ': ' + feature.get(this.event_main_property[i]) + '</li>';
+            for (let i = 0; i < this.event_main_properties.length; i++) {
+                if (["event_time", "start_time", "end_time"].includes(this.event_main_properties[i])) {
+                    this.event_main_text += '<li>' + this.event_main_properties_title[i] + ': ' 
+                    + feature.get(this.event_main_properties[i]).substring(0,10) + '</li>';
+                }
+                else {
+                    this.event_main_text += '<li>' + this.event_main_properties_title[i] + ': ' 
+                    + feature.get(this.event_main_properties[i]) + '</li>';
+                } 
             }
             // Les propriétés supplémentaires se chargent, mais elles ne s'affichent que si la checkbox Show other information est cochée
             // L'utilisateur peut choisir s'il veut afficher les informations supplémentaires ou non, son choix est conservé
-            for (let i = 0; i < this.event_other_property.length; i++) {
-                this.event_other_text += '<li>' + this.event_other_property_title[i] + ': ' + feature.get(this.event_other_property[i]) + '</li>';
+            for (let i = 0; i < this.event_other_properties.length; i++) {
+                this.event_other_text += '<li>' + this.event_other_properties_title[i] + ': ' + feature.get(this.event_other_properties[i]) + '</li>';
             }
             // Les propriétés sur la localisation se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
             // L'utilisateur peut choisir s'il veut afficher les informations sur la localisation ou non, son choix est conservé
-            for (let i = 0; i < this.event_location_property.length; i++) {
-                this.event_location_text += '<li>' + this.event_location_property_title[i] + ': ' + feature.get(this.event_location_property[i]) + '</li>';
+            for (let i = 0; i < this.event_location_properties.length; i++) {
+                this.event_location_text += '<li>' + this.event_location_properties_title[i] + ': ' + feature.get(this.event_location_properties[i]) + '</li>';
             }
             // Les propriétés statistiques se chargent, mais elles ne s'affichent que si la checkbox Show more statistics est cochée
             // L'utilisateur peut choisir s'il veut afficher les informations statistiques ou non, son choix est conservé
-            for (let i = 0; i < this.event_number_property.length; i++) {
-                this.event_number_text += '<li>' + this.event_number_property_title[i] + ': ' + feature.get(this.event_number_property[i]) + '</li>';
+            for (let i = 0; i < this.event_number_properties.length; i++) {
+                this.event_number_text += '<li>' + this.event_number_properties_title[i] + ': ' + feature.get(this.event_number_properties[i]) + '</li>';
             }
             this.event_main_text += '</ul>';
             this.event_other_text += '</ul>';
@@ -235,8 +242,15 @@ Vue.createApp({
             // Chargement et affichage du texte sur le paragraph
             this.paragraph_text = '<ul>';
             // Les propriétés principales s'affichent tout le temps
-            for (let i = 0; i < this.paragraph_main_property.length; i++) {
-                this.paragraph_text += '<li>' + this.paragraph_main_property_title[i] + ': ' + feature.get(this.paragraph_main_property[i]) + '</li>';
+            for (let i = 0; i < this.paragraph_main_properties.length; i++) {
+                if (["publication_time", "paragraph_time"].includes(this.paragraph_main_properties[i])) {
+                    this.paragraph_text += '<li>' + this.paragraph_main_properties_title[i] + ': ' 
+                    + feature.get(this.paragraph_main_properties[i]).substring(0,10) + '</li>';
+                }
+                else {
+                    this.paragraph_text += '<li>' + this.paragraph_main_properties_title[i] + ': ' 
+                    + feature.get(this.paragraph_main_properties[i]) + '</li>';
+                } 
             }
             this.paragraph_text += '</ul>';
 
@@ -404,7 +418,7 @@ Vue.createApp({
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
                 "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
-            let paragraph_property_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
+            let paragraph_properties_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
 
             // Création du tableau pour le join final, initialisation du texte (header)
             let paragraph_content_lines = [paragraph_download_properties.join(',')];
@@ -445,7 +459,7 @@ Vue.createApp({
                 let row = paragraph_download_properties.map(prop => {
                     let value = f.properties[prop];
                     if (value == null) return ''; // gérer les null
-                    if (paragraph_property_str.includes(prop)) {
+                    if (paragraph_properties_str.includes(prop)) {
                         value = String(value).replace(/"/g, '""');
                         return `"${value}"`;
                     }
@@ -487,7 +501,7 @@ Vue.createApp({
                 "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
                 "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
                 "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
-            let event_property_str = ["bbox_event"];
+            let event_properties_str = ["bbox_event"];
 
             // Création du tableau pour le join final, initialisation du texte (header)
             let event_content_lines = [event_download_properties.join(',')];
@@ -505,7 +519,7 @@ Vue.createApp({
                 let row = event_download_properties.map(prop => {
                     let value = f.get(prop);
                     if (value == null) return ''; // gérer les null
-                    if (event_property_str.includes(prop)) {
+                    if (event_properties_str.includes(prop)) {
                         value = String(value).replace(/"/g, '""');
                         return `"${value}"`;
                     }

@@ -2,6 +2,8 @@ Vue.createApp({
 
     data() {
         return {
+
+            // Initialisation de la carte et des couches
             map: null, // Initialisation de la map
             countries_layer: null, // Initialisation de la couche countries
             extent_layer: null, // Initialisation de la couche du polygone de l'extent
@@ -10,26 +12,33 @@ Vue.createApp({
             events_co_layer: null, // Initialisation de la couche events citizen observer
             selected_event_layer: null, // Initialisation de la couche selected event
             localisation_layer: null, // Initialisation de la couche de géolocalisation
+
+            // Event sélectionné
+            selected_event: null, // Permet de conserver l'event sélectionné
+            selected_event_type: null, // Type de l'event (hazminer ou citizen observer)
+
+            // Affichage des propriétés des events (hazminer)
             // Propriétés principales des events
-            event_main_property: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
+            event_main_properties_hazminer: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
                 "n_paragraphs", "n_articles"],
-            event_main_property_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
+            event_main_properties_hazminer_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des events
-            event_other_property: ["country", "country_found", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
-            event_other_property_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Duration", "Disaster score", "Hasard type score"],
-            // Propriétés locations des events
-            event_location_property: ["latitude", "longitude", "bbox_event"],
-            event_location_property_title: ["Latitude", "Longitude", "Bbox event"],
+            event_other_properties_hazminer: ["country", "country_found", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
+            event_other_properties_hazminer_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Duration", "Disaster score", 
+                "Hasard type score"],
+            // Propriétés de localisation des events
+            event_location_properties_hazminer: ["latitude", "longitude", "bbox_event"],
+            event_location_properties_hazminer_title: ["Latitude", "Longitude", "Bbox event"],
             // Propriétés chiffrées des events (souvent null)
-            event_number_property: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
+            event_number_properties_hazminer: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
                 "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
                 "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", 
                 "n_max_injured", "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", 
                 "max_affected", "n_max_affected", "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", 
                 "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", 
                 "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated"],
-            event_number_property_title: ["Most frequent death", "Number of most frequent death", "Time of most frequent death", "Max death", 
+            event_number_properties_hazminer_title: ["Most frequent death", "Number of most frequent death", "Time of most frequent death", "Max death", 
                 "Number of max death", "Time of max death", "Median death", "Most frequent homeless", "Number of most frequent homeless", 
                 "Time of most frequent homeless", "Max homeless", "Number of max homeless", "Time of max homeless", "Median homeless", "Most frequent injured", 
                 "Number of most frequent injured", "Time of most frequent injured", "Max injured", "Number of max injured", "Time of max injured", 
@@ -38,14 +47,43 @@ Vue.createApp({
                 "Time of most frequent missing", "Max missing", "Number of max missing", "Time of max missing", "Median missing", "Most frequent evacuated", 
                 "Number of most frequent evacuated", "Time of most frequent evacuated", "Max evacuated", "Number of max evacuated", "Time of max evacuated", 
                 "Median evacuated"],
-            event_main_text: '', // Texte sur les events (haut droite de l'écran)
-            event_other_text: '', // Texte sur les events, partie optionnelle others (haut droite de l'écran)
-            event_location_text: '', // Texte sur les events, partie optionnelle locations (haut droite de l'écran)
-            event_number_text: '', // Texte sur les events, partie optionnelle numbers (haut droite de l'écran)
-            selected_event: null, // Permet de conserver l'event sélectionné
-            other_information: false, // Affichage des informations de other ou non (inactif par défaut)
-            location_information: false, // Affichage des informations de location ou non (inactif par défaut)
-            number_information: false, // Affichage des informations de number ou non (inactif par défaut)
+            event_main_text_hazminer: '', // Texte sur les events (haut droite de l'écran)
+            event_other_text_hazminer: '', // Texte sur les events, partie optionnelle autres (haut droite de l'écran)
+            event_location_text_hazminer: '', // Texte sur les events, partie optionnelle localisations (haut droite de l'écran)
+            event_number_text_hazminer: '', // Texte sur les events, partie optionnelle statistiques (haut droite de l'écran)        
+            other_information_hazminer: false, // Affichage des informations supplémentaires ou non (inactif par défaut)
+            location_information_hazminer: false, // Affichage des informations de localisation ou non (inactif par défaut)
+            number_information_hazminer: false, // Affichage des informations statistiques ou non (inactif par défaut)
+
+            // Affichage des propriétés des events (citizen observer)
+            // Propriétés principales des events
+            event_main_properties_co: ["type_event", "event_date", "country_found", "province", "territoire", "nom_collectivite_commune", "nom_groupement_quartier", 
+                "noms_villages", "nb_morts", "nb_blesses", "nb_sansabris", "surprise_population"],
+            // Propriétés de l'impact des events
+            event_impact_properties_co: ["impact_betail_bool", "impact_betail_type", "impact_betail_autre", "impact_logement_bool", "impact_routes_bool", 
+                "impact_ponts_bool", "impact_autres_type", "impact_autres_autre", "impact_coupures_elec", "impact_eau_consommation", "impact_cultures_bool", 
+                "impact_cultures_type"],
+            // Propriétés de localisation des events
+            event_location_properties_co: ["latitude", "longitude", "donnees_georeferencees"],
+            // Propriétés spécifiques des events, liés à certain types d'events
+            event_landslide_properties_co: ["landslide_new_or_old", "landslide_react_date_1", "landslide_react_date_2", "landslide_react_cause", 
+                "landslide_react_cause_autre", "landslide_react_signes_bool", "landslide_react_signes", "landslide_react_signes_autre", "landslide_apres", 
+                "landslide_cause_habitants", "landslide_cause_habitants_autre"],
+            event_inondation_properties_co: ["inondation_duree_jours", "inondation_max_date", "inondation_apres", "inondation_apres_autre"],
+            event_grele_properties_co: ["grele_duree_minutes"],
+            event_vents_violents_properties_co: ["vents_violents_duree_jours", "vents_violents_max_date", "vents_violents_avec_autre_event_bool", 
+                "vents_violents_avec_autre_event"],
+            event_tdt_properties_co: ["tdt_duree", "tdt_declenche_landslide"],
+            event_main_text_co: '', // Texte sur les events (haut droite de l'écran)
+            event_impact_text_co: '', // Texte sur les events, partie optionnelle impacts (haut droite de l'écran)
+            event_location_text_co: '', // Texte sur les events, partie optionnelle localisations (haut droite de l'écran)
+            event_specific_text_co: '', // Texte sur les events, partie optionnelle spécifique (haut droite de l'écran)
+            text_checkbox: '', // Légende du texte de la partie specifique sur les events
+            event_specific_co: false, // Apparition de la partie spécifique ou non
+            impact_information_co: false, // Affichage des informations sur l'impact ou non (inactif par défaut)
+            location_information_co: false, // Affichage des informations de localisation ou non (inactif par défaut)
+            specific_information_co: false, // Affichage des informations spécifiques ou non (inactif par défaut)
+
             // Affichage popup changer style
             show_changer_style_form: false,
             // Propriétés par défaut du changement de style
@@ -363,34 +401,129 @@ Vue.createApp({
         // Crée le texte en récupérant les infos sur l'event, change le style de l'event
         affichage_selection_event (feature) {
 
-            // Chargement et affichage du texte sur l'event
-            this.event_main_text = '<ul>';
-            this.event_other_text = '<ul>';
-            this.event_location_text = '<ul>';
-            this.event_number_text = '<ul>';
-            // Les propriétés principales s'affichent tout le temps
-            for (let i = 0; i < this.event_main_property.length; i++) {
-                this.event_main_text += '<li>' + this.event_main_property_title[i] + ': ' + feature.get(this.event_main_property[i]) + '</li>';
+            if (feature.get('hazard_type')) {
+
+                this.selected_event_type = 'hazminer';
+
+                // Chargement et affichage du texte sur l'event
+                this.event_main_text_hazminer = '<ul>';
+                this.event_other_text_hazminer = '<ul>';
+                this.event_location_text_hazminer = '<ul>';
+                this.event_number_text_hazminer = '<ul>';
+
+                // Les propriétés principales s'affichent tout le temps
+                for (let i = 0; i < this.event_main_properties_hazminer.length; i++) {
+                    if (["event_time", "start_time", "end_time"].includes(this.event_main_properties_hazminer[i])) {
+                        this.event_main_text_hazminer += '<li>' + this.event_main_properties_hazminer_title[i] + ': ' 
+                        + feature.get(this.event_main_properties_hazminer[i]).substring(0,10) + '</li>';
+                    }
+                    else {
+                        this.event_main_text_hazminer += '<li>' + this.event_main_properties_hazminer_title[i] + ': ' 
+                        + feature.get(this.event_main_properties_hazminer[i]) + '</li>';
+                    }     
+                }
+                // Les propriétés supplémentaires se chargent, mais elles ne s'affichent que si la checkbox Show other information est cochée
+                // L'utilisateur peut choisir s'il veut afficher les informations supplémentaires ou non, son choix est conservé
+                for (let i = 0; i < this.event_other_properties_hazminer.length; i++) {
+                    this.event_other_text_hazminer += '<li>' + this.event_other_properties_hazminer_title[i] + ': ' 
+                    + feature.get(this.event_other_properties_hazminer[i]) + '</li>';
+                }
+                // Les propriétés sur la localisation se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
+                // L'utilisateur peut choisir s'il veut afficher les informations sur la localisation ou non, son choix est conservé
+                for (let i = 0; i < this.event_location_properties_hazminer.length; i++) {
+                    this.event_location_text_hazminer += '<li>' + this.event_location_properties_hazminer_title[i] + ': ' 
+                    + feature.get(this.event_location_properties_hazminer[i]) + '</li>';
+                }
+                // Les propriétés statistiques se chargent, mais elles ne s'affichent que si la checkbox Show more statistics est cochée
+                // L'utilisateur peut choisir s'il veut afficher les informations statistiques ou non, son choix est conservé
+                for (let i = 0; i < this.event_number_properties_hazminer.length; i++) {
+                    this.event_number_text_hazminer += '<li>' + this.event_number_properties_hazminer_title[i] + ': ' 
+                    + feature.get(this.event_number_properties_hazminer[i]) + '</li>';
+                }
+
+                this.event_main_text_hazminer += '</ul>';
+                this.event_other_text_hazminer += '</ul>';
+                this.event_location_text_hazminer += '</ul>';
+                this.event_number_text_hazminer += '</ul>';
+
             }
-            // Les propriétés supplémentaires se chargent, mais elles ne s'affichent que si la checkbox Show other information est cochée
-            // L'utilisateur peut choisir s'il veut afficher les informations supplémentaires ou non, son choix est conservé
-            for (let i = 0; i < this.event_other_property.length; i++) {
-                this.event_other_text += '<li>' + this.event_other_property_title[i] + ': ' + feature.get(this.event_other_property[i]) + '</li>';
-            }
-            // Les propriétés sur la localisation se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
-            // L'utilisateur peut choisir s'il veut afficher les informations sur la localisation ou non, son choix est conservé
-            for (let i = 0; i < this.event_location_property.length; i++) {
-                this.event_location_text += '<li>' + this.event_location_property_title[i] + ': ' + feature.get(this.event_location_property[i]) + '</li>';
-            }
-            // Les propriétés statistiques se chargent, mais elles ne s'affichent que si la checkbox Show more statistics est cochée
-            // L'utilisateur peut choisir s'il veut afficher les informations statistiques ou non, son choix est conservé
-            for (let i = 0; i < this.event_number_property.length; i++) {
-                this.event_number_text += '<li>' + this.event_number_property_title[i] + ': ' + feature.get(this.event_number_property[i]) + '</li>';
-            }
-            this.event_main_text += '</ul>';
-            this.event_other_text += '</ul>';
-            this.event_location_text += '</ul>';
-            this.event_number_text += '</ul>';
+
+            if (feature.get('type_event')) {
+
+                this.selected_event_type = 'citizen oberver';
+
+                // Chargement et affichage du texte sur l'event
+                this.event_main_text_co = '<ul>';
+                this.event_impact_text_co = '<ul>';
+                this.event_location_text_co = '<ul>';
+                this.event_specific_text_co = '<ul>';
+
+                // Les propriétés principales s'affichent tout le temps
+                for (let i = 0; i < this.event_main_properties_co.length; i++) {
+                    if (this.event_main_properties_co[i] === 'event_date') {
+                        this.event_main_text_co += '<li>' + this.event_main_properties_co[i] + ': ' 
+                        + feature.get(this.event_main_properties_co[i]).substring(0,10) + '</li>';
+                    }
+                    else {
+                        this.event_main_text_co += '<li>' + this.event_main_properties_co[i] + ': ' 
+                        + feature.get(this.event_main_properties_co[i]) + '</li>';
+                    }
+                }
+                // Les propriétés sur l'impact de l'event se chargent, mais elles ne s'affichent que si la checkbox Afficher les informations sur l'impact est cochée
+                // L'utilisateur peut choisir s'il veut afficher les informations sur l'impact ou non, son choix est conservé
+                for (let i = 0; i < this.event_impact_properties_co.length; i++) {
+                    this.event_impact_text_co += '<li>' + this.event_impact_properties_co[i] + ': ' 
+                    + feature.get(this.event_impact_properties_co[i]) + '</li>';
+                }
+                // Les propriétés sur la localisation se chargent, mais elles ne s'affichent que si la checkbox Afficher les informations de localisation est cochée
+                // L'utilisateur peut choisir s'il veut afficher les informations sur la localisation ou non, son choix est conservé
+                for (let i = 0; i < this.event_location_properties_co.length; i++) {
+                    this.event_location_text_co += '<li>' + this.event_location_properties_co[i] + ': ' 
+                    + feature.get(this.event_location_properties_co[i]) + '</li>';
+                }
+                // Si l'évènement possède des informations supplémentaires selon son type, ces propriétés se chargent, mais elles ne s'affichent que si la checkbox 
+                // Afficher les informations spécifiques est cochée
+                // L'utilisateur peut choisir s'il veut afficher les informations spécifiques ou non, son choix est conservé
+                let type_event = feature.get('type_event');
+                if (['Glissement de terrain', 'Inondation', 'Tempête de grêle', 'Tempête de vents violents', 'Tremblement de terre'].includes(type_event)) {
+                    this.event_specific_co = true;
+                    let type_prop = '';
+                    if (type_event === 'Glissement de terrain') {
+                        type_prop = 'landslide';
+                        this.text_checkbox = 'Afficher les informations spécifiques au glissement de terrain:';
+                    }
+                    if (type_event === 'Inondation') {
+                        type_prop = 'inondation';
+                        this.text_checkbox = "Afficher les informations spécifiques à l'inondation:";
+                    }
+                    if (type_event === 'Tempête de grêle') {
+                        type_prop = 'grele';
+                        this.text_checkbox = 'Afficher les informations spécifiques à la tempête de grêle:';
+                    }
+                    if (type_event === 'Tempête de vents violents') {
+                        type_prop = 'vents_violents';
+                        this.text_checkbox = 'Afficher les informations spécifiques à la tempête de vents violents:';
+                    }
+                    if (type_event === 'Tremblement de terre') {
+                        type_prop = 'tdt';
+                        this.text_checkbox = 'Afficher les informations spécifiques au tremblement de terre:';
+                    }
+                    let event_specific_properties_co = this['event_' + type_prop + '_properties_co'];
+                    for (let i = 0; i < event_specific_properties_co.length; i++) {
+                        this.event_specific_text_co += '<li>' + event_specific_properties_co[i] + ': ' 
+                        + feature.get(event_specific_properties_co[i]) + '</li>';
+                    }
+                }
+                else {
+                    this.event_specific_co = false;
+                }
+                
+                this.event_main_text_co += '</ul>';
+                this.event_impact_text_co += '</ul>';
+                this.event_location_text_co += '</ul>';
+                this.event_specific_text_co += '</ul>';
+
+            }     
 
             // Affichage contours scrollbox
             document.getElementById('event_data_map_scroll_box').style.border = "1px solid #ccc";
@@ -398,10 +531,10 @@ Vue.createApp({
             // Garder l'event actuel
             this.selected_event = feature;
 
-            // Couche selected_event vidée
+            // Couche selected event layer vidée
             this.selected_event_layer.getSource().clear();
 
-            // Couche selected_event contient l'event sélectionné : permet de voir l'event
+            // Couche selected event layer contient l'event sélectionné : permet de voir l'event
             this.selected_event_layer.getSource().addFeature(feature);
 
         },
@@ -1022,7 +1155,7 @@ Vue.createApp({
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
                 "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
-            let paragraph_property_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
+            let paragraph_properties_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
 
             // Récupérer les valeurs d'event_id
             let event_id;
@@ -1064,7 +1197,7 @@ Vue.createApp({
                 let row = paragraph_download_properties.map(prop => {
                     let value = f.properties[prop];
                     if (value == null) return ''; // gérer les null
-                    if (paragraph_property_str.includes(prop)) {
+                    if (paragraph_properties_str.includes(prop)) {
                         value = String(value).replace(/"/g, '""');
                         return `"${value}"`;
                     }
@@ -1106,7 +1239,7 @@ Vue.createApp({
                 "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
                 "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
                 "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
-            let event_property_str = ["bbox_event"];
+            let event_properties_str = ["bbox_event"];
             let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
                 "paragraph_id", "original_text", "disaster_label", "disaster_score", "hasard_type", "hasard_type_score", "nb_death", "score_death", "answer_death",
                 "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
@@ -1180,7 +1313,7 @@ Vue.createApp({
                         let row = event_download_properties.map(prop => {
                             let value = f.properties[prop];
                             if (value == null) return ''; // gérer les null
-                            if (event_property_str.includes(prop)) {
+                            if (event_properties_str.includes(prop)) {
                                 value = String(value).replace(/"/g, '""');
                                 return `"${value}"`;
                             }
@@ -1251,7 +1384,7 @@ Vue.createApp({
                             let row = event_download_properties.map(prop => {
                                 let value = f.get(prop);
                                 if (value == null) return ''; // gérer les null
-                                if (event_property_str.includes(prop)) {
+                                if (event_properties_str.includes(prop)) {
                                     value = String(value).replace(/"/g, '""');
                                     return `"${value}"`;
                                 }

@@ -382,30 +382,53 @@
 
             <div id=no_event_selected v-if="!selected_event">Select an event to get more information!</div>
 
-            <div id=event_hazminer v-if="selected_event">
+            <div id=event_hazminer v-if="selected_event && selected_event_type === 'hazminer'">
 
                 <div id=event_title class=title>Event:</div>
 
-                <div id=event_data_main_text v-html="event_main_text"></div>
+                <div id=event_data_main_text v-html="event_main_text_hazminer"></div>
 
                 <div id="other_data_checkbox">
-                    <label>Show other information: <input type="checkbox" v-model="other_information"></label>
+                    <label>Show other information: <input type="checkbox" v-model="other_information_hazminer"></label>
                 </div>
-                <div id=event_other_data v-html="event_other_text" v-if="other_information"></div>
+                <div id=event_other_data v-html="event_other_text_hazminer" v-if="other_information_hazminer"></div>
 
                 <div id="location_data_checkbox">
-                    <label>Show location information: <input type="checkbox" v-model="location_information"></label>
+                    <label>Show location information: <input type="checkbox" v-model="location_information_hazminer"></label>
                 </div>
-                <div id=event_location_data v-html="event_location_text" v-if="location_information"></div>
+                <div id=event_location_data v-html="event_location_text_hazminer" v-if="location_information_hazminer"></div>
 
                 <div id="number_data_checkbox">
-                    <label>Show more statistics: <input type="checkbox" v-model="number_information"></label>
+                    <label>Show more statistics: <input type="checkbox" v-model="number_information_hazminer"></label>
                 </div>
-                <div id=event_number_data v-html="event_number_text" v-if="number_information"></div>
+                <div id=event_number_data v-html="event_number_text_hazminer" v-if="number_information_hazminer"></div>
 
                 <div class="flexrow space_evenly padding">
                     <button id=more_info_button @click="more_infos_page">More information</button>
                 </div>
+
+            </div>
+
+            <div id=event_co v-if="selected_event && selected_event_type === 'citizen oberver'">
+
+                <div id=event_title class=title>Event:</div>
+
+                <div id=event_data_main_text v-html="event_main_text_co"></div>
+
+                <div id="specific_data_checkbox" v-if=event_specific_co>
+                    <label>{{ text_checkbox }} <input type="checkbox" v-model="specific_information_co"></label>
+                </div>
+                <div id=event_specific_data v-html="event_specific_text_co" v-if="specific_information_co"></div>
+
+                <div id="impact_data_checkbox">
+                    <label>Afficher les informations sur l'impact: <input type="checkbox" v-model="impact_information_co"></label>
+                </div>
+                <div id=event_impact_data v-html="event_impact_text_co" v-if="impact_information_co"></div>
+
+                <div id="location_data_checkbox">
+                    <label>Afficher les informations de localisation: <input type="checkbox" v-model="location_information_co"></label>
+                </div>
+                <div id=event_location_data v-html="event_location_text_co" v-if="location_information_co"></div>
 
             </div>
 
