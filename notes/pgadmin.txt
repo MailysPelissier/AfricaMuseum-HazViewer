@@ -430,8 +430,8 @@ DROP TABLE IF EXISTS public.citizen_observer;
 
 CREATE TABLE IF NOT EXISTS public.citizen_observer
 (
-start_time timestamp without time zone,
-end_time timestamp without time zone,
+to_delete_1 timestamp without time zone,
+to_delete_2 timestamp without time zone,
 today timestamp without time zone,
 to_delete_4 character varying COLLATE pg_catalog."default",
 to_delete_5 character varying COLLATE pg_catalog."default",
@@ -469,7 +469,7 @@ to_delete_36 character varying COLLATE pg_catalog."default",
 to_delete_37 character varying COLLATE pg_catalog."default",
 inondation_duree_jours real,
 to_delete_39 character varying COLLATE pg_catalog."default",
-inondation_max_date timestamp without time zone,
+to_delete_40 character varying COLLATE pg_catalog."default",
 to_delete_41 character varying COLLATE pg_catalog."default",
 to_delete_42 character varying COLLATE pg_catalog."default",
 to_delete_43 character varying COLLATE pg_catalog."default",
@@ -480,7 +480,7 @@ to_delete_47 character varying COLLATE pg_catalog."default",
 to_delete_48 character varying COLLATE pg_catalog."default",
 to_delete_49 character varying COLLATE pg_catalog."default",
 to_delete_50 character varying COLLATE pg_catalog."default",
-inondation_apres_autre character varying COLLATE pg_catalog."default",
+inondation_apres_1 character varying COLLATE pg_catalog."default",
 to_delete_52 character varying COLLATE pg_catalog."default",
 to_delete_53 character varying COLLATE pg_catalog."default",
 grele_duree_minutes real,
@@ -488,11 +488,11 @@ to_delete_55 character varying COLLATE pg_catalog."default",
 to_delete_56 character varying COLLATE pg_catalog."default",
 vents_violents_duree_jours real,
 to_delete_58 character varying COLLATE pg_catalog."default",
-vents_violents_max_date timestamp without time zone,
+to_delete_59 character varying COLLATE pg_catalog."default",
 to_delete_60 character varying COLLATE pg_catalog."default",
 to_delete_61 character varying COLLATE pg_catalog."default",
-vents_violents_avec_autre_event_bool character varying COLLATE pg_catalog."default",
 vents_violents_avec_autre_event character varying COLLATE pg_catalog."default",
+vents_violents_avec_autre_event_1 character varying COLLATE pg_catalog."default",
 to_delete_64 character varying COLLATE pg_catalog."default",
 to_delete_65 character varying COLLATE pg_catalog."default",
 to_delete_66 character varying COLLATE pg_catalog."default",
@@ -517,17 +517,17 @@ to_delete_84 character varying COLLATE pg_catalog."default",
 to_delete_85 character varying COLLATE pg_catalog."default",
 to_delete_86 character varying COLLATE pg_catalog."default",
 to_delete_87 character varying COLLATE pg_catalog."default",
-landslide_react_date_1 character varying COLLATE pg_catalog."default",
-landslide_react_date_2 character varying COLLATE pg_catalog."default",
-landslide_react_cause character varying COLLATE pg_catalog."default",
-landslide_react_cause_autre character varying COLLATE pg_catalog."default",
-landslide_react_signes_bool character varying COLLATE pg_catalog."default",
+to_delete_88 character varying COLLATE pg_catalog."default",
+to_delete_89 character varying COLLATE pg_catalog."default",
+to_delete_90 character varying COLLATE pg_catalog."default",
+to_delete_91 character varying COLLATE pg_catalog."default",
 landslide_react_signes character varying COLLATE pg_catalog."default",
+landslide_react_signes_1 character varying COLLATE pg_catalog."default",
 to_delete_94 character varying COLLATE pg_catalog."default",
 to_delete_95 character varying COLLATE pg_catalog."default",
 to_delete_96 character varying COLLATE pg_catalog."default",
 to_delete_97 character varying COLLATE pg_catalog."default",
-landslide_react_signes_autre character varying COLLATE pg_catalog."default",
+landslide_react_signes_2 character varying COLLATE pg_catalog."default",
 landslide_apres character varying COLLATE pg_catalog."default",
 to_delete_100 character varying COLLATE pg_catalog."default",
 to_delete_101 character varying COLLATE pg_catalog."default",
@@ -540,7 +540,7 @@ to_delete_107 character varying COLLATE pg_catalog."default",
 to_delete_108 character varying COLLATE pg_catalog."default",
 to_delete_109 character varying COLLATE pg_catalog."default",
 to_delete_110 character varying COLLATE pg_catalog."default",
-landslide_cause_habitants_autre character varying COLLATE pg_catalog."default",
+landslide_cause_habitants_1 character varying COLLATE pg_catalog."default",
 to_delete_112 character varying COLLATE pg_catalog."default",
 to_delete_113 character varying COLLATE pg_catalog."default",
 to_delete_114 character varying COLLATE pg_catalog."default",
@@ -555,8 +555,8 @@ to_delete_122 character varying COLLATE pg_catalog."default",
 nb_blesses real,
 nb_sansabris real,
 to_delete_125 character varying COLLATE pg_catalog."default",
-impact_betail_bool character varying COLLATE pg_catalog."default",
-impact_betail_type character varying COLLATE pg_catalog."default",
+impact_betail character varying COLLATE pg_catalog."default",
+impact_betail_1 character varying COLLATE pg_catalog."default",
 to_delete_128 character varying COLLATE pg_catalog."default",
 to_delete_129 character varying COLLATE pg_catalog."default",
 to_delete_130 character varying COLLATE pg_catalog."default",
@@ -568,9 +568,9 @@ to_delete_135 character varying COLLATE pg_catalog."default",
 to_delete_136 character varying COLLATE pg_catalog."default",
 to_delete_137 character varying COLLATE pg_catalog."default",
 to_delete_138 character varying COLLATE pg_catalog."default",
-impact_betail_autre character varying COLLATE pg_catalog."default",
+impact_betail_2 character varying COLLATE pg_catalog."default",
 to_delete_140 character varying COLLATE pg_catalog."default",
-impact_logement_bool character varying COLLATE pg_catalog."default",
+impact_logement character varying COLLATE pg_catalog."default",
 to_delete_142 character varying COLLATE pg_catalog."default",
 to_delete_143 character varying COLLATE pg_catalog."default",
 to_delete_144 character varying COLLATE pg_catalog."default",
@@ -607,7 +607,7 @@ to_delete_174 character varying COLLATE pg_catalog."default",
 to_delete_175 character varying COLLATE pg_catalog."default",
 to_delete_176 character varying COLLATE pg_catalog."default",
 to_delete_177 character varying COLLATE pg_catalog."default",
-impact_routes_bool character varying COLLATE pg_catalog."default",
+impact_routes character varying COLLATE pg_catalog."default",
 to_delete_179 character varying COLLATE pg_catalog."default",
 to_delete_180 character varying COLLATE pg_catalog."default",
 to_delete_181 character varying COLLATE pg_catalog."default",
@@ -623,7 +623,7 @@ to_delete_190 character varying COLLATE pg_catalog."default",
 to_delete_191 character varying COLLATE pg_catalog."default",
 to_delete_192 character varying COLLATE pg_catalog."default",
 to_delete_193 character varying COLLATE pg_catalog."default",
-impact_ponts_bool character varying COLLATE pg_catalog."default",
+impact_ponts character varying COLLATE pg_catalog."default",
 to_delete_195 character varying COLLATE pg_catalog."default",
 to_delete_196 character varying COLLATE pg_catalog."default",
 to_delete_197 character varying COLLATE pg_catalog."default",
@@ -632,7 +632,7 @@ to_delete_199 character varying COLLATE pg_catalog."default",
 to_delete_200 character varying COLLATE pg_catalog."default",
 to_delete_201 character varying COLLATE pg_catalog."default",
 to_delete_202 character varying COLLATE pg_catalog."default",
-impact_autres_type character varying COLLATE pg_catalog."default",
+impact_autres character varying COLLATE pg_catalog."default",
 to_delete_204 character varying COLLATE pg_catalog."default",
 to_delete_205 character varying COLLATE pg_catalog."default",
 to_delete_206 character varying COLLATE pg_catalog."default",
@@ -640,7 +640,7 @@ to_delete_207 character varying COLLATE pg_catalog."default",
 to_delete_208 character varying COLLATE pg_catalog."default",
 to_delete_209 character varying COLLATE pg_catalog."default",
 to_delete_210 character varying COLLATE pg_catalog."default",
-impact_autres_autre character varying COLLATE pg_catalog."default",
+impact_autres_1 character varying COLLATE pg_catalog."default",
 to_delete_212 character varying COLLATE pg_catalog."default",
 to_delete_213 character varying COLLATE pg_catalog."default",
 to_delete_214 character varying COLLATE pg_catalog."default",
@@ -653,8 +653,8 @@ impact_eau_consommation character varying COLLATE pg_catalog."default",
 to_delete_221 character varying COLLATE pg_catalog."default",
 tdt_declenche_landslide character varying COLLATE pg_catalog."default",
 to_delete_223 character varying COLLATE pg_catalog."default",
-impact_cultures_bool character varying COLLATE pg_catalog."default",
-impact_cultures_type character varying COLLATE pg_catalog."default",
+impact_cultures character varying COLLATE pg_catalog."default",
+impact_cultures_1 character varying COLLATE pg_catalog."default",
 to_delete_226 character varying COLLATE pg_catalog."default",
 to_delete_227 character varying COLLATE pg_catalog."default",
 to_delete_228 character varying COLLATE pg_catalog."default",
@@ -693,7 +693,7 @@ TABLESPACE pg_default;
 ALTER TABLE IF EXISTS public.citizen_observer 
     OWNER to postgres;
 
-COPY citizen_observer (start_time, end_time, today, to_delete_4, to_delete_5, province, territoire, nom_collectivite_commune, nom_groupement_quartier, noms_villages, type_event, landslide_new_or_old, to_delete_13, to_delete_14, to_delete_15, to_delete_16, to_delete_17, to_delete_18, to_delete_19, to_delete_20, to_delete_21, to_delete_22, to_delete_23, latitude, longitude, to_delete_26, to_delete_27, to_delete_28, to_delete_29, to_delete_30, to_delete_31, to_delete_32, to_delete_33, event_date, to_delete_35, to_delete_36, to_delete_37, inondation_duree_jours, to_delete_39, inondation_max_date, to_delete_41, to_delete_42, to_delete_43, inondation_apres, to_delete_45, to_delete_46, to_delete_47, to_delete_48, to_delete_49, to_delete_50, inondation_apres_autre, to_delete_52, to_delete_53, grele_duree_minutes, to_delete_55, to_delete_56, vents_violents_duree_jours, to_delete_58, vents_violents_max_date, to_delete_60, to_delete_61, vents_violents_avec_autre_event_bool, vents_violents_avec_autre_event, to_delete_64, to_delete_65, to_delete_66, to_delete_67, to_delete_68, to_delete_69, to_delete_70, to_delete_71, to_delete_72, to_delete_73, to_delete_74, to_delete_75, to_delete_76, tdt_duree, to_delete_78, to_delete_79, to_delete_80, to_delete_81, to_delete_82, to_delete_83, to_delete_84, to_delete_85, to_delete_86, to_delete_87, landslide_react_date_1, landslide_react_date_2, landslide_react_cause, landslide_react_cause_autre, landslide_react_signes_bool, landslide_react_signes, to_delete_94, to_delete_95, to_delete_96, to_delete_97, landslide_react_signes_autre, landslide_apres, to_delete_100, to_delete_101, to_delete_102, to_delete_103, to_delete_104, landslide_cause_habitants, to_delete_106, to_delete_107, to_delete_108, to_delete_109, to_delete_110, landslide_cause_habitants_autre, to_delete_112, to_delete_113, to_delete_114, to_delete_115, to_delete_116, to_delete_117, to_delete_118, to_delete_119, surprise_population, nb_morts, to_delete_122, nb_blesses, nb_sansabris, to_delete_125, impact_betail_bool, impact_betail_type, to_delete_128, to_delete_129, to_delete_130, to_delete_131, to_delete_132, to_delete_133, to_delete_134, to_delete_135, to_delete_136, to_delete_137, to_delete_138, impact_betail_autre, to_delete_140, impact_logement_bool, to_delete_142, to_delete_143, to_delete_144, to_delete_145, to_delete_146, to_delete_147, to_delete_148, to_delete_149, to_delete_150, to_delete_151, to_delete_152, to_delete_153, to_delete_154, to_delete_155, to_delete_156, to_delete_157, to_delete_158, to_delete_159, to_delete_160, to_delete_161, to_delete_162, to_delete_163, to_delete_164,to_delete_165, to_delete_166, to_delete_167, to_delete_168, to_delete_169, to_delete_170, to_delete_171, to_delete_172, to_delete_173, to_delete_174, to_delete_175, to_delete_176, to_delete_177, impact_routes_bool, to_delete_179, to_delete_180, to_delete_181, to_delete_182, to_delete_183, to_delete_184, to_delete_185, to_delete_186, to_delete_187, to_delete_188, to_delete_189, to_delete_190, to_delete_191, to_delete_192, to_delete_193, impact_ponts_bool, to_delete_195, to_delete_196, to_delete_197, to_delete_198, to_delete_199, to_delete_200, to_delete_201, to_delete_202, impact_autres_type, to_delete_204, to_delete_205, to_delete_206, to_delete_207, to_delete_208, to_delete_209, to_delete_210, impact_autres_autre, to_delete_212, to_delete_213, to_delete_214, to_delete_215, to_delete_216, to_delete_217, to_delete_218, impact_coupures_elec, impact_eau_consommation, to_delete_221, tdt_declenche_landslide, to_delete_223, impact_cultures_bool, impact_cultures_type, to_delete_226, to_delete_227, to_delete_228, to_delete_229, to_delete_230, to_delete_231, to_delete_232, to_delete_233, to_delete_234, to_delete_235, to_delete_236, to_delete_237, to_delete_238, to_delete_239, to_delete_240, to_delete_241, to_delete_242, to_delete_243, to_delete_244, validation_status, to_delete_246, to_delete_247, to_delete_248, to_delete_249, to_delete_250)
+COPY citizen_observer (to_delete_1, to_delete_2, today, to_delete_4, to_delete_5, province, territoire, nom_collectivite_commune, nom_groupement_quartier, noms_villages, type_event, landslide_new_or_old, to_delete_13, to_delete_14, to_delete_15, to_delete_16, to_delete_17, to_delete_18, to_delete_19, to_delete_20, to_delete_21, to_delete_22, to_delete_23, latitude, longitude, to_delete_26, to_delete_27, to_delete_28, to_delete_29, to_delete_30, to_delete_31, to_delete_32, to_delete_33, event_date, to_delete_35, to_delete_36, to_delete_37, inondation_duree_jours, to_delete_39, to_delete_40, to_delete_41, to_delete_42, to_delete_43, inondation_apres, to_delete_45, to_delete_46, to_delete_47, to_delete_48, to_delete_49, to_delete_50, inondation_apres_1, to_delete_52, to_delete_53, grele_duree_minutes, to_delete_55, to_delete_56, vents_violents_duree_jours, to_delete_58, to_delete_59, to_delete_60, to_delete_61, vents_violents_avec_autre_event, vents_violents_avec_autre_event_1, to_delete_64, to_delete_65, to_delete_66, to_delete_67, to_delete_68, to_delete_69, to_delete_70, to_delete_71, to_delete_72, to_delete_73, to_delete_74, to_delete_75, to_delete_76, tdt_duree, to_delete_78, to_delete_79, to_delete_80, to_delete_81, to_delete_82, to_delete_83, to_delete_84, to_delete_85, to_delete_86, to_delete_87, to_delete_88, to_delete_89, to_delete_90, to_delete_91, landslide_react_signes, landslide_react_signes_1, to_delete_94, to_delete_95, to_delete_96, to_delete_97, landslide_react_signes_2, landslide_apres, to_delete_100, to_delete_101, to_delete_102, to_delete_103, to_delete_104, landslide_cause_habitants, to_delete_106, to_delete_107, to_delete_108, to_delete_109, to_delete_110, landslide_cause_habitants_1, to_delete_112, to_delete_113, to_delete_114, to_delete_115, to_delete_116, to_delete_117, to_delete_118, to_delete_119, surprise_population, nb_morts, to_delete_122, nb_blesses, nb_sansabris, to_delete_125, impact_betail, impact_betail_1, to_delete_128, to_delete_129, to_delete_130, to_delete_131, to_delete_132, to_delete_133, to_delete_134, to_delete_135, to_delete_136, to_delete_137, to_delete_138, impact_betail_2, to_delete_140, impact_logement, to_delete_142, to_delete_143, to_delete_144, to_delete_145, to_delete_146, to_delete_147, to_delete_148, to_delete_149, to_delete_150, to_delete_151, to_delete_152, to_delete_153, to_delete_154, to_delete_155, to_delete_156, to_delete_157, to_delete_158, to_delete_159, to_delete_160, to_delete_161, to_delete_162, to_delete_163, to_delete_164,to_delete_165, to_delete_166, to_delete_167, to_delete_168, to_delete_169, to_delete_170, to_delete_171, to_delete_172, to_delete_173, to_delete_174, to_delete_175, to_delete_176, to_delete_177, impact_routes, to_delete_179, to_delete_180, to_delete_181, to_delete_182, to_delete_183, to_delete_184, to_delete_185, to_delete_186, to_delete_187, to_delete_188, to_delete_189, to_delete_190, to_delete_191, to_delete_192, to_delete_193, impact_ponts, to_delete_195, to_delete_196, to_delete_197, to_delete_198, to_delete_199, to_delete_200, to_delete_201, to_delete_202, impact_autres, to_delete_204, to_delete_205, to_delete_206, to_delete_207, to_delete_208, to_delete_209, to_delete_210, impact_autres_1, to_delete_212, to_delete_213, to_delete_214, to_delete_215, to_delete_216, to_delete_217, to_delete_218, impact_coupures_elec, impact_eau_consommation, to_delete_221, tdt_declenche_landslide, to_delete_223, impact_cultures, impact_cultures_1, to_delete_226, to_delete_227, to_delete_228, to_delete_229, to_delete_230, to_delete_231, to_delete_232, to_delete_233, to_delete_234, to_delete_235, to_delete_236, to_delete_237, to_delete_238, to_delete_239, to_delete_240, to_delete_241, to_delete_242, to_delete_243, to_delete_244, validation_status, to_delete_246, to_delete_247, to_delete_248, to_delete_249, to_delete_250)
 FROM 'C:/Mailys/data/Formulaire_OC_2020_-_all_versions_-_labels_-_2025-05-22-09-35-22_sans-guillemets.csv'
 DELIMITER ';' 
 CSV HEADER
@@ -718,20 +718,46 @@ END $$;
 
 DELETE FROM citizen_observer WHERE validation_status != 'Approved';
 DELETE FROM citizen_observer WHERE validation_status IS NULL; 
+
 UPDATE citizen_observer SET event_date=today WHERE event_date IS NULL;
+
 UPDATE citizen_observer SET donnees_georeferencees=false WHERE latitude IS null;
 UPDATE citizen_observer SET donnees_georeferencees=true WHERE donnees_georeferencees IS NULL;
-UPDATE citizen_observer
-SET latitude = citizen_observer_coord_territoires.latitude
-FROM citizen_observer_coord_territoires
-WHERE citizen_observer.territoire = citizen_observer_coord_territoires.territoire
-AND citizen_observer.donnees_georeferencees = false;
-UPDATE citizen_observer
-SET longitude = citizen_observer_coord_territoires.longitude
-FROM citizen_observer_coord_territoires
-WHERE citizen_observer.territoire = citizen_observer_coord_territoires.territoire
-AND citizen_observer.donnees_georeferencees = false;
+UPDATE citizen_observer SET latitude = citizen_observer_coord_territoires.latitude FROM citizen_observer_coord_territoires WHERE citizen_observer.territoire = citizen_observer_coord_territoires.territoire AND citizen_observer.donnees_georeferencees = false;
+UPDATE citizen_observer SET longitude = citizen_observer_coord_territoires.longitude FROM citizen_observer_coord_territoires WHERE citizen_observer.territoire = citizen_observer_coord_territoires.territoire AND citizen_observer.donnees_georeferencees = false;
 UPDATE citizen_observer SET wkt=concat('POINT (',longitude,' ',latitude,')');
 UPDATE citizen_observer SET geom=ST_GeomFromText(wkt);
 UPDATE citizen_observer SET country_found = c.admin FROM countries c WHERE ST_Contains(c.geom, citizen_observer.geom);
 
+UPDATE citizen_observer SET impact_betail_1 = REPLACE(impact_betail_1,'autre',impact_betail_2) WHERE impact_betail_2 IS NOT NULL;
+ALTER TABLE citizen_observer DROP COLUMN impact_betail_2;
+UPDATE citizen_observer SET impact_betail = REPLACE(impact_betail,'oui',concat('oui (',impact_betail_1,')')) WHERE impact_betail = 'oui';
+ALTER TABLE citizen_observer DROP COLUMN impact_betail_1;
+
+UPDATE citizen_observer SET impact_autres = REPLACE(impact_autres,'publiques','publics');
+UPDATE citizen_observer SET impact_autres = REPLACE(impact_autres,' non, rien d''autre affecté','') WHERE impact_autres LIKE '% non, rien d''autre affecté%';
+UPDATE citizen_observer SET impact_autres = REPLACE(impact_autres,'non, rien d''autre affecté ','') WHERE impact_autres LIKE '%non, rien d''autre affecté %';
+UPDATE citizen_observer SET impact_autres = REPLACE(impact_autres,'autres infrastructures',impact_autres_1) WHERE impact_autres_1 IS NOT NULL;
+ALTER TABLE citizen_observer DROP COLUMN impact_autres_1;
+UPDATE citizen_observer SET impact_autres = REPLACE(impact_autres,'non, rien d''autre affecté','non');
+UPDATE citizen_observer SET impact_autres = REPLACE(impact_autres,impact_autres,concat('oui (',impact_autres,')')) WHERE impact_autres != 'non';
+
+UPDATE citizen_observer SET impact_coupures_elec = 'non' WHERE impact_coupures_elec IS NULL;
+
+UPDATE citizen_observer SET impact_cultures = REPLACE(impact_cultures,'oui',concat('oui (',impact_cultures_1,')')) WHERE impact_cultures = 'oui';
+ALTER TABLE citizen_observer DROP COLUMN impact_cultures_1;
+
+UPDATE citizen_observer SET vents_violents_avec_autre_event = REPLACE(vents_violents_avec_autre_event,'Oui',concat('Oui (',vents_violents_avec_autre_event_1,')')) WHERE vents_violents_avec_autre_event = 'Oui';
+ALTER TABLE citizen_observer DROP COLUMN vents_violents_avec_autre_event_1;
+
+UPDATE citizen_observer SET inondation_apres = REPLACE(inondation_apres,'autre événement',inondation_apres_1) WHERE inondation_apres_1 IS NOT NULL;
+ALTER TABLE citizen_observer DROP COLUMN inondation_apres_1;
+
+UPDATE citizen_observer SET landslide_react_signes = 'non' WHERE landslide_react_signes IS NULL;
+UPDATE citizen_observer SET landslide_react_signes_1 = REPLACE(landslide_react_signes_1,'autre',landslide_react_signes_2) WHERE landslide_react_signes_2 IS NOT NULL;
+ALTER TABLE citizen_observer DROP COLUMN landslide_react_signes_2;
+UPDATE citizen_observer SET landslide_react_signes = REPLACE(landslide_react_signes,'oui',concat('oui (',landslide_react_signes_1,')')) WHERE landslide_react_signes = 'oui';
+ALTER TABLE citizen_observer DROP COLUMN landslide_react_signes_1;
+
+UPDATE citizen_observer SET landslide_cause_habitants = REPLACE(landslide_cause_habitants,'une autre cause',landslide_cause_habitants_1) WHERE landslide_cause_habitants_1 IS NOT NULL;
+ALTER TABLE citizen_observer DROP COLUMN landslide_cause_habitants_1;

@@ -60,19 +60,15 @@ Vue.createApp({
             event_main_properties_co: ["type_event", "event_date", "country_found", "province", "territoire", "nom_collectivite_commune", "nom_groupement_quartier", 
                 "noms_villages", "nb_morts", "nb_blesses", "nb_sansabris", "surprise_population"],
             // Propriétés de l'impact des events
-            event_impact_properties_co: ["impact_betail_bool", "impact_betail_type", "impact_betail_autre", "impact_logement_bool", "impact_routes_bool", 
-                "impact_ponts_bool", "impact_autres_type", "impact_autres_autre", "impact_coupures_elec", "impact_eau_consommation", "impact_cultures_bool", 
-                "impact_cultures_type"],
+            event_impact_properties_co: ["impact_betail", "impact_logement", "impact_routes", "impact_ponts", "impact_autres", "impact_coupures_elec", 
+                "impact_eau_consommation", "impact_cultures"],
             // Propriétés de localisation des events
             event_location_properties_co: ["latitude", "longitude", "donnees_georeferencees"],
             // Propriétés spécifiques des events, liés à certain types d'events
-            event_landslide_properties_co: ["landslide_new_or_old", "landslide_react_date_1", "landslide_react_date_2", "landslide_react_cause", 
-                "landslide_react_cause_autre", "landslide_react_signes_bool", "landslide_react_signes", "landslide_react_signes_autre", "landslide_apres", 
-                "landslide_cause_habitants", "landslide_cause_habitants_autre"],
-            event_inondation_properties_co: ["inondation_duree_jours", "inondation_max_date", "inondation_apres", "inondation_apres_autre"],
+            event_landslide_properties_co: ["landslide_new_or_old", "landslide_react_signes", "landslide_apres", "landslide_cause_habitants"],
+            event_inondation_properties_co: ["inondation_duree_jours", "inondation_apres"],
             event_grele_properties_co: ["grele_duree_minutes"],
-            event_vents_violents_properties_co: ["vents_violents_duree_jours", "vents_violents_max_date", "vents_violents_avec_autre_event_bool", 
-                "vents_violents_avec_autre_event"],
+            event_vents_violents_properties_co: ["vents_violents_duree_jours", "vents_violents_avec_autre_event"],
             event_tdt_properties_co: ["tdt_duree", "tdt_declenche_landslide"],
             event_main_text_co: '', // Texte sur les events (haut droite de l'écran)
             event_impact_text_co: '', // Texte sur les events, partie optionnelle impacts (haut droite de l'écran)
