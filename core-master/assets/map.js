@@ -59,17 +59,29 @@ Vue.createApp({
             // Propriétés principales des events
             event_main_properties_co: ["type_event", "event_date", "country_found", "province", "territoire", "nom_collectivite_commune", "nom_groupement_quartier", 
                 "noms_villages", "nb_morts", "nb_blesses", "nb_sansabris", "surprise_population"],
+            event_main_properties_co_title: ["Type d'évènement", "Date", "Pays", "Province", "Territoire", "Nom de la collectivité/commune", 
+                "Nom du groupement/quartier", "Noms des villages affectés", "Nombre de morts", "Nombre de blessés", "Nombre de sans abris", 
+                "Réaction de la population"],
             // Propriétés de l'impact des events
             event_impact_properties_co: ["impact_betail", "impact_logement", "impact_routes", "impact_ponts", "impact_autres", "impact_coupures_elec", 
                 "impact_eau_consommation", "impact_cultures"],
+            event_impact_properties_co_title: ["Impact bétail", "Impact logement", "Impact routes", "Impact ponts", "Impact autres", "Impact coupures électricité", 
+                "Impact sources d'eau de consommation", "Impact cultures"],
             // Propriétés de localisation des events
             event_location_properties_co: ["latitude", "longitude", "donnees_georeferencees"],
+            event_location_properties_co_title: ["Latitude", "Longitude", "Données géoréférencées"],
             // Propriétés spécifiques des events, liés à certain types d'events
             event_landslide_properties_co: ["landslide_new_or_old", "landslide_react_signes", "landslide_apres", "landslide_cause_habitants"],
+            event_landslide_properties_co_title: ["Glissement de terrain", "Signes indiquant que la réactivitation pouvait se produire", 
+                "Le récent glissement de terrain s'est produit pendant ou juste après", "Cause selon les habitants"],
             event_inondation_properties_co: ["inondation_duree_jours", "inondation_apres"],
+            event_inondation_properties_co_title: ["Durée (en jours)", "L'inondation est survenue pendant ou juste après"],
             event_grele_properties_co: ["grele_duree_minutes"],
+            event_grele_properties_co_title: ["Durée (en minutes)"],
             event_vents_violents_properties_co: ["vents_violents_duree_jours", "vents_violents_avec_autre_event"],
+            event_vents_violents_properties_co_title: ["Durée (en jours)", "Les vents violents sont survenus pendant ou juste après un évènement"],
             event_tdt_properties_co: ["tdt_duree", "tdt_declenche_landslide"],
+            event_tdt_properties_co_title: ["Durée", "Glissement de terrain déclenché par ce tremblement de terre"],
             event_main_text_co: '', // Texte sur les events (haut droite de l'écran)
             event_impact_text_co: '', // Texte sur les events, partie optionnelle impacts (haut droite de l'écran)
             event_location_text_co: '', // Texte sur les events, partie optionnelle localisations (haut droite de l'écran)
@@ -457,25 +469,35 @@ Vue.createApp({
                 // Les propriétés principales s'affichent tout le temps
                 for (let i = 0; i < this.event_main_properties_co.length; i++) {
                     if (this.event_main_properties_co[i] === 'event_date') {
-                        this.event_main_text_co += '<li>' + this.event_main_properties_co[i] + ': ' 
+                        this.event_main_text_co += '<li>' + this.event_main_properties_co_title[i] + ': ' 
                         + feature.get(this.event_main_properties_co[i]).substring(0,10) + '</li>';
                     }
                     else {
-                        this.event_main_text_co += '<li>' + this.event_main_properties_co[i] + ': ' 
+                        this.event_main_text_co += '<li>' + this.event_main_properties_co_title[i] + ': ' 
                         + feature.get(this.event_main_properties_co[i]) + '</li>';
                     }
                 }
                 // Les propriétés sur l'impact de l'event se chargent, mais elles ne s'affichent que si la checkbox Afficher les informations sur l'impact est cochée
                 // L'utilisateur peut choisir s'il veut afficher les informations sur l'impact ou non, son choix est conservé
                 for (let i = 0; i < this.event_impact_properties_co.length; i++) {
-                    this.event_impact_text_co += '<li>' + this.event_impact_properties_co[i] + ': ' 
+                    this.event_impact_text_co += '<li>' + this.event_impact_properties_co_title[i] + ': ' 
                     + feature.get(this.event_impact_properties_co[i]) + '</li>';
                 }
                 // Les propriétés sur la localisation se chargent, mais elles ne s'affichent que si la checkbox Afficher les informations de localisation est cochée
                 // L'utilisateur peut choisir s'il veut afficher les informations sur la localisation ou non, son choix est conservé
                 for (let i = 0; i < this.event_location_properties_co.length; i++) {
-                    this.event_location_text_co += '<li>' + this.event_location_properties_co[i] + ': ' 
-                    + feature.get(this.event_location_properties_co[i]) + '</li>';
+                    if (this.event_location_properties_co[i] === 'donnees_georeferencees') {
+                        if (feature.get('donnees_georeferencees') === true) {
+                            this.event_location_text_co += '<li>' + 'Position exacte (données géoréférencées)'+ '</li>';
+                        }
+                        else {
+                            this.event_location_text_co += '<li>' + 'Point placé au centre du territoire (données non géoréférencées)'+ '</li>';
+                        }
+                    }
+                    else {
+                        this.event_location_text_co += '<li>' + this.event_location_properties_co_title[i] + ': ' 
+                        + feature.get(this.event_location_properties_co[i]) + '</li>';
+                    }
                 }
                 // Si l'évènement possède des informations supplémentaires selon son type, ces propriétés se chargent, mais elles ne s'affichent que si la checkbox 
                 // Afficher les informations spécifiques est cochée
@@ -505,8 +527,9 @@ Vue.createApp({
                         this.text_checkbox = 'Afficher les informations spécifiques au tremblement de terre:';
                     }
                     let event_specific_properties_co = this['event_' + type_prop + '_properties_co'];
+                    let event_specific_properties_co_title = this['event_' + type_prop + '_properties_co_title'];
                     for (let i = 0; i < event_specific_properties_co.length; i++) {
-                        this.event_specific_text_co += '<li>' + event_specific_properties_co[i] + ': ' 
+                        this.event_specific_text_co += '<li>' + event_specific_properties_co_title[i] + ': ' 
                         + feature.get(event_specific_properties_co[i]) + '</li>';
                     }
                 }
