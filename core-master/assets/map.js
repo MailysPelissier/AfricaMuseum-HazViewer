@@ -13,6 +13,9 @@ Vue.createApp({
             selected_event_layer: null, // Initialisation de la couche selected event
             localisation_layer: null, // Initialisation de la couche de géolocalisation
 
+            // Liste des pays
+            countries_list: [],
+
             // Event sélectionné
             selected_event: null, // Permet de conserver l'event sélectionné
             selected_event_type: null, // Type de l'event (hazminer ou citizen observer)
@@ -234,36 +237,55 @@ Vue.createApp({
                 { label: '81 - 100', min: 81, max: 100, size: 12 },
                 { label: '101 - 120', min: 101, max: 120, size: 15 },
             ],
+
             // Affichage popup filtres
             show_filter_form: false,
-            // Affichage menu général
-            show_general_menu: true,
-            // Affichage choix event type
-            show_event_type_filter: false,
-            // Affichage choix dates
-            show_date_filter: false,
-            // Affichage choix impact
-            show_casualties_filter: false,
-            // Affichage choix popularité
-            show_popularity_filter: false,
-            // Affichage choix location
-            show_location_filter: false,
+
+            // Affichage menu général hazminer / citizen observer
+            show_general_menu_hazminer: true,
+            show_general_menu_co: false,
+
+            // Affichage des différents menus de filtres hazminer         
+            show_event_type_filter_hazminer: false, // Affichage choix event type          
+            show_date_filter_hazminer: false, // Affichage choix dates         
+            show_casualties_filter_hazminer: false, // Affichage choix impact       
+            show_popularity_filter_hazminer: false, // Affichage choix popularité        
+            show_location_filter_hazminer: false, // Affichage choix location
+
+            // Affichage des différents menus de filtres co        
+            show_type_event_filter_co: false, // Affichage choix type event
+            show_date_filter_co: false, // Affichage choix dates         
+            show_impact_filter_co: false, // Affichage choix impact            
+            show_location_filter_co: false, // Affichage choix location
+
+            // Filtres hazminer
             // Filtre event type
             flood: true,
             flashflood: true,
             landslide: true,
             // Filtre dates
-            min_date: "01-01-1953",
-            max_date: "31-12-2028",
-            start_date: "01-01-1953",
-            end_date: "31-12-2028",
-            flatpickr_start: null,
-            flatpickr_end: null,
+            min_date_hazminer: "01-01-1953",
+            max_date_hazminer: "31-12-2028",
+            start_date_hazminer: "01-01-1953",
+            end_date_hazminer: "31-12-2028",
+            flatpickr_start_hazminer: null,
+            flatpickr_end_hazminer: null,
             duration_filter: [
                 { id: 'duration', label: 'Duration:', min: 0, max: 25, min_depart: 0, max_depart: 25 },
             ],
+            // Filtre location
+            chosen_country_hazminer: 'All',
+            substring_country_hazminer: '',
+            research_country_list_hazminer: [],
+            draw: null,
+            draw_actif: false,
+            features_polygon: [],
+            extent_filter: [
+                { id: 'latitude', label: 'Latitude', min: -90, max: 90, min_depart: -90, max_depart: 90 },
+                { id: 'longitude', label: 'Longitude', min: -180, max: 180, min_depart: -180, max_depart: 180 },
+            ],
             // Filtre impact
-            impact_filter: [
+            impact_filter_hazminer: [
                 { id: 'median_death', label: 'Median death:', checkbox_null: true, min: 1, max: 35000, min_depart: 1, max_depart: 35000 },
                 { id: 'median_injured', label: 'Median injured:', checkbox_null: true, min: 1, max: 900000000, min_depart: 1, max_depart: 900000000 },
                 { id: 'median_affected', label: 'Median affected:', checkbox_null: true, min: 1, max: 1600000000, min_depart: 1, max_depart: 1600000000 },
@@ -278,18 +300,45 @@ Vue.createApp({
                 { id: 'n_languages', label: 'Number of languages:', min: 1, max: 34, min_depart: 1, max_depart: 34 },
                 { id: 'n_source_countries', label: 'Number of source countries:', min: 1, max: 113, min_depart: 1, max_depart: 113 },
             ],
+
+            // Filtres citizen observer
+            // Filtre type d'event
+            inondation: true,
+            glissement_terrain: true,
+            tdt: true,
+            vents_violents: true,
+            grele: true,
+            foudre: true,
+            // Filtre dates
+            min_date_co: "12-05-2020",
+            max_date_co: "27-03-2025",
+            start_date_co: "12-05-2020",
+            end_date_co: "27-03-2025",
+            flatpickr_start_co: null,
+            flatpickr_end_co: null,
             // Filtre location
-            countries_list: [], // Liste des pays
-            chosen_country: 'All',
-            substring_country: '',
-            research_country_list: [],
-            draw: null,
-            draw_actif: false,
-            features_polygon: [],
-            extent_filter: [
-                { id: 'latitude', label: 'Latitude', min: -90, max: 90, min_depart: -90, max_depart: 90 },
-                { id: 'longitude', label: 'Longitude', min: -180, max: 180, min_depart: -180, max_depart: 180 },
+            chosen_country_co: 'All',
+            country_list_co: ["Democratic Republic of the Congo", "Rwanda"],
+            province_list_co: ["Sud Kivu", "Nord Kivu"],
+            territoire_list_co: ["Beni Territoire", "Beni Ville", "Bukavu", "Butembo", "Goma ", "Idjwi", "Kabare", "Kalehe", "Lubero", "Masisi", "Nyiragongo", 
+                "Rutshuru", "Uvira", "Walikale", "Walungu"],
+            // Filtre impact
+            impact_chiffre_filter_co: [
+                { id: 'nb_morts', label: 'Nombre de morts:', checkbox_null: true, min: 0, max: 300, min_depart: 0, max_depart: 300 },
+                { id: 'nb_blesses', label: 'Nombre de blessés:', checkbox_null: true, min: 0, max: 3000, min_depart: 0, max_depart: 3000 },
+                { id: 'nb_sans_abris', label: 'Nombre de sans abris:', checkbox_null: true, min: 0, max: 5000, min_depart: 0, max_depart: 5000 },
             ],
+            impact_bool_filter_co: [
+                { id: 'impact_betail', label: 'Impact bétail:', checkbox_impact: false },
+                { id: 'impact_logement', label: 'Impact logement:', checkbox_impact: false },
+                { id: 'impact_routes', label: 'Impact routes:', checkbox_impact: false },
+                { id: 'impact_ponts', label: 'Impact ponts:', checkbox_impact: false },
+                { id: 'impact_autres', label: 'Impact autres:', checkbox_impact: false },
+                { id: 'impact_coupures_elec', label: 'Impact coupures électricité:', checkbox_impact: false },
+                { id: 'impact_eau_consommation', label: "Impact sources d'eau de consommation:", checkbox_impact: false },
+                { id: 'impact_cultures', label: 'Impact cultures:', checkbox_impact: false },
+            ],
+
             // Affichage popup download
             show_download_form: false,
             download_filter_e: true,
@@ -351,19 +400,37 @@ Vue.createApp({
 
         },
 
-        // Ajout des events à la couche events par geoservices, selon la bbox
-        visibilite_features_ajoutees(feature) {
+        // Création de la variable visibilité de l'event hazminer selon les filtres actifs
+        visibilite_features_hazminer_ajoutees(feature) {
 
             // Si l'event n'est pas déjà dans la couche :
             let exists = this.events_hazminer_layer.getSource().getFeatureById(feature.getId());
             if (!exists.get('visible')) {
 
                 // Dates du filtre en format y-m-d
-                let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
-                let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
+                let start_date_hazminer_ymd = this.start_date_hazminer.substring(6,10) + '-' + this.start_date_hazminer.substring(3,5) + '-' + this.start_date_hazminer.substring(0,2);
+                let end_date_hazminer_ymd = this.end_date_hazminer.substring(6,10) + '-' + this.end_date_hazminer.substring(3,5) + '-' + this.end_date_hazminer.substring(0,2);
 
                 // Propriété visibilité dépend des filtres
-                this.set_feature_visibility(exists, start_date_ymd, end_date_ymd);
+                this.set_feature_hazminer_visibility(exists, start_date_hazminer_ymd, end_date_hazminer_ymd);
+
+            }
+
+        },
+
+        // Création de la variable visibilité de l'event citizen observer selon les filtres actifs
+        visibilite_features_co_ajoutees(feature) {
+
+            // Si l'event n'est pas déjà dans la couche :
+            let exists = this.events_co_layer.getSource().getFeatureById(feature.getId());
+            if (!exists.get('visible')) {
+
+                // Dates du filtre en format y-m-d
+                let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2);
+                let end_date_co_ymd = this.end_date_co.substring(6,10) + '-' + this.end_date_co.substring(3,5) + '-' + this.end_date_co.substring(0,2);
+
+                // Propriété visibilité dépend des filtres
+                this.set_feature_co_visibility(exists, start_date_co_ymd, end_date_co_ymd);
 
             }
 
@@ -373,14 +440,14 @@ Vue.createApp({
         set_countries_list() {
 
             this.countries_list = [];
-            this.research_country_list = [];
+            this.research_country_list_hazminer = [];
             let countries = this.countries_layer.getSource().getFeatures();
             for (let country of countries) {
                 this.countries_list.push(country.values_.admin);
-                this.research_country_list.push(country.values_.admin);
+                this.research_country_list_hazminer.push(country.values_.admin);
             }
             this.countries_list.sort()
-            this.research_country_list.sort();
+            this.research_country_list_hazminer.sort();
 
         },
 
@@ -592,8 +659,8 @@ Vue.createApp({
 
         },
 
-        // Création du style de chaque feature selon ses propriétés et le style choisi
-        creation_style(couleur_fixee = null) {
+        // Création du style de chaque feature hazminer selon ses propriétés et le style choisi
+        creation_style_hazminer(couleur_fixee = null) {
 
             return (feature) => {
 
@@ -608,9 +675,6 @@ Vue.createApp({
                     let color;
                     if (couleur_fixee) {
                         color = couleur_fixee;
-                    }
-                    else if (this.color_style === 'Standard') {
-                        color = this.color_standard;
                     }
                     else if (this.color_style === 'Event_type') {
                         let hazardType = feature.get('hazard_type');
@@ -697,15 +761,54 @@ Vue.createApp({
 
         },
 
+        // Création du style de chaque feature hazminer selon ses propriétés et le style choisi
+        creation_style_co(couleur_fixee = null) {
+
+            return (feature) => {
+
+                // Feature invisible si elle ne respecte pas les critères de filtrage
+                if (feature.get('visible') === false) {
+                    return new ol.style.Style({});
+                }
+
+                else {
+
+                    // Définition de la couleur
+                    let color;
+                    if (couleur_fixee) {
+                        color = couleur_fixee;
+                    }
+                    else {
+                        color = 'rgba(255, 0, 0, 1)';
+                    }
+                    
+                    // Définition de la taille
+                    let size = this.size_standard;
+                    
+                    return new ol.style.Style({
+                        image: new ol.style.Circle({
+                            radius: size,
+                            fill: new ol.style.Fill({
+                                color: color,
+                            }),
+                        })
+                    });
+
+                }
+                
+            };
+
+        },
+
         // Change le style des évènements
         change_style() {
 
             // Appliquer le style aux couches events
-            this.events_hazminer_layer.setStyle(this.creation_style());
-            // this.events_co_layer.setStyle(this.creation_style());
+            this.events_hazminer_layer.setStyle(this.creation_style_hazminer());
+            this.events_co_layer.setStyle(this.creation_style_co());
 
             // Appliquer le style à la couche selected event (couleur imposée)
-            this.selected_event_layer.setStyle(this.creation_style('rgba(0, 255, 0, 1)'));
+            this.selected_event_layer.setStyle(this.creation_style_hazminer('rgba(0, 255, 0, 1)'));
         
         },
 
@@ -721,11 +824,21 @@ Vue.createApp({
 
         },
 
-        // Affiche le filtre dates
+        // Affiche le filtre dates hazminer
         // Initialisation des calendriers
-        display_date_filter() {
+        display_hazminer_date_filter() {
 
-            this.show_date_filter = !this.show_date_filter;
+            this.show_date_filter_hazminer = !this.show_date_filter_hazminer;
+
+            this.set_flatpickr();
+        
+        },
+
+        // Affiche le filtre dates citizen observer
+        // Initialisation des calendriers
+        display_co_date_filter() {
+
+            this.show_date_filter_co = !this.show_date_filter_co;
 
             this.set_flatpickr();
         
@@ -734,31 +847,63 @@ Vue.createApp({
         // Initialise les calendriers
         set_flatpickr() {
 
-            if (this.show_date_filter) {
+            if (this.show_date_filter_hazminer) {
 
                 this.$nextTick(() => {
 
                     // Calandrier pour sélectionner la date de départ
-                    let start_date_input = document.querySelector('input[data-id="start_date"]');
-                    this.flatpickr_start = flatpickr(start_date_input, {
+                    let start_date_hazminer_input = document.querySelector('input[data-id="start_date_hazminer"]');
+                    this.flatpickr_start_hazminer = flatpickr(start_date_hazminer_input, {
                         dateFormat: "d-m-Y",
-                        minDate: this.min_date,
-                        maxDate: this.max_date,
-                        defaultDate: this.start_date,
+                        minDate: this.min_date_hazminer,
+                        maxDate: this.max_date_hazminer,
+                        defaultDate: this.start_date_hazminer,
                         onChange: (selectedDates, dateStr) => {
-                            this.start_date = dateStr;
+                            this.start_date_hazminer = dateStr;
                         }
                     });
         
                     // Calandrier pour sélectionner la date de fin
-                    let end_date_input = document.querySelector('input[data-id="end_date"]');
-                    this.flatpickr_end = flatpickr(end_date_input, {
+                    let end_date_hazminer_input = document.querySelector('input[data-id="end_date_hazminer"]');
+                    this.flatpickr_end_hazminer = flatpickr(end_date_hazminer_input, {
                         dateFormat: "d-m-Y",
-                        minDate: this.min_date,
-                        maxDate: this.max_date,
-                        defaultDate: this.end_date,
+                        minDate: this.min_date_hazminer,
+                        maxDate: this.max_date_hazminer,
+                        defaultDate: this.end_date_hazminer,
                         onChange: (selectedDates, dateStr) => {
-                            this.end_date = dateStr;
+                            this.end_date_hazminer = dateStr;
+                        }
+                    });
+
+                });
+
+            }
+
+            if (this.show_date_filter_co) {
+
+                this.$nextTick(() => {
+
+                    // Calandrier pour sélectionner la date de départ
+                    let start_date_co_input = document.querySelector('input[data-id="start_date_co"]');
+                    this.flatpickr_start_co = flatpickr(start_date_co_input, {
+                        dateFormat: "d-m-Y",
+                        minDate: this.min_date_co,
+                        maxDate: this.max_date_co,
+                        defaultDate: this.start_date_co,
+                        onChange: (selectedDates, dateStr) => {
+                            this.start_date_co = dateStr;
+                        }
+                    });
+        
+                    // Calandrier pour sélectionner la date de fin
+                    let end_date_co_input = document.querySelector('input[data-id="end_date_co"]');
+                    this.flatpickr_end_co = flatpickr(end_date_co_input, {
+                        dateFormat: "d-m-Y",
+                        minDate: this.min_date_co,
+                        maxDate: this.max_date_co,
+                        defaultDate: this.end_date_co,
+                        onChange: (selectedDates, dateStr) => {
+                            this.end_date_co = dateStr;
                         }
                     });
 
@@ -801,20 +946,20 @@ Vue.createApp({
 
         // Affiche les pays répondant aux critères
         input_search_country() {
-            this.research_country_list = [];
+            this.research_country_list_hazminer = [];
             for (let country of this.countries_list) {
-                if (country.toLowerCase().includes(this.substring_country)) {
-                    this.research_country_list.push(country);
+                if (country.toLowerCase().includes(this.substring_country_hazminer)) {
+                    this.research_country_list_hazminer.push(country);
                 }
             }
-            if (this.substring_country === '') {
-                this.chosen_country = 'All';
+            if (this.substring_country_hazminer === '') {
+                this.chosen_country_hazminer = 'All';
             }
-            else if (this.research_country_list.length === 0) {
-                this.chosen_country = 'All';
+            else if (this.research_country_list_hazminer.length === 0) {
+                this.chosen_country_hazminer = 'All';
             }
             else {
-                this.chosen_country = this.research_country_list[0]
+                this.chosen_country_hazminer = this.research_country_list_hazminer[0]
             }
         },
 
@@ -923,21 +1068,21 @@ Vue.createApp({
             this.flood = true;
             this.flashflood = true;
             this.landslide = true;
-            this.start_date = this.min_date;
-            this.end_date = this.max_date;
+            this.start_date_hazminer = this.min_date_hazminer;
+            this.end_date_hazminer = this.max_date_hazminer;
             this.duration_filter[0].min = this.duration_filter[0].min_depart;
             this.duration_filter[0].max = this.duration_filter[0].max_depart;
-            for(let i = 0; i < this.impact_filter.length; i++) {
-                this.impact_filter[i].checkbox_null = true;              
-                this.impact_filter[i].min = this.impact_filter[i].min_depart;
-                this.impact_filter[i].max = this.impact_filter[i].max_depart;
+            for(let i = 0; i < this.impact_filter_hazminer.length; i++) {
+                this.impact_filter_hazminer[i].checkbox_null = true;              
+                this.impact_filter_hazminer[i].min = this.impact_filter_hazminer[i].min_depart;
+                this.impact_filter_hazminer[i].max = this.impact_filter_hazminer[i].max_depart;
             }
             for(let i = 0; i < this.popularity_filter.length; i++) {           
                 this.popularity_filter[i].min = this.popularity_filter[i].min_depart;
                 this.popularity_filter[i].max = this.popularity_filter[i].max_depart;
             }
-            this.chosen_country = 'All';
-            this.substring_country = '';
+            this.chosen_country_hazminer = 'All';
+            this.substring_country_hazminer = '';
             this.set_countries_list();
             this.draw_layer.getSource().clear();
             this.features_polygon = [];
@@ -953,16 +1098,16 @@ Vue.createApp({
             }
 
             // Ferme les panneaux ouverts
-            this.show_event_type_filter = false;
-            this.show_date_filter = false;
-            this.show_casualties_filter = false;
-            this.show_popularity_filter = false;
-            this.show_location_filter = false;
+            this.show_event_type_filter_hazminer = false;
+            this.show_date_filter_hazminer = false;
+            this.show_casualties_filter_hazminer = false;
+            this.show_popularity_filter_hazminer = false;
+            this.show_location_filter_hazminer = false;
 
         },
 
-        // Met à jour la propriété visibilité de la feature selon le filtre
-        set_feature_visibility(feature, start_date_ymd, end_date_ymd) {
+        // Met à jour la propriété visibilité de la feature (hazminer) selon le filtre
+        set_feature_hazminer_visibility(feature, start_date_hazminer_ymd, end_date_hazminer_ymd) {
       
             // Feature visible par défaut
             feature.set('visible',true);
@@ -984,11 +1129,11 @@ Vue.createApp({
             }
 
             // Date
-            if (Date.parse(feature.get('event_time')) < Date.parse(start_date_ymd)) {
+            if (Date.parse(feature.get('event_time')) < Date.parse(start_date_hazminer_ymd)) {
                 feature.set('visible',false);
                 return;
             }
-            if (Date.parse(feature.get('event_time')) > Date.parse(end_date_ymd)) {
+            if (Date.parse(feature.get('event_time')) > Date.parse(end_date_hazminer_ymd)) {
                 feature.set('visible',false);
                 return;
             }
@@ -1002,16 +1147,16 @@ Vue.createApp({
             }
 
             // Impact
-            for(let i = 0; i < this.impact_filter.length; i++) {
-                if (!this.impact_filter[i].checkbox_null && feature.get(this.impact_filter[i].id) === null) {
+            for(let i = 0; i < this.impact_filter_hazminer.length; i++) {
+                if (!this.impact_filter_hazminer[i].checkbox_null && feature.get(this.impact_filter_hazminer[i].id) === null) {
                     feature.set('visible',false);
                     return;
                 }
-                if (parseFloat(feature.get(this.impact_filter[i].id)) < parseFloat(this.impact_filter[i].min)) {
+                if (parseFloat(feature.get(this.impact_filter_hazminer[i].id)) < parseFloat(this.impact_filter_hazminer[i].min)) {
                     feature.set('visible',false);
                     return;
                 }
-                if (parseFloat(feature.get(this.impact_filter[i].id)) > parseFloat(this.impact_filter[i].max)) {
+                if (parseFloat(feature.get(this.impact_filter_hazminer[i].id)) > parseFloat(this.impact_filter_hazminer[i].max)) {
                     feature.set('visible',false);
                     return;
                 }
@@ -1030,7 +1175,7 @@ Vue.createApp({
             }
 
             // Location
-            if (this.chosen_country != 'All' && feature.get('country_found') != this.chosen_country) {
+            if (this.chosen_country_hazminer != 'All' && feature.get('country_found') != this.chosen_country_hazminer) {
                 feature.set('visible',false);
                 return;
             }
@@ -1051,16 +1196,89 @@ Vue.createApp({
             
         },
 
+        // Met à jour la propriété visibilité de la feature (citizen observer) selon le filtre
+        set_feature_co_visibility(feature, start_date_co_ymd, end_date_co_ymd) {
+      
+            // Feature visible par défaut
+            feature.set('visible',true);
+
+            // Feature ne doit pas être visible si elle ne respecte pas les critères du filtre
+
+            // Type event
+            if (!this.inondation && feature.get('type_event') === 'Inondation') {
+                feature.set('visible',false);
+                return;
+            }
+            if (!this.glissement_terrain && feature.get('type_event') === 'Glissement de terrain') {
+                feature.set('visible',false);
+                return;
+            }
+            if (!this.tdt && feature.get('type_event') === 'Tremblement de terre') {
+                feature.set('visible',false);
+                return;
+            }
+            if (!this.vents_violents && feature.get('type_event') === 'Tempête de vents violents') {
+                feature.set('visible',false);
+                return;
+            }
+            if (!this.grele && feature.get('type_event') === 'Tempête de grêle') {
+                feature.set('visible',false);
+                return;
+            }
+            if (!this.foudre && feature.get('type_event') === 'Foudre') {
+                feature.set('visible',false);
+                return;
+            }
+
+            // Date
+            if (Date.parse(feature.get('event_date')) < Date.parse(start_date_co_ymd)) {
+                feature.set('visible',false);
+                return;
+            }
+            if (Date.parse(feature.get('event_date')) > Date.parse(end_date_co_ymd)) {
+                feature.set('visible',false);
+                return;
+            }
+
+            // Impact
+            for(let i = 0; i < this.impact_chiffre_filter_co.length; i++) {
+                if (!this.impact_chiffre_filter_co[i].checkbox_null && feature.get(this.impact_chiffre_filter_co[i].id) === null) {
+                    feature.set('visible',false);
+                    return;
+                }
+                if (parseFloat(feature.get(this.impact_chiffre_filter_co[i].id)) < parseFloat(this.impact_chiffre_filter_co[i].min)) {
+                    feature.set('visible',false);
+                    return;
+                }
+                if (parseFloat(feature.get(this.impact_chiffre_filter_co[i].id)) > parseFloat(this.impact_chiffre_filter_co[i].max)) {
+                    feature.set('visible',false);
+                    return;
+                }
+            }
+            for(let i = 0; i < this.impact_bool_filter_co.length; i++) {
+                if (this.impact_bool_filter_co[i].checkbox_impact && feature.get(this.impact_bool_filter_co[i].id) === 'non') {
+                    feature.set('visible',false);
+                    return;
+                }
+            }
+            
+        },
+
         // Application des filtres : seuls les évènements respectant les critères apparaissent
         appliquer_filtres() {
 
-            // Dates du filtre en format y-m-d
-            let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
-            let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
+            // Dates des filtres en format y-m-d
+            let start_date_hazminer_ymd = this.start_date_hazminer.substring(6,10) + '-' + this.start_date_hazminer.substring(3,5) + '-' + this.start_date_hazminer.substring(0,2);
+            let end_date_hazminer_ymd = this.end_date_hazminer.substring(6,10) + '-' + this.end_date_hazminer.substring(3,5) + '-' + this.end_date_hazminer.substring(0,2);
+            let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2);
+            let end_date_co_ymd = this.end_date_co.substring(6,10) + '-' + this.end_date_co.substring(3,5) + '-' + this.end_date_co.substring(0,2);
 
             // Pour chaque feature, sa propriété visibilité est modifiée selon le filtre
             for (let feature of this.events_hazminer_layer.getSource().getFeatures()) {
-                this.set_feature_visibility(feature, start_date_ymd, end_date_ymd);
+                this.set_feature_hazminer_visibility(feature, start_date_hazminer_ymd, end_date_hazminer_ymd);
+            }
+            for (let feature of this.events_co_layer.getSource().getFeatures()) {
+                this.set_feature_co_visibility(feature, start_date_co_ymd, end_date_co_ymd);
             }
 
             // Change le style des features : celles dont la visibilité est fausse sont invisibles, les autres gardent leur style actuel
@@ -1127,20 +1345,20 @@ Vue.createApp({
                 }
 
                 // Date
-                let start_date_ymd = this.start_date.substring(6,10) + '-' + this.start_date.substring(3,5) + '-' + this.start_date.substring(0,2);
-                let end_date_ymd = this.end_date.substring(6,10) + '-' + this.end_date.substring(3,5) + '-' + this.end_date.substring(0,2);
-                cqlFilter += " AND event_time >= '" + start_date_ymd + "'";
-                cqlFilter += " AND event_time <= '" + end_date_ymd + "'";
+                let start_date_hazminer_ymd = this.start_date_hazminer.substring(6,10) + '-' + this.start_date_hazminer.substring(3,5) + '-' + this.start_date_hazminer.substring(0,2);
+                let end_date_hazminer_ymd = this.end_date_hazminer.substring(6,10) + '-' + this.end_date_hazminer.substring(3,5) + '-' + this.end_date_hazminer.substring(0,2);
+                cqlFilter += " AND event_time >= '" + start_date_hazminer_ymd + "'";
+                cqlFilter += " AND event_time <= '" + end_date_hazminer_ymd + "'";
                 cqlFilter += " AND " + this.duration_filter[0].id + " BETWEEN " + this.duration_filter[0].min + " AND " + this.duration_filter[0].max;
 
                 // Impact
-                for(let i = 0; i < this.impact_filter.length; i++) {
-                    if (this.impact_filter[i].checkbox_null) {
-                        cqlFilter += " AND (" + this.impact_filter[i].id + " BETWEEN " + this.impact_filter[i].min + " AND " + this.impact_filter[i].max
-                        + " OR " + this.impact_filter[i].id + " IS NULL)";
+                for(let i = 0; i < this.impact_filter_hazminer.length; i++) {
+                    if (this.impact_filter_hazminer[i].checkbox_null) {
+                        cqlFilter += " AND (" + this.impact_filter_hazminer[i].id + " BETWEEN " + this.impact_filter_hazminer[i].min + " AND " + this.impact_filter_hazminer[i].max
+                        + " OR " + this.impact_filter_hazminer[i].id + " IS NULL)";
                     }
                     else {
-                        cqlFilter += " AND " + this.impact_filter[i].id + " BETWEEN " + this.impact_filter[i].min + " AND " + this.impact_filter[i].max;
+                        cqlFilter += " AND " + this.impact_filter_hazminer[i].id + " BETWEEN " + this.impact_filter_hazminer[i].min + " AND " + this.impact_filter_hazminer[i].max;
                     }
                 }
 
@@ -1150,8 +1368,8 @@ Vue.createApp({
                 }
 
                 // Location
-                if (this.chosen_country != 'All') {
-                    cqlFilter += " AND country_found = '" + this.chosen_country + "'";
+                if (this.chosen_country_hazminer != 'All') {
+                    cqlFilter += " AND country_found = '" + this.chosen_country_hazminer + "'";
                 }
                 for(let i = 0; i < this.extent_filter.length; i++) {
                     cqlFilter += " AND " + this.extent_filter[i].id + " BETWEEN " + this.extent_filter[i].min + " AND " + this.extent_filter[i].max;
@@ -1631,7 +1849,7 @@ Vue.createApp({
         this.events_hazminer_layer.getSource().on('featuresloadend', event => {
             let features = event.features;
             features.forEach((feature) => {
-                this.visibilite_features_ajoutees(feature)
+                this.visibilite_features_hazminer_ajoutees(feature)
             })
         });
 
@@ -1661,7 +1879,7 @@ Vue.createApp({
         // this.events_co_layer.getSource().on('featuresloadend', event => {
         //     let features = event.features;
         //     features.forEach((feature) => {
-        //         this.visibilite_features_ajoutees(feature)
+        //         this.visibilite_features_co_ajoutees(feature)
         //     })
         // });
 

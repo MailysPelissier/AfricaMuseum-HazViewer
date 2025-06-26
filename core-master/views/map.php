@@ -150,173 +150,328 @@
                     <button class="vertical_center" @click="change_true_false(['show_filter_form'])">&#215;</button>
                 </div> 
 
+                <div id=choix_filtre_data class="flexrow space_between padding">
+                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_hazminer>Hazminer</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_hazminer @click="change_true_false(['show_general_menu_hazminer','show_general_menu_co'])">Citizen observer</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_co @click="change_true_false(['show_general_menu_hazminer','show_general_menu_co'])">Hazminer</button>
+                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_co>Citizen observer</button>
+                </div>
+
                 <br>
 
-                <button id="event_type_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_event_type_filter'])">
-                    <h6>Hazard type</h6>
-                    <div class="vertical_center" v-if="!show_event_type_filter">&#62;</div>
-                    <div class="vertical_center" v-if="show_event_type_filter">&#60;</div>
-                </button>
+                <div id=hazminer_filter v-if=show_general_menu_hazminer>
 
-                <div id="event_type_filter" class="flexrow space_between padding largeur_min" v-if="show_event_type_filter">
-                    <div class="vertical_center">
-                        <button class='back_button' @click="change_true_false(['show_event_type_filter'])">&#60;</button>
-                    </div>
-                    <div id="event_type_field">
-                        <div class="title">Hazard type filter:</div>
-                        <div id="flood">
-                            <label>Flood: <input type="checkbox" v-model="flood"></label>
-                        </div>  
-                        <div id="flashflood">
-                            <label>Flash flood: <input type="checkbox" v-model="flashflood"></label>
+                    <button id="event_type_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_event_type_filter_hazminer'])">
+                        <h6>Hazard type</h6>
+                        <div class="vertical_center" v-if="!show_event_type_filter_hazminer">&#62;</div>
+                        <div class="vertical_center" v-if="show_event_type_filter_hazminer">&#60;</div>
+                    </button>
+
+                    <div id="event_type_filter" class="flexrow space_between padding largeur_min" v-if="show_event_type_filter_hazminer">
+                        <div class="vertical_center">
+                            <button class='back_button' @click="change_true_false(['show_event_type_filter_hazminer'])">&#60;</button>
                         </div>
-                        <div id="landslide">
-                            <label>Landslide: <input type="checkbox" v-model="landslide"></label>
-                        </div>         
-                    </div>  
-                    <div class='back_button'></div>
-                </div>
-
-                <hr style='margin:5px;' />
-
-                <button id="date_button" class="flexrow space_between padding largeur_min largeur_auto" @click="display_date_filter">
-                    <h6>Date</h6>
-                    <div class="vertical_center" v-if="!show_date_filter">&#62;</div>
-                    <div class="vertical_center" v-if="show_date_filter">&#60;</div>
-                </button>
-
-                <div id="date_filter" class="flexrow space_between padding largeur_min" v-if="show_date_filter">
-                    <div class="vertical_center">
-                        <button class='back_button' @click="display_date_filter">&#60;</button>
+                        <div id="event_type_field">
+                            <div class="title">Hazard type filter:</div>
+                            <div id="flood">
+                                <label>Flood: <input type="checkbox" v-model="flood"></label>
+                            </div>  
+                            <div id="flashflood">
+                                <label>Flash flood: <input type="checkbox" v-model="flashflood"></label>
+                            </div>
+                            <div id="landslide">
+                                <label>Landslide: <input type="checkbox" v-model="landslide"></label>
+                            </div>         
+                        </div>  
+                        <div class='back_button'></div>
                     </div>
-                    <div id="date_field" class="margin">
-                        <div class="title">Date filter:</div>
-                        <ul>
-                            <li id="start_date">
-                                <label>Start date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date"></label>
-                            </li>
-                            <li id="end_date">
-                                <label>End date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date"></label>
-                            </li>
-                            <li id="duration">{{duration_filter[0].label}}</li>
-                            <div>
-                                <label>Min: <input class="input_number" type="text" :min="duration_filter[0].min_depart" :max="duration_filter[0].max_depart" v-model="duration_filter[0].min" @beforeinput="(event) => validateInput(event, duration_filter[0].min_depart, duration_filter[0].max_depart)"/></label>
-                                <label class="margin_left">Max: <input class="input_number" type="text" :min="duration_filter[0].min_depart" :max="duration_filter[0].max_depart" v-model="duration_filter[0].max" @beforeinput="(event) => validateInput(event, duration_filter[0].min_depart, duration_filter[0].max_depart)"/></label>
-                            </div>
-                        </ul>
-                    </div>  
-                    <div class='back_button'></div>
-                </div>
 
-                <hr style='margin:5px' />
+                    <hr style='margin:5px;' />
 
-                <button id="location_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_location_filter'])">
-                    <h6>Location</h6>
-                    <div class="vertical_center" v-if="!show_location_filter">&#62;</div>
-                    <div class="vertical_center" v-if="show_location_filter">&#60;</div>
-                </button>
-                
-                <div id="location_filter" class="flexrow space_between padding largeur_min" v-if="show_location_filter">
-                    <div class="vertical_center">
-                        <button class='back_button' @click="change_true_false(['show_location_filter'])">&#60;</button>
-                    </div>
-                    <div id="location_field" class="margin">
-                        <div class="title">Location filter:</div>
-                        <ul>
-                            <div class="flexrow margin">
-                                <li id="countries">Country:</li>
-                                <div class=flexcolumn>
-                                    <input class="margin_left" type="text" v-model="substring_country" @input="input_search_country"/>
-                                    <select class="margin_left" v-model="chosen_country">
-                                        <option value="All">---All---</option>
-                                        <option v-for="country in research_country_list" :value="country">{{country}}</option> 
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="flexrow space_between margin">
-                                <li id="draw">Choose area (draw):</li>
-                                <button @click="add_draw" v-if=draw_actif>Stop drawing</button>
-                                <button @click="add_draw" v-if=!draw_actif>Draw</button>
-                                <button @click="reset_draw">Reset draw</button>
-                            </div>
-                            <div class="flexrow space_between margin">
-                                <li id="bbox">Choose extent:</li>
-                                <button @click="extent_polygon">Show extent</button>
-                                <button @click="reset_extent">Reset extent</button>
-                            </div>
-                            <div>
-                                <li style="list-style-type:none">
-                                    <ul>
-                                        <div class="margin" v-for="coord in extent_filter">
-                                            <li>{{coord.label}}</li>
-                                            <div>
-                                                <label>Min: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.min" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
-                                                <label class="margin_left">Max: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.max" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
-                                            </div>
-                                        </div>
-                                    </ul>
+                    <button id="date_button" class="flexrow space_between padding largeur_min largeur_auto" @click="display_hazminer_date_filter">
+                        <h6>Date</h6>
+                        <div class="vertical_center" v-if="!show_date_filter_hazminer">&#62;</div>
+                        <div class="vertical_center" v-if="show_date_filter_hazminer">&#60;</div>
+                    </button>
+
+                    <div id="date_filter" class="flexrow space_between padding largeur_min" v-if="show_date_filter_hazminer">
+                        <div class="vertical_center">
+                            <button class='back_button' @click="display_hazminer_date_filter">&#60;</button>
+                        </div>
+                        <div id="date_field" class="margin">
+                            <div class="title">Date filter:</div>
+                            <ul>
+                                <li id="start_date_hazminer">
+                                    <label>Start date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date_hazminer"></label>
                                 </li>
-                            </div>
-                        </ul>
-                    </div>  
-                    <div class='back_button'></div>
+                                <li id="end_date_hazminer">
+                                    <label>End date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date_hazminer"></label>
+                                </li>
+                                <li id="duration">{{duration_filter[0].label}}</li>
+                                <div>
+                                    <label>Min: <input class="input_number" type="text" :min="duration_filter[0].min_depart" :max="duration_filter[0].max_depart" v-model="duration_filter[0].min" @beforeinput="(event) => validateInput(event, duration_filter[0].min_depart, duration_filter[0].max_depart)"/></label>
+                                    <label class="margin_left">Max: <input class="input_number" type="text" :min="duration_filter[0].min_depart" :max="duration_filter[0].max_depart" v-model="duration_filter[0].max" @beforeinput="(event) => validateInput(event, duration_filter[0].min_depart, duration_filter[0].max_depart)"/></label>
+                                </div>
+                            </ul>
+                        </div>  
+                        <div class='back_button'></div>
+                    </div>
+
+                    <hr style='margin:5px' />
+
+                    <button id="location_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_location_filter_hazminer'])">
+                        <h6>Location</h6>
+                        <div class="vertical_center" v-if="!show_location_filter_hazminer">&#62;</div>
+                        <div class="vertical_center" v-if="show_location_filter_hazminer">&#60;</div>
+                    </button>
+                    
+                    <div id="location_filter" class="flexrow space_between padding largeur_min" v-if="show_location_filter_hazminer">
+                        <div class="vertical_center">
+                            <button class='back_button' @click="change_true_false(['show_location_filter_hazminer'])">&#60;</button>
+                        </div>
+                        <div id="location_field" class="margin">
+                            <div class="title">Location filter:</div>
+                            <ul>
+                                <div class="flexrow margin">
+                                    <li id="countries">Country:</li>
+                                    <div class=flexcolumn>
+                                        <input class="margin_left" type="text" v-model="substring_country_hazminer" @input="input_search_country"/>
+                                        <select class="margin_left" v-model="chosen_country_hazminer">
+                                            <option value="All">---All---</option>
+                                            <option v-for="country in research_country_list_hazminer" :value="country">{{country}}</option> 
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="flexrow space_between margin">
+                                    <li id="draw">Choose area (draw):</li>
+                                    <button @click="add_draw" v-if=draw_actif>Stop drawing</button>
+                                    <button @click="add_draw" v-if=!draw_actif>Draw</button>
+                                    <button @click="reset_draw">Reset draw</button>
+                                </div>
+                                <div class="flexrow space_between margin">
+                                    <li id="bbox">Choose extent:</li>
+                                    <button @click="extent_polygon">Show extent</button>
+                                    <button @click="reset_extent">Reset extent</button>
+                                </div>
+                                <div>
+                                    <li style="list-style-type:none">
+                                        <ul>
+                                            <div class="margin" v-for="coord in extent_filter">
+                                                <li>{{coord.label}}</li>
+                                                <div>
+                                                    <label>Min: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.min" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
+                                                    <label class="margin_left">Max: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.max" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
+                                                </div>
+                                            </div>
+                                        </ul>
+                                    </li>
+                                </div>
+                            </ul>
+                        </div>  
+                        <div class='back_button'></div>
+                    </div>
+
+                    <hr style='margin:5px' />
+
+                    <button id="casualties_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_casualties_filter_hazminer'])">
+                        <h6>Casualties</h6>
+                        <div class="vertical_center" v-if="!show_casualties_filter_hazminer">&#62;</div>
+                        <div class="vertical_center" v-if="show_casualties_filter_hazminer">&#60;</div>
+                    </button>
+
+                    <div id="casualties_filter" class="flexrow space_between padding largeur_min" v-if="show_casualties_filter_hazminer">
+                        <div class="vertical_center">
+                            <button class='back_button' @click="change_true_false(['show_casualties_filter_hazminer'])">&#60;</button>
+                        </div>
+                        <div id="casualties_field" class="margin">
+                            <div class="title">Casualties filter:</div>
+                            <ul> 
+                                <div class="margin" v-for="impact in impact_filter_hazminer">
+                                    <li>{{impact.label}}</li>
+                                    <div>
+                                        <label>Show null values: <input type="checkbox" v-model="impact.checkbox_null"></label>
+                                    </div>
+                                    <div>
+                                        <label>Min: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.min" @beforeinput="(event) => validateInput(event, impact.min_depart, impact.max_depart)"/></label>
+                                        <label class="margin_left">Max: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.max" @beforeinput="(event) => validateInput(event, impact.min_depart, impact.max_depart)"/></label>
+                                    </div>
+                                </div>
+                            </ul>
+                        </div>  
+                        <div class='back_button'></div>
+                    </div>
+
+                    <hr style='margin:5px' />
+
+                    <button id="popularity_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_popularity_filter_hazminer'])">
+                        <h6>Popularity</h6>
+                        <div class="vertical_center" v-if="!show_popularity_filter_hazminer">&#62;</div>
+                        <div class="vertical_center" v-if="show_popularity_filter_hazminer">&#60;</div>
+                    </button>
+                    
+                    <div id="popularity_filter" class="flexrow space_between padding largeur_min" v-if="show_popularity_filter_hazminer">
+                        <div class="vertical_center">
+                            <button class='back_button' @click="change_true_false(['show_popularity_filter_hazminer'])">&#60;</button>
+                        </div>
+                        <div id="popularity_field" class="margin">
+                            <div class="title">Popularity filter:</div>
+                            <ul>
+                                <div class="margin" v-for="popularity in popularity_filter">
+                                    <li>{{popularity.label}}</li>
+                                    <div>
+                                        <label>Min: <input class="input_number" type="text" :min="popularity.min_depart" :max="popularity.max_depart" v-model="popularity.min" @beforeinput="(event) => validateInput(event, popularity.min_depart, popularity.max_depart)"/></label>
+                                        <label class="margin_left">Max: <input class="input_number" type="text" :min="popularity.min_depart" :max="popularity.max_depart" v-model="popularity.max" @beforeinput="(event) => validateInput(event, popularity.min_depart, popularity.max_depart)"/></label>
+                                    </div>
+                                </div>
+                            </ul>
+                        </div>  
+                        <div class='back_button'></div>
+                    </div>
+
                 </div>
 
-                <hr style='margin:5px' />
+                <div id=co_filter v-if=show_general_menu_co>
 
-                <button id="casualties_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_casualties_filter'])">
-                    <h6>Casualties</h6>
-                    <div class="vertical_center" v-if="!show_casualties_filter">&#62;</div>
-                    <div class="vertical_center" v-if="show_casualties_filter">&#60;</div>
-                </button>
+                    <button id="type_event_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_type_event_filter_co'])">
+                        <h6>Type d'évènement</h6>
+                        <div class="vertical_center" v-if="!show_type_event_filter_co">&#62;</div>
+                        <div class="vertical_center" v-if="show_type_event_filter_co">&#60;</div>
+                    </button>
 
-                <div id="casualties_filter" class="flexrow space_between padding largeur_min" v-if="show_casualties_filter">
-                    <div class="vertical_center">
-                        <button class='back_button' @click="change_true_false(['show_casualties_filter'])">&#60;</button>
-                    </div>
-                    <div id="casualties_field" class="margin">
-                        <div class="title">Casualties filter:</div>
-                        <ul> 
-                            <div class="margin" v-for="impact in impact_filter">
-                                <li>{{impact.label}}</li>
-                                <div>
-                                    <label>Show null values: <input type="checkbox" v-model="impact.checkbox_null"></label>
-                                </div>
-                                <div>
-                                    <label>Min: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.min" @beforeinput="(event) => validateInput(event, impact.min_depart, impact.max_depart)"/></label>
-                                    <label class="margin_left">Max: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.max" @beforeinput="(event) => validateInput(event, impact.min_depart, impact.max_depart)"/></label>
-                                </div>
+                    <div id="type_event_filter" class="flexrow space_between padding largeur_min" v-if="show_type_event_filter_co">
+                        <div class="vertical_center">
+                            <button class='back_button' @click="change_true_false(['show_type_event_filter_co'])">&#60;</button>
+                        </div>
+                        <div id="type_event_field" class="margin">
+                            <div class="title">Filtre selon le type d'évènement:</div>
+                            <div id="inondation">
+                                <label>Inondation: <input type="checkbox" v-model="inondation"></label>
+                            </div>  
+                            <div id="glissement_terrain">
+                                <label>Glissement de terrain: <input type="checkbox" v-model="glissement_terrain"></label>
                             </div>
-                        </ul>
-                    </div>  
-                    <div class='back_button'></div>
-                </div>
-
-                <hr style='margin:5px' />
-
-                <button id="popularity_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_popularity_filter'])">
-                    <h6>Popularity</h6>
-                    <div class="vertical_center" v-if="!show_popularity_filter">&#62;</div>
-                    <div class="vertical_center" v-if="show_popularity_filter">&#60;</div>
-                </button>
-                
-                <div id="popularity_filter" class="flexrow space_between padding largeur_min" v-if="show_popularity_filter">
-                    <div class="vertical_center">
-                        <button class='back_button' @click="change_true_false(['show_popularity_filter'])">&#60;</button>
+                            <div id="tdt">
+                                <label>Tremblement de terre: <input type="checkbox" v-model="tdt"></label>
+                            </div> 
+                            <div id="vents_violents">
+                                <label>Vents violents: <input type="checkbox" v-model="vents_violents"></label>
+                            </div>  
+                            <div id="grele">
+                                <label>Grêle: <input type="checkbox" v-model="grele"></label>
+                            </div>  
+                            <div id="foudre">
+                                <label>Foudre: <input type="checkbox" v-model="foudre"></label>
+                            </div>          
+                        </div>  
+                        <div class='back_button'></div>
                     </div>
-                    <div id="popularity_field" class="margin">
-                        <div class="title">Popularity filter:</div>
-                        <ul>
-                            <div class="margin" v-for="popularity in popularity_filter">
-                                <li>{{popularity.label}}</li>
-                                <div>
-                                    <label>Min: <input class="input_number" type="text" :min="popularity.min_depart" :max="popularity.max_depart" v-model="popularity.min" @beforeinput="(event) => validateInput(event, popularity.min_depart, popularity.max_depart)"/></label>
-                                    <label class="margin_left">Max: <input class="input_number" type="text" :min="popularity.min_depart" :max="popularity.max_depart" v-model="popularity.max" @beforeinput="(event) => validateInput(event, popularity.min_depart, popularity.max_depart)"/></label>
+
+                    <hr style='margin:5px;' />
+
+                    <button id="date_button" class="flexrow space_between padding largeur_min largeur_auto" @click="display_co_date_filter">
+                        <h6>Date</h6>
+                        <div class="vertical_center" v-if="!show_date_filter_co">&#62;</div>
+                        <div class="vertical_center" v-if="show_date_filter_co">&#60;</div>
+                    </button>
+
+                    <div id="date_filter" class="flexrow space_between padding largeur_min" v-if="show_date_filter_co">
+                        <div class="vertical_center">
+                            <button class='back_button' @click="display_co_date_filter">&#60;</button>
+                        </div>
+                        <div id="date_field" class="margin">
+                            <div class="title">Filtre selon la date:</div>
+                            <ul>
+                                <li id="start_date_co">
+                                    <label>Start date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date_co"></label>
+                                </li>
+                                <li id="end_date_co">
+                                    <label>End date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date_co"></label>
+                                </li>
+                            </ul>
+                        </div>  
+                        <div class='back_button'></div>
+                    </div>
+
+                    <hr style='margin:5px' />
+
+                    <button id="location_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_location_filter_co'])">
+                        <h6>Localisation</h6>
+                        <div class="vertical_center" v-if="!show_location_filter_co">&#62;</div>
+                        <div class="vertical_center" v-if="show_location_filter_co">&#60;</div>
+                    </button>
+                    
+                    <div id="location_filter" class="flexrow space_between padding largeur_min" v-if="show_location_filter_co">
+                        <div class="vertical_center">
+                            <button class='back_button' @click="change_true_false(['show_location_filter_co'])">&#60;</button>
+                        </div>
+                        <div id="location_field" class="margin">
+                            <div class="title">Filtre selon la localisation:</div>
+                            <ul>
+                                <div class="flexrow margin">
+                                    <li id="pays">Pays:</li>
+                                    <div class=flexcolumn>
+                                        <select class="margin_left" v-model="chosen_pays_co">
+                                            <option value="All">---All---</option>
+                                            <option v-for="pays in pays_list_co" :value="pays">{{pays}}</option> 
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                        </ul>
-                    </div>  
-                    <div class='back_button'></div>
+                                <div class="flexrow margin">
+                                    <li id="province">Province:</li>
+                                    <div class=flexcolumn>
+                                        <select class="margin_left" v-model="chosen_province_co">
+                                            <option value="All">---All---</option>
+                                            <option v-for="province in province_list_co" :value="province">{{Province}}</option> 
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="flexrow margin">
+                                    <li id="territoire">Territoire:</li>
+                                    <div class=flexcolumn>
+                                        <select class="margin_left" v-model="chosen_territoire_co">
+                                            <option value="All">---All---</option>
+                                            <option v-for="territoire in territoire_list_co" :value="territoire">{{Territoire}}</option> 
+                                        </select>
+                                    </div>
+                                </div>
+                            </ul>
+                        </div>  
+                        <div class='back_button'></div>
+                    </div>
+
+                    <hr style='margin:5px' />
+
+                    <button id="impact_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_impact_filter_co'])">
+                        <h6>Impact</h6>
+                        <div class="vertical_center" v-if="!show_impact_filter_co">&#62;</div>
+                        <div class="vertical_center" v-if="show_impact_filter_co">&#60;</div>
+                    </button>
+
+                    <div id="impact_filter" class="flexrow space_between padding largeur_min" v-if="show_impact_filter_co">
+                        <div class="vertical_center">
+                            <button class='back_button' @click="change_true_false(['show_impact_filter_co'])">&#60;</button>
+                        </div>
+                        <div id="impact_field" class="margin">
+                            <div class="title">Filtre selon l'impact:</div>
+                            <ul> 
+                                <div class="margin" v-for="impact in impact_chiffre_filter_co">
+                                    <li>{{impact.label}}</li>
+                                    <div>
+                                        <label>Montrer les valeurs nulles: <input type="checkbox" v-model="impact.checkbox_null"></label>
+                                    </div>
+                                    <div>
+                                        <label>Min: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.min" @beforeinput="(event) => validateInput(event, impact.min_depart, impact.max_depart)"/></label>
+                                        <label class="margin_left">Max: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.max" @beforeinput="(event) => validateInput(event, impact.min_depart, impact.max_depart)"/></label>
+                                    </div>
+                                </div>
+                                <div class="margin" v-for="impact in impact_bool_filter_co">
+                                    <li><label>{{impact.label}} <input type="checkbox" v-model="impact.checkbox_impact"></label></li>
+                                </div>
+                            </ul>
+                        </div>
+                        <div class='back_button'></div>
+                    </div>
+
                 </div>
 
                 <br>
