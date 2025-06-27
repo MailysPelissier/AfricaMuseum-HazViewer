@@ -24,120 +24,204 @@
                     <button class="vertical_center" @click="change_true_false(['show_changer_style_form'])">&#215;</button>
                 </div>
 
+                <div id=choix_style_data class="flexrow space_between padding">
+                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_style_hazminer>Hazminer</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_style_hazminer @click="change_true_false(['show_general_menu_style_hazminer','show_general_menu_style_co'])">Citizen observer</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_style_co @click="change_true_false(['show_general_menu_style_hazminer','show_general_menu_style_co'])">Hazminer</button>
+                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_style_co>Citizen observer</button>
+                </div>
+
                 <br>
 
-                <div id="choix_couleur" class="padding">
-                    <label>Color style:
-                        <select class="margin_left" v-model="color_style">
-                            <option value="Event_type">Hazard type</option>
-                            <option value="Year">Year</option>
-                            <option value="Month">Month</option>
-                        </select>
-                    </label>
-                </div>
+                <div id=hazminer_style v-if=show_general_menu_style_hazminer>
 
-                <div id="color_eventtype" class="padding" v-if="color_style ==='Event_type'">
-                    <div class="flexrow">
-                        <div class="vertical_center">Flood:</div>
-                        <input type="color" class="color_input margin_left" v-model="color_flood">
+                    <div id="choix_couleur" class="padding">
+                        <label>Color style:
+                            <select class="margin_left" v-model="color_style">
+                                <option value="Event_type">Hazard type</option>
+                                <option value="Year">Year</option>
+                                <option value="Month">Month</option>
+                            </select>
+                        </label>
                     </div>
-                    <div class="flexrow">
-                        <div class="vertical_center">Flash flood:</div>
-                        <input type="color" class="color_input margin_left" v-model="color_flashflood">
-                    </div>
-                    <div class="flexrow">
-                        <div class="vertical_center">Landslide:</div>
-                        <input type="color" class="color_input margin_left" v-model="color_landslide">
-                    </div>
-                </div>
 
-                <div id="color_year" class="flexrow padding" v-if="color_style ==='Year'">
-                    <div>
-                        <div class="flexrow" v-for="step in color_year">
-                            <div class="vertical_center">{{step.label}}:</div>
-                            <input type="color" class="color_input margin_left" v-model="step.color">
+                    <div id="color_eventtype" class="padding" v-if="color_style ==='Event_type'">
+                        <div class="flexrow">
+                            <div class="vertical_center">Flood:</div>
+                            <input type="color" class="color_input margin_left" v-model="color_flood">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Flash flood:</div>
+                            <input type="color" class="color_input margin_left" v-model="color_flashflood">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Landslide:</div>
+                            <input type="color" class="color_input margin_left" v-model="color_landslide">
                         </div>
                     </div>
-                </div> 
 
-                <div id="color_month" class="flexrow padding" v-if="color_style ==='Month'">
-                    <div>
-                        <div class="flexrow" v-for="step in color_month">
-                            <div class="vertical_center">{{step.label}}:</div>
-                            <input type="color" class="color_input margin_left" v-model="step.color">
+                    <div id="color_year" class="flexrow padding" v-if="color_style ==='Year'">
+                        <div>
+                            <div class="flexrow" v-for="step in color_year">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="color" class="color_input margin_left" v-model="step.color">
+                            </div>
+                        </div>
+                    </div> 
+
+                    <div id="color_month" class="flexrow padding" v-if="color_style ==='Month'">
+                        <div>
+                            <div class="flexrow" v-for="step in color_month">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="color" class="color_input margin_left" v-model="step.color">
+                            </div>
+                        </div>
+                    </div> 
+
+                    <hr />
+
+                    <div id="choix_taille" class="padding">
+                        <label>Size style:
+                            <select class="margin_left" v-model="size_style">
+                                <option value="Standard">Standard</option>
+                                <option value="Duration">Duration</option>
+                                <option value="Casualties">Casualties</option> 
+                                <option value="Popularity">Popularity</option>                         
+                            </select>
+                        </label>
+                    </div>
+
+                    <div id="size_standard" class="flexrow padding" v-if="size_style ==='Standard'">
+                        <div class="vertical_center">All events:</div>
+                        <input type="range" min="0" max="15" class="slider margin_left" v-model="size_standard">
+                        <span class="margin_left">{{size_standard}}</span>
+                    </div>
+
+                    <div id="size_duration" class="flexrow padding" v-if="size_style ==='Duration'">
+                        <div>
+                            <div class="flexrow margin" v-for="step in size_duration">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <span class="margin_left">{{step.size}}</span></label>
+                            </div>
+                        </div>
+                    </div>        
+
+                    <div id="size_casualties" class="flexrow padding" v-if="size_style ==='Casualties'">
+                        <label>Size style (casualties):
+                            <select class="margin_left" v-model="size_casualties">
+                                <option v-for="casualty in casualties_list" :value="casualty.id">{{casualty.label}}</option>  
+                            </select>
+                        </label>
+                    </div>
+
+                    <div v-for="casualty in casualties_list" v-if="size_style ==='Casualties'">
+                        <div v-if="size_casualties === casualty.id">
+                            <div class="flexrow margin" v-for="step in casualty.table">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <span class="margin_left">{{step.size}}</span></label>
+                            </div>
                         </div>
                     </div>
-                </div> 
 
-                <hr />
+                    <div id="size_popularity" class="flexrow padding" v-if="size_style ==='Popularity'">
+                        <label>Size style (popularity):
+                            <select class="margin_left" v-model="size_popularity">
+                                <option v-for="pop in popularity_list" :value="pop.id">{{pop.label}}</option>  
+                            </select>
+                        </label>
+                    </div>
 
-                <div id="choix_taille" class="padding">
-                    <label>Size style:
-                        <select class="margin_left" v-model="size_style">
-                            <option value="Standard">Standard</option>
-                            <option value="Duration">Duration</option>
-                            <option value="Casualties">Casualties</option> 
-                            <option value="Popularity">Popularity</option>                         
-                        </select>
-                    </label>
-                </div>
-
-                <div id="size_standard" class="flexrow padding" v-if="size_style ==='Standard'">
-                    <div class="vertical_center">All events:</div>
-                    <input type="range" min="0" max="15" class="slider margin_left" v-model="size_standard">
-                    <span class="margin_left">{{size_standard}}</span>
-                </div>
-
-                <div id="size_duration" class="flexrow padding" v-if="size_style ==='Duration'">
-                    <div>
-                        <div class="flexrow margin" v-for="step in size_duration">
-                            <div class="vertical_center">{{step.label}}:</div>
-                            <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
-                            <span class="margin_left">{{step.size}}</span></label>
+                    <div v-for="pop in popularity_list" v-if="size_style ==='Popularity'">
+                        <div v-if="size_popularity === pop.id">
+                            <div class="flexrow margin" v-for="step in pop.table">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <span class="margin_left">{{step.size}}</span></label>
+                            </div>
                         </div>
                     </div>
-                </div>        
 
-                <div id="size_casualties" class="flexrow padding" v-if="size_style ==='Casualties'">
-                    <label>Size style (casualties):
-                        <select class="margin_left" v-model="size_casualties">
-                            <option v-for="casualty in casualties_list" :value="casualty.id">{{casualty.label}}</option>  
-                        </select>
-                    </label>
                 </div>
 
-                <div v-for="casualty in casualties_list" v-if="size_style ==='Casualties'">
-                    <div v-if="size_casualties === casualty.id">
-                        <div class="flexrow margin" v-for="step in casualty.table">
-                            <div class="vertical_center">{{step.label}}:</div>
-                            <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
-                            <span class="margin_left">{{step.size}}</span></label>
+                <div id=co_style v-if=show_general_menu_style_co>
+
+                    <div id="choix_couleur" class="padding">
+                        <label>Couleur:
+                            <select class="margin_left" v-model="style_couleur">
+                                <option value="Type_event">Type d'évènement</option>
+                                <option value="Annee">Année</option>
+                                <option value="Mois">Mois</option>
+                                <option value="Georeferencees">Données géoréférencées ou non</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div id="couleur_typeevent" class="padding" v-if="style_couleur ==='Type_event'">
+                        <div class="flexrow">
+                            <div class="vertical_center">Inondation:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_inondation">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Glissement de terrain:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_landslide">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Tremblement de terre:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_tdt">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Vents violents:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_vents_violents">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Grêle:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_grele">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Foudre:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_foudre">
                         </div>
                     </div>
-                </div>
 
-                <div id="size_popularity" class="flexrow padding" v-if="size_style ==='Popularity'">
-                    <label>Size style (popularity):
-                        <select class="margin_left" v-model="size_popularity">
-                            <option v-for="pop in popularity_list" :value="pop.id">{{pop.label}}</option>  
-                        </select>
-                    </label>
-                </div>
+                    <div id="couleur_annee" class="flexrow padding" v-if="style_couleur ==='Annee'">
+                        <div>
+                            <div class="flexrow" v-for="step in couleur_annee">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="color" class="color_input margin_left" v-model="step.color">
+                            </div>
+                        </div>
+                    </div> 
 
-                <div v-for="pop in popularity_list" v-if="size_style ==='Popularity'">
-                    <div v-if="size_popularity === pop.id">
-                        <div class="flexrow margin" v-for="step in pop.table">
-                            <div class="vertical_center">{{step.label}}:</div>
-                            <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
-                            <span class="margin_left">{{step.size}}</span></label>
+                    <div id="couleur_mois" class="flexrow padding" v-if="style_couleur ==='Mois'">
+                        <div>
+                            <div class="flexrow" v-for="step in couleur_mois">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="color" class="color_input margin_left" v-model="step.color">
+                            </div>
+                        </div>
+                    </div> 
+
+                    <div id="couleur_georef" class="padding" v-if="style_couleur ==='Georeferencees'">
+                        <div class="flexrow">
+                            <div class="vertical_center">Données géoréférencées:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_georef_true">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Données non géoréférencées:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_georef_false">
                         </div>
                     </div>
+
+                    <hr />
+
                 </div>
 
                 <br>
 
                 <div class="flexrow space_evenly padding">
-                    <button id="change_style" @click="change_style">Apply</button>
+                    <button id="change_style" @click="change_style_all">Apply</button>
                     <button id="cancel" @click="change_true_false(['show_changer_style_form'])">Close</button>
                 </div>
 
@@ -151,15 +235,15 @@
                 </div> 
 
                 <div id=choix_filtre_data class="flexrow space_between padding">
-                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_hazminer>Hazminer</button>
-                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_hazminer @click="change_true_false(['show_general_menu_hazminer','show_general_menu_co'])">Citizen observer</button>
-                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_co @click="change_true_false(['show_general_menu_hazminer','show_general_menu_co'])">Hazminer</button>
-                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_co>Citizen observer</button>
+                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_filter_hazminer>Hazminer</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_filter_hazminer @click="change_true_false(['show_general_menu_filter_hazminer','show_general_menu_filter_co'])">Citizen observer</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_filter_co @click="change_true_false(['show_general_menu_filter_hazminer','show_general_menu_filter_co'])">Hazminer</button>
+                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_filter_co>Citizen observer</button>
                 </div>
 
                 <br>
 
-                <div id=hazminer_filter v-if=show_general_menu_hazminer>
+                <div id=hazminer_filter v-if=show_general_menu_filter_hazminer>
 
                     <button id="event_type_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_event_type_filter_hazminer'])">
                         <h6>Hazard type</h6>
@@ -209,8 +293,8 @@
                                 </li>
                                 <li id="duration">{{duration_filter[0].label}}</li>
                                 <div>
-                                    <label>Min: <input class="input_number" type="text" :min="duration_filter[0].min_depart" :max="duration_filter[0].max_depart" v-model="duration_filter[0].min" @beforeinput="(event) => validateInput(event, duration_filter[0].min_depart, duration_filter[0].max_depart)"/></label>
-                                    <label class="margin_left">Max: <input class="input_number" type="text" :min="duration_filter[0].min_depart" :max="duration_filter[0].max_depart" v-model="duration_filter[0].max" @beforeinput="(event) => validateInput(event, duration_filter[0].min_depart, duration_filter[0].max_depart)"/></label>
+                                    <label>Min: <input class="input_number" type="text" :min="duration_filter[0].min_depart" :max="duration_filter[0].max_depart" v-model="duration_filter[0].min" @beforeinput="(event) => validate_input(event, duration_filter[0].min_depart, duration_filter[0].max_depart)"/></label>
+                                    <label class="margin_left">Max: <input class="input_number" type="text" :min="duration_filter[0].min_depart" :max="duration_filter[0].max_depart" v-model="duration_filter[0].max" @beforeinput="(event) => validate_input(event, duration_filter[0].min_depart, duration_filter[0].max_depart)"/></label>
                                 </div>
                             </ul>
                         </div>  
@@ -259,8 +343,8 @@
                                             <div class="margin" v-for="coord in extent_filter">
                                                 <li>{{coord.label}}</li>
                                                 <div>
-                                                    <label>Min: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.min" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
-                                                    <label class="margin_left">Max: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.max" @beforeinput="(event) => validateInput(event, coord.min_depart, coord.max_depart)"/></label>
+                                                    <label>Min: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.min" @beforeinput="(event) => validate_input(event, coord.min_depart, coord.max_depart)"/></label>
+                                                    <label class="margin_left">Max: <input class="input_number" type="text" :min="coord.min_depart" :max="coord.max_depart" v-model="coord.max" @beforeinput="(event) => validate_input(event, coord.min_depart, coord.max_depart)"/></label>
                                                 </div>
                                             </div>
                                         </ul>
@@ -292,8 +376,8 @@
                                         <label>Show null values: <input type="checkbox" v-model="impact.checkbox_null"></label>
                                     </div>
                                     <div>
-                                        <label>Min: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.min" @beforeinput="(event) => validateInput(event, impact.min_depart, impact.max_depart)"/></label>
-                                        <label class="margin_left">Max: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.max" @beforeinput="(event) => validateInput(event, impact.min_depart, impact.max_depart)"/></label>
+                                        <label>Min: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.min" @beforeinput="(event) => validate_input(event, impact.min_depart, impact.max_depart)"/></label>
+                                        <label class="margin_left">Max: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.max" @beforeinput="(event) => validate_input(event, impact.min_depart, impact.max_depart)"/></label>
                                     </div>
                                 </div>
                             </ul>
@@ -319,8 +403,8 @@
                                 <div class="margin" v-for="popularity in popularity_filter">
                                     <li>{{popularity.label}}</li>
                                     <div>
-                                        <label>Min: <input class="input_number" type="text" :min="popularity.min_depart" :max="popularity.max_depart" v-model="popularity.min" @beforeinput="(event) => validateInput(event, popularity.min_depart, popularity.max_depart)"/></label>
-                                        <label class="margin_left">Max: <input class="input_number" type="text" :min="popularity.min_depart" :max="popularity.max_depart" v-model="popularity.max" @beforeinput="(event) => validateInput(event, popularity.min_depart, popularity.max_depart)"/></label>
+                                        <label>Min: <input class="input_number" type="text" :min="popularity.min_depart" :max="popularity.max_depart" v-model="popularity.min" @beforeinput="(event) => validate_input(event, popularity.min_depart, popularity.max_depart)"/></label>
+                                        <label class="margin_left">Max: <input class="input_number" type="text" :min="popularity.min_depart" :max="popularity.max_depart" v-model="popularity.max" @beforeinput="(event) => validate_input(event, popularity.min_depart, popularity.max_depart)"/></label>
                                     </div>
                                 </div>
                             </ul>
@@ -330,7 +414,7 @@
 
                 </div>
 
-                <div id=co_filter v-if=show_general_menu_co>
+                <div id=co_filter v-if=show_general_menu_filter_co>
 
                     <button id="type_event_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_type_event_filter_co'])">
                         <h6>Type d'évènement</h6>
@@ -382,10 +466,10 @@
                             <div class="title">Filtre selon la date:</div>
                             <ul>
                                 <li id="start_date_co">
-                                    <label>Start date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date_co"></label>
+                                    <label>Date de départ: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="start_date_co"></label>
                                 </li>
                                 <li id="end_date_co">
-                                    <label>End date: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date_co"></label>
+                                    <label>Date de fin: <input class="flatpickr flatpickr-input" type="text" placeholder="Select Date.." data-id="end_date_co"></label>
                                 </li>
                             </ul>
                         </div>  
@@ -408,20 +492,11 @@
                             <div class="title">Filtre selon la localisation:</div>
                             <ul>
                                 <div class="flexrow margin">
-                                    <li id="pays">Pays:</li>
-                                    <div class=flexcolumn>
-                                        <select class="margin_left" v-model="chosen_pays_co">
-                                            <option value="All">---All---</option>
-                                            <option v-for="pays in pays_list_co" :value="pays">{{pays}}</option> 
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="flexrow margin">
                                     <li id="province">Province:</li>
                                     <div class=flexcolumn>
                                         <select class="margin_left" v-model="chosen_province_co">
-                                            <option value="All">---All---</option>
-                                            <option v-for="province in province_list_co" :value="province">{{Province}}</option> 
+                                            <option value="All">---Toutes---</option>
+                                            <option v-for="province in province_list_co" :value="province">{{province}}</option> 
                                         </select>
                                     </div>
                                 </div>
@@ -429,8 +504,8 @@
                                     <li id="territoire">Territoire:</li>
                                     <div class=flexcolumn>
                                         <select class="margin_left" v-model="chosen_territoire_co">
-                                            <option value="All">---All---</option>
-                                            <option v-for="territoire in territoire_list_co" :value="territoire">{{Territoire}}</option> 
+                                            <option value="All">---Tous---</option>
+                                            <option v-for="territoire in territoire_list_co" :value="territoire">{{territoire}}</option> 
                                         </select>
                                     </div>
                                 </div>
@@ -460,8 +535,8 @@
                                         <label>Montrer les valeurs nulles: <input type="checkbox" v-model="impact.checkbox_null"></label>
                                     </div>
                                     <div>
-                                        <label>Min: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.min" @beforeinput="(event) => validateInput(event, impact.min_depart, impact.max_depart)"/></label>
-                                        <label class="margin_left">Max: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.max" @beforeinput="(event) => validateInput(event, impact.min_depart, impact.max_depart)"/></label>
+                                        <label>Min: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.min" @beforeinput="(event) => validate_input(event, impact.min_depart, impact.max_depart)"/></label>
+                                        <label class="margin_left">Max: <input class="input_number" type="text" :min="impact.min_depart" :max="impact.max_depart" v-model="impact.max" @beforeinput="(event) => validate_input(event, impact.min_depart, impact.max_depart)"/></label>
                                     </div>
                                 </div>
                                 <div class="margin" v-for="impact in impact_bool_filter_co">

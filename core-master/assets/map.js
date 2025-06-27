@@ -1,6 +1,7 @@
 Vue.createApp({
 
     data() {
+
         return {
 
             // Initialisation de la carte et des couches
@@ -97,7 +98,12 @@ Vue.createApp({
 
             // Affichage popup changer style
             show_changer_style_form: false,
-            // Propriétés par défaut du changement de style
+
+            // Affichage menu général style hazminer / citizen observer
+            show_general_menu_style_hazminer: true,
+            show_general_menu_style_co: false,
+
+            // Propriétés par défaut du changement de style hazminer
             color_style: 'Event_type',
             color_flood: '#3252a8',
             color_flashflood: '#7f14cc',
@@ -238,26 +244,60 @@ Vue.createApp({
                 { label: '101 - 120', min: 101, max: 120, size: 15 },
             ],
 
+            // Propriétés par défaut du changement de style citizen observer
+            style_couleur: 'Type_event',
+            couleur_inondation: '#3252a8',
+            couleur_landslide: '#4a2c03',
+            couleur_tdt: '#b30000',
+            couleur_vents_violents: '#339966',
+            couleur_grele: '#00ccff',
+            couleur_foudre: '#ffcc00',
+            couleur_annee: [
+                { label: '2020', min: Date.parse("2020-01-01"), max: Date.parse("2021-01-01"), color: '#0491d0' },
+                { label: '2021', min: Date.parse("2021-01-01"), max: Date.parse("2022-01-01"), color: '#88bb64' },
+                { label: '2022', min: Date.parse("2022-01-01"), max: Date.parse("2023-01-01"), color: '#f2ce3f' },
+                { label: '2023', min: Date.parse("2023-01-01"), max: Date.parse("2024-01-01"), color: '#fc9548' },
+                { label: '2024', min: Date.parse("2024-01-01"), max: Date.parse("2025-01-01"), color: '#fb5b44' },
+                { label: '2025', min: Date.parse("2025-01-01"), max: Date.parse("2026-01-01"), color: '#e085c2' },
+            ],
+            couleur_mois: [
+                { label: 'Janvier', number: '01', color: '#ed008c' },
+                { label: 'Février', number: '02', color: '#d0191b' },
+                { label: 'Mars', number: '03', color: '#f06730' },
+                { label: 'Avril', number: '04', color: '#f08622' },
+                { label: 'Mai', number: '05', color: '#e9eb28' },
+                { label: 'Juin', number: '06', color: '#b4e742' },
+                { label: 'Juillet', number: '07', color: '#5fc650' },
+                { label: 'Août', number: '08', color: '#1fa5a6' },
+                { label: 'Septembre', number: '09', color: '#2689c7' },
+                { label: 'Octobre', number: '10', color: '#3242a8' },
+                { label: 'Novembre', number: '11', color: '#761ca2' },
+                { label: 'Decembre', number: '12', color: '#b23593' },
+            ],
+            couleur_georef_true: '#00cc00',
+            couleur_georef_false: '#ff6600',
+            
+
             // Affichage popup filtres
             show_filter_form: false,
 
-            // Affichage menu général hazminer / citizen observer
-            show_general_menu_hazminer: true,
-            show_general_menu_co: false,
+            // Affichage menu général filtre hazminer / citizen observer
+            show_general_menu_filter_hazminer: true,
+            show_general_menu_filter_co: false,
 
             // Affichage des différents menus de filtres hazminer         
             show_event_type_filter_hazminer: false, // Affichage choix event type          
-            show_date_filter_hazminer: false, // Affichage choix dates         
+            show_date_filter_hazminer: false, // Affichage choix dates
+            show_location_filter_hazminer: false, // Affichage choix location       
             show_casualties_filter_hazminer: false, // Affichage choix impact       
             show_popularity_filter_hazminer: false, // Affichage choix popularité        
-            show_location_filter_hazminer: false, // Affichage choix location
-
+            
             // Affichage des différents menus de filtres co        
             show_type_event_filter_co: false, // Affichage choix type event
-            show_date_filter_co: false, // Affichage choix dates         
+            show_date_filter_co: false, // Affichage choix dates
+            show_location_filter_co: false, // Affichage choix location       
             show_impact_filter_co: false, // Affichage choix impact            
-            show_location_filter_co: false, // Affichage choix location
-
+            
             // Filtres hazminer
             // Filtre event type
             flood: true,
@@ -316,9 +356,9 @@ Vue.createApp({
             end_date_co: "27-03-2025",
             flatpickr_start_co: null,
             flatpickr_end_co: null,
-            // Filtre location
-            chosen_country_co: 'All',
-            country_list_co: ["Democratic Republic of the Congo", "Rwanda"],
+            // Filtre localisation
+            chosen_province_co: 'All',
+            chosen_territoire_co: 'All',
             province_list_co: ["Sud Kivu", "Nord Kivu"],
             territoire_list_co: ["Beni Territoire", "Beni Ville", "Bukavu", "Butembo", "Goma ", "Idjwi", "Kabare", "Kalehe", "Lubero", "Masisi", "Nyiragongo", 
                 "Rutshuru", "Uvira", "Walikale", "Walungu"],
@@ -349,7 +389,9 @@ Vue.createApp({
             show_download_progression: false,
             fetch_progression: 0,
             download_progression: 0,
+
         };
+
     },
 
     computed: {
@@ -424,6 +466,8 @@ Vue.createApp({
             // Si l'event n'est pas déjà dans la couche :
             let exists = this.events_co_layer.getSource().getFeatureById(feature.getId());
             if (!exists.get('visible')) {
+
+                exists.set('country_found','République démocratique du Congo');
 
                 // Dates du filtre en format y-m-d
                 let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2);
@@ -643,7 +687,7 @@ Vue.createApp({
 
         },
 
-        // Change la variable passée en paramètre (utilisée avec boutons)
+        // Change la / les variable passée en paramètre (true/false)
         change_true_false (parameters) {
             for (let parameter of parameters) {
                 this[parameter] = !this[parameter];
@@ -778,8 +822,47 @@ Vue.createApp({
                     if (couleur_fixee) {
                         color = couleur_fixee;
                     }
-                    else {
-                        color = 'rgba(255, 0, 0, 1)';
+                    else if (this.style_couleur === 'Type_event') {
+                        let type_event = feature.get('type_event');
+                        switch (type_event) {
+                        case 'Inondation':
+                            color = this.couleur_inondation;
+                            break;
+                        case 'Glissement de terrain':
+                            color = this.couleur_landslide;
+                            break;
+                        case 'Tremblement de terre':
+                            color = this.couleur_tdt;
+                            break;
+                        case 'Tempête de vents violents':
+                            color = this.couleur_vents_violents;
+                            break;
+                        case 'Tempête de grêle':
+                            color = this.couleur_grele;
+                            break;
+                        case 'Foudre':
+                            color = this.couleur_foudre;
+                            break;
+                        }
+                    }
+                    else if (this.style_couleur === 'Annee') {
+                        let date = Date.parse(feature.get('event_date'));
+                        let intervalle_date = this.couleur_annee.find(interval => {
+                            return date >= interval.min && date <= interval.max;
+                        });
+                        color = intervalle_date.color;
+                    }
+                    else if (this.style_couleur === 'Mois') {
+                        let str_mois = feature.get('event_date').substring(5,7);
+                        let mois = this.couleur_mois.find(interval => {
+                            return str_mois === interval.number
+                        });
+                        color = mois.color;
+                    }
+                    else if (this.style_couleur === 'Georeferencees') {
+                        let georef = feature.get('donnees_georeferencees');
+                        if (georef) { color = this.couleur_georef_true }
+                        else { color = this.couleur_georef_false }
                     }
                     
                     // Définition de la taille
@@ -800,16 +883,30 @@ Vue.createApp({
 
         },
 
-        // Change le style des évènements
-        change_style() {
+        // Change tous les styles
+        change_style_all() {
+            this.change_style_events();
+            this.change_style_selected_event();
+        },
 
-            // Appliquer le style aux couches events
+        // Change le style des évènements
+        change_style_events() {
+
             this.events_hazminer_layer.setStyle(this.creation_style_hazminer());
             this.events_co_layer.setStyle(this.creation_style_co());
 
-            // Appliquer le style à la couche selected event (couleur imposée)
-            this.selected_event_layer.setStyle(this.creation_style_hazminer('rgba(0, 255, 0, 1)'));
-        
+        },
+
+        // Change le style de l'évènement sélectionné (couleur imposée)
+        change_style_selected_event() {
+
+            if (this.selected_event != null && this.selected_event.get('hazard_type')) {
+                this.selected_event_layer.setStyle(this.creation_style_hazminer('rgba(0, 255, 0, 1)'));
+            }
+            if (this.selected_event != null && this.selected_event.get('type_event')) {
+                this.selected_event_layer.setStyle(this.creation_style_co('rgba(0, 255, 0, 1)'));
+            }
+
         },
 
         // Affiche le filtre, ferme les autres forms ouverts
@@ -914,7 +1011,7 @@ Vue.createApp({
         },
 
         // Vérifie si la valeur entrée est valide (nombre entre les valeurs min et max)
-        validateInput(event,n_min_depart,n_max_depart) {
+        validate_input(event,n_min_depart,n_max_depart) {
 
             // Calcule la prochaine valeur
             let input = event.target;
@@ -1065,6 +1162,7 @@ Vue.createApp({
         reset_filter_form() {
 
             // Remet les propriétés à leur état initial
+            // Propriétés hazminer
             this.flood = true;
             this.flashflood = true;
             this.landslide = true;
@@ -1072,15 +1170,6 @@ Vue.createApp({
             this.end_date_hazminer = this.max_date_hazminer;
             this.duration_filter[0].min = this.duration_filter[0].min_depart;
             this.duration_filter[0].max = this.duration_filter[0].max_depart;
-            for(let i = 0; i < this.impact_filter_hazminer.length; i++) {
-                this.impact_filter_hazminer[i].checkbox_null = true;              
-                this.impact_filter_hazminer[i].min = this.impact_filter_hazminer[i].min_depart;
-                this.impact_filter_hazminer[i].max = this.impact_filter_hazminer[i].max_depart;
-            }
-            for(let i = 0; i < this.popularity_filter.length; i++) {           
-                this.popularity_filter[i].min = this.popularity_filter[i].min_depart;
-                this.popularity_filter[i].max = this.popularity_filter[i].max_depart;
-            }
             this.chosen_country_hazminer = 'All';
             this.substring_country_hazminer = '';
             this.set_countries_list();
@@ -1091,9 +1180,40 @@ Vue.createApp({
                 this.extent_filter[i].min = this.extent_filter[i].min_depart;
                 this.extent_filter[i].max = this.extent_filter[i].max_depart;
             }
+            for(let i = 0; i < this.impact_filter_hazminer.length; i++) {
+                this.impact_filter_hazminer[i].checkbox_null = true;              
+                this.impact_filter_hazminer[i].min = this.impact_filter_hazminer[i].min_depart;
+                this.impact_filter_hazminer[i].max = this.impact_filter_hazminer[i].max_depart;
+            }
+            for(let i = 0; i < this.popularity_filter.length; i++) {           
+                this.popularity_filter[i].min = this.popularity_filter[i].min_depart;
+                this.popularity_filter[i].max = this.popularity_filter[i].max_depart;
+            }            
+            // Propriétés citizen observer
+            this.inondation = true;
+            this.glissement_terrain = true;
+            this.tdt = true;
+            this.vents_violents = true;
+            this.grele = true;
+            this.foudre = true;
+            this.start_date_co = this.min_date_co;
+            this.end_date_co = this.max_date_co;
+            this.chosen_province_co = 'All';
+            this.chosen_territoire_co = 'All';
+            for(let i = 0; i < this.impact_chiffre_filter_co.length; i++) {
+                this.impact_chiffre_filter_co[i].checkbox_null = true;              
+                this.impact_chiffre_filter_co[i].min = this.impact_chiffre_filter_co[i].min_depart;
+                this.impact_chiffre_filter_co[i].max = this.impact_chiffre_filter_co[i].max_depart;
+            }
+            for(let i = 0; i < this.impact_bool_filter_co.length; i++) {
+                this.impact_bool_filter_co[i].checkbox_impact = false;              
+            }
 
             // Chaque event devient visible
             for (let feature of this.events_hazminer_layer.getSource().getFeatures()) {
+                feature.set('visible',true);
+            }
+            for (let feature of this.events_co_layer.getSource().getFeatures()) {
                 feature.set('visible',true);
             }
 
@@ -1103,6 +1223,10 @@ Vue.createApp({
             this.show_casualties_filter_hazminer = false;
             this.show_popularity_filter_hazminer = false;
             this.show_location_filter_hazminer = false;
+            this.show_type_event_filter_co = false;
+            this.show_date_filter_co = false;
+            this.show_location_filter_co = false;     
+            this.show_impact_filter_co = false;
 
         },
 
@@ -1146,6 +1270,26 @@ Vue.createApp({
                 return;
             }
 
+            // Location
+            if (this.chosen_country_hazminer != 'All' && feature.get('country_found') != this.chosen_country_hazminer) {
+                feature.set('visible',false);
+                return;
+            }
+            if (this.draw_layer.getSource().getFeatures().length === 1 && !this.features_polygon.includes(feature)) {
+                feature.set('visible',false);
+                return;
+            }
+            for(let i = 0; i < this.extent_filter.length; i++) {
+                if (parseFloat(feature.get(this.extent_filter[i].id)) < parseFloat(this.extent_filter[i].min)) {
+                    feature.set('visible',false);
+                    return;
+                }
+                if (parseFloat(feature.get(this.extent_filter[i].id)) > parseFloat(this.extent_filter[i].max)) {
+                    feature.set('visible',false);
+                    return;
+                }
+            }
+
             // Impact
             for(let i = 0; i < this.impact_filter_hazminer.length; i++) {
                 if (!this.impact_filter_hazminer[i].checkbox_null && feature.get(this.impact_filter_hazminer[i].id) === null) {
@@ -1169,26 +1313,6 @@ Vue.createApp({
                     return;
                 }
                 if (parseFloat(feature.get(this.popularity_filter[i].id)) > parseFloat(this.popularity_filter[i].max)) {
-                    feature.set('visible',false);
-                    return;
-                }
-            }
-
-            // Location
-            if (this.chosen_country_hazminer != 'All' && feature.get('country_found') != this.chosen_country_hazminer) {
-                feature.set('visible',false);
-                return;
-            }
-            if (this.draw_layer.getSource().getFeatures().length === 1 && !this.features_polygon.includes(feature)) {
-                feature.set('visible',false);
-                return;
-            }
-            for(let i = 0; i < this.extent_filter.length; i++) {
-                if (parseFloat(feature.get(this.extent_filter[i].id)) < parseFloat(this.extent_filter[i].min)) {
-                    feature.set('visible',false);
-                    return;
-                }
-                if (parseFloat(feature.get(this.extent_filter[i].id)) > parseFloat(this.extent_filter[i].max)) {
                     feature.set('visible',false);
                     return;
                 }
@@ -1240,6 +1364,17 @@ Vue.createApp({
                 return;
             }
 
+            // Location
+            if (this.chosen_province_co != 'All' && feature.get('province') != this.chosen_province_co) {
+                feature.set('visible',false);
+                return;
+            }
+            if (this.chosen_territoire_co != 'All' && feature.get('territoire') != this.chosen_territoire_co) {
+                feature.set('visible',false);
+                return;
+            }
+
+
             // Impact
             for(let i = 0; i < this.impact_chiffre_filter_co.length; i++) {
                 if (!this.impact_chiffre_filter_co[i].checkbox_null && feature.get(this.impact_chiffre_filter_co[i].id) === null) {
@@ -1282,7 +1417,7 @@ Vue.createApp({
             }
 
             // Change le style des features : celles dont la visibilité est fausse sont invisibles, les autres gardent leur style actuel
-            this.change_style();
+            this.change_style_all();
 
         },
 
@@ -1833,19 +1968,11 @@ Vue.createApp({
                 },
                 strategy: ol.loadingstrategy.bbox
             }),
-            style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 10,
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255, 0, 0, 1)',
-                    }),
-                }),
-            }),
             zIndex: 10,
         });
         this.map.addLayer(this.events_hazminer_layer);
 
-        // À chaque ajout de nouvelles features, création de la variable visibilité selon les filtres actifs
+        // À chaque ajout de nouvelles features hazminer, création de la variable visibilité selon les filtres actifs
         this.events_hazminer_layer.getSource().on('featuresloadend', event => {
             let features = event.features;
             features.forEach((feature) => {
@@ -1863,91 +1990,81 @@ Vue.createApp({
                 },
                 strategy: ol.loadingstrategy.bbox
             }),
-            style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 10,
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255, 0, 0, 1)',
-                    }),
-                }),
-            }),
-            zIndex: 10,
+            zIndex: 11,
         });
         this.map.addLayer(this.events_co_layer);
 
-        // // À chaque ajout de nouvelles features, création de la variable visibilité selon les filtres actifs
-        // this.events_co_layer.getSource().on('featuresloadend', event => {
-        //     let features = event.features;
-        //     features.forEach((feature) => {
-        //         this.visibilite_features_co_ajoutees(feature)
-        //     })
-        // });
+        // À chaque ajout de nouvelles features citizen observer, création de la variable visibilité selon les filtres actifs
+        this.events_co_layer.getSource().on('featuresloadend', event => {
+            let features = event.features;
+            features.forEach((feature) => {
+                this.visibilite_features_co_ajoutees(feature)
+            })
+        });
+
+        // Style au départ
+        this.change_style_events();
 
         // Création de la couche event selectionné (vide)
         this.selected_event_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 10,
-                    fill: new ol.style.Fill({
-                        color: 'rgba(0, 255, 0, 1)',
-                    }),
-                }),
-            }),
-            zIndex: 11,
+            zIndex: 12,
         });
         this.map.addLayer(this.selected_event_layer);
 
-        // Style au départ
-        this.change_style();
+        // Changer le style de la couche selected event à chaque feature ajoutée
+        // (le style dépend de la couche d'origine de la feature et des filtres)
+        this.selected_event_layer.getSource().on('addfeature', event => {
+            this.change_style_selected_event();
+        });
 
         // Création de la couche géolocalisation vide
         this.localisation_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
-            zIndex: 12,
+            zIndex: 13,
         });
         this.map.addLayer(this.localisation_layer);
 
         // Création du popup vide pour le pointermove
-        let var_popup_pointermove = new ol.Overlay({
+        let overlay_pointermove = new ol.Overlay({
             element: document.getElementById("popup_pointermove"),
             positioning: "bottom-center"
         });
-        this.map.addOverlay(var_popup_pointermove);
+        this.map.addOverlay(overlay_pointermove);
 
         // Création du popup vide pour le clic
-        let var_popup_clic = new ol.Overlay({
+        let overlay_clic = new ol.Overlay({
             element: document.getElementById("popup_clic"),
             positioning: "bottom-center"
         });
-        this.map.addOverlay(var_popup_clic);
+        this.map.addOverlay(overlay_clic);
 
         // Bouton pour accéder à l'outil filtrage
-        var filtrage_control = new ol.control.Control({
+        let filtrage_control = new ol.control.Control({
             element: document.getElementById("outil_filtrage_div"),
         });
         this.map.addControl(filtrage_control);
 
         // Bouton pour changer le style
-        var change_style_control = new ol.control.Control({
+        let change_style_control = new ol.control.Control({
             element: document.getElementById("changer_style_div"),
         });
         this.map.addControl(change_style_control);
 
         // Bouton download
-        var download_control = new ol.control.Control({
+        let download_control = new ol.control.Control({
             element: document.getElementById("download_div"),
         });
         this.map.addControl(download_control);
 
         // Bouton pour activer la localisation
-        var localisation_control = new ol.control.Control({
+        let localisation_control = new ol.control.Control({
             element: document.getElementById("affichage_localisation_div"),
         });
         this.map.addControl(localisation_control);
 
         // Scale line
-        var scaleline = new ol.control.ScaleLine({
+        let scaleline = new ol.control.ScaleLine({
             element: document.getElementById("scaleline_div"),
         });
         this.map.addControl(scaleline);
@@ -1972,7 +2089,7 @@ Vue.createApp({
             // Si il y a plusieurs events, le popup affiche "n events"
             if (event_features.length > 1) {
                 document.getElementById("popup_pointermove").innerHTML = event_features.length + " events";
-                var_popup_pointermove.setPosition(evt.coordinate);
+                overlay_pointermove.setPosition(evt.coordinate);
                 document.getElementById("popup_pointermove").style.display = "block";
             }
         
@@ -2022,7 +2139,7 @@ Vue.createApp({
                         this.affichage_selection_event(event_feature);
                     });
                 });
-                var_popup_clic.setPosition(evt.coordinate);
+                overlay_clic.setPosition(evt.coordinate);
                 document.getElementById("popup_clic").style.display = "block";
             }
 
@@ -2032,10 +2149,6 @@ Vue.createApp({
 
         });
 
-    },
-
-    created() {
-    
     },
 
 }).mount('#vue_map');
