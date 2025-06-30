@@ -276,7 +276,32 @@ Vue.createApp({
             ],
             couleur_georef_true: '#00cc00',
             couleur_georef_false: '#ff6600',
-            
+            style_taille: 'Standard',
+            taille_standard: 10,
+            taille_impact_humain: 'nb_morts',
+            taille_nb_morts: [
+                { label: 'No value', min: null, max: null, size: 3 },
+                { label: '0 - 9', min: 0, max: 9, size: 6 },
+                { label: '10 - 99', min: 10, max: 99, size: 9 },
+                { label: '≥ 100', min: 100, max: Infinity, size: 12 },
+            ],
+            taille_nb_blesses: [
+                { label: 'No value', min: null, max: null, size: 3 },
+                { label: '0 - 9', min: 0, max: 9, size: 6 },
+                { label: '10 - 99', min: 10, max: 99, size: 9 },
+                { label: '100 - 999', min: 100, max: 999, size: 12 },
+                { label: '≥ 1000', min: 1000, max: Infinity, size: 15 },
+            ],
+            taille_nb_sansabris: [
+                { label: 'No value', min: null, max: null, size: 3 },
+                { label: '0 - 9', min: 0, max: 9, size: 6 },
+                { label: '10 - 99', min: 10, max: 99, size: 9 },
+                { label: '100 - 999', min: 100, max: 999, size: 12 },
+                { label: '≥ 1000', min: 1000, max: Infinity, size: 15 },
+            ],
+            taille_autres_impacts: 'impact_betail',
+            taille_oui: 10,
+            taille_non: 3,
 
             // Affichage popup filtres
             show_filter_form: false,
@@ -413,6 +438,27 @@ Vue.createApp({
                 { id: 'n_paragraphs', label: 'Number of paragraphs', table: this.size_paragraphs },
                 { id: 'n_languages', label: 'Number of languages', table: this.size_languages },
                 { id: 'n_source_countries', label: 'Number of source countries', table: this.size_source_countries },
+            ];
+        },
+
+        liste_impact_humain() {
+            return [
+                { id: 'nb_morts', label: 'Nombre de morts', table: this.taille_nb_morts },
+                { id: 'nb_blesses', label: 'Nombre de blessés', table: this.taille_nb_blesses },
+                { id: 'nb_sansabris', label: 'Nombre de sans abris', table: this.taille_nb_sansabris },
+            ];
+        },
+
+        liste_autres_impacts() {
+            return [
+                { id: 'impact_betail', label: 'Impact bétail' },
+                { id: 'impact_logement', label: 'Impact logement' },
+                { id: 'impact_routes', label: 'Impact routes' },
+                { id: 'impact_ponts', label: 'Impact ponts' },
+                { id: 'impact_autres', label: 'Impact autres' },
+                { id: 'impact_coupures_elec', label: 'Impact coupures électricité' },
+                { id: 'impact_eau_consommation', label: "Impact sources d'eau de consommation" },
+                { id: 'impact_cultures', label: 'Impact cultures' },
             ];
         },
 
@@ -866,7 +912,33 @@ Vue.createApp({
                     }
                     
                     // Définition de la taille
-                    let size = this.size_standard;
+                    let size;
+                    if (this.style_taille === 'Standard') {
+                        size = this.taille_standard;
+                    } 
+                    else if (this.style_taille === 'Impact_humain') {
+                        for (let i = 0; i < this.liste_impact_humain.length; i++) {
+                            if (this.taille_impact_humain === this.liste_impact_humain[i].id) {
+                                let property = feature.get(this.liste_impact_humain[i].id);
+                                let intervalle_property = this.liste_impact_humain[i].table.find(interval => {
+                                    if (interval.min === null && interval.max === null) {
+                                        return property === null;
+                                    }
+                                    return property >= interval.min && property <= interval.max;
+                                });          
+                                size = intervalle_property.size;
+                            }
+                        }
+                    } 
+                    else if (this.style_taille === 'Autres_impacts') {
+                        for (let i = 0; i < this.liste_autres_impacts.length; i++) {
+                            if (this.taille_autres_impacts === this.liste_autres_impacts[i].id) {
+                                let property = feature.get(this.liste_autres_impacts[i].id);
+                                if (property === 'non') { size = this.taille_non }
+                                else { size = this.taille_oui }
+                            }
+                        }
+                    } 
                     
                     return new ol.style.Style({
                         image: new ol.style.Circle({

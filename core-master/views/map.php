@@ -102,7 +102,7 @@
                             <div class="flexrow margin" v-for="step in size_duration">
                                 <div class="vertical_center">{{step.label}}:</div>
                                 <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
-                                <span class="margin_left">{{step.size}}</span></label>
+                                <span class="margin_left">{{step.size}}</span>
                             </div>
                         </div>
                     </div>        
@@ -120,7 +120,7 @@
                             <div class="flexrow margin" v-for="step in casualty.table">
                                 <div class="vertical_center">{{step.label}}:</div>
                                 <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
-                                <span class="margin_left">{{step.size}}</span></label>
+                                <span class="margin_left">{{step.size}}</span>
                             </div>
                         </div>
                     </div>
@@ -138,7 +138,7 @@
                             <div class="flexrow margin" v-for="step in pop.table">
                                 <div class="vertical_center">{{step.label}}:</div>
                                 <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
-                                <span class="margin_left">{{step.size}}</span></label>
+                                <span class="margin_left">{{step.size}}</span>
                             </div>
                         </div>
                     </div>
@@ -215,6 +215,63 @@
                     </div>
 
                     <hr />
+
+                    <div id="choix_taille" class="padding">
+                        <label>Taille:
+                            <select class="margin_left" v-model="style_taille">
+                                <option value="Standard">Standard</option>
+                                <option value="Impact_humain">Impact humain</option>
+                                <option value="Autres_impacts">Autres impacts</option>                       
+                            </select>
+                        </label>
+                    </div>
+
+                    <div id="taille_standard" class="flexrow padding" v-if="style_taille ==='Standard'">
+                        <div class="vertical_center">Tous les évènements:</div>
+                        <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_standard">
+                        <span class="margin_left">{{taille_standard}}</span>
+                    </div>
+
+                    <div id="taille_impact_humain" class="flexrow padding" v-if="style_taille ==='Impact_humain'">
+                        <label>Taille selon :
+                            <select class="margin_left" v-model="taille_impact_humain">
+                                <option v-for="impact in liste_impact_humain" :value="impact.id">{{impact.label}}</option>  
+                            </select>
+                        </label>
+                    </div>
+
+                    <div v-for="impact in liste_impact_humain" v-if="style_taille ==='Impact_humain'">
+                        <div v-if="taille_impact_humain === impact.id">
+                            <div class="flexrow margin" v-for="step in impact.table">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <span class="margin_left">{{step.size}}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="taille_autres_impacts" class="flexrow padding" v-if="style_taille ==='Autres_impacts'">
+                        <label>Taille selon :
+                            <select class="margin_left" v-model="taille_autres_impacts">
+                                <option v-for="impact in liste_autres_impacts" :value="impact.id">{{impact.label}}</option>  
+                            </select>
+                        </label>
+                    </div>
+
+                    <div v-for="impact in liste_autres_impacts" v-if="style_taille ==='Autres_impacts'">
+                        <div v-if="taille_autres_impacts === impact.id">
+                            <div class="flexrow margin">
+                                <div class="vertical_center">Oui:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_oui">
+                                <span class="margin_left">{{taille_oui}}</span>
+                            </div>
+                            <div class="flexrow margin">
+                                <div class="vertical_center">Non:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_non">
+                                <span class="margin_left">{{taille_non}}</span>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
 
