@@ -625,29 +625,57 @@
 
                 <br>
 
-                <div id="download_filter" class="padding largeur_min">
-                    <div class="title">Download filter:</div>
-                    <div id="events">
-                        <label>Events: <input type="checkbox" v-model="download_filter_e" @click=checkbox_download(download_filter_e)></label>
-                    </div> 
-                    <div id="paragraphs">
-                        <label>Paragraphs: <input type="checkbox" v-model="download_filter_p" @click=checkbox_download(download_filter_p)></label>
-                    </div>  
-                    <div id="events_paragraphs">
-                        <label>Events and paragraphs: <input type="checkbox" v-model="download_filter_e_p" @click=checkbox_download(download_filter_e_p)></label>
-                    </div>    
+                <div id="hazminer_download">
+
+                    <div class="flexrow space_evenly padding">
+                        <div class="title">Hazminer</div>
+                    </div>
+
+                    <div id="download_filter" class="padding largeur_min">
+                        <div class="title">Download filter:</div>
+                        <div id="events">
+                            <label>Events: <input type="checkbox" v-model="download_filter_e_hazminer" @click=checkbox_download(download_filter_e_hazminer)></label>
+                        </div> 
+                        <div id="paragraphs">
+                            <label>Paragraphs: <input type="checkbox" v-model="download_filter_p_hazminer" @click=checkbox_download(download_filter_p_hazminer)></label>
+                        </div>  
+                        <div id="events_paragraphs">
+                            <label>Events and paragraphs: <input type="checkbox" v-model="download_filter_e_p_hazminer" @click=checkbox_download(download_filter_e_p_hazminer)></label>
+                        </div>    
+                    </div>
+
+                    <div id="download_all" class="padding largeur_min">
+                        <div class="title">Download all:</div>
+                        <div id="events">
+                            <label>Events: <input type="checkbox" v-model="download_all_e_hazminer" @click=checkbox_download(download_all_e_hazminer)></label>
+                        </div>     
+                    </div>
+
                 </div>
 
-                <hr style='margin:5px;' />
+                <hr style='margin:10px;' />
 
-                <div id="download_all" class="padding largeur_min">
-                    <div class="title">Download all:</div>
-                    <div id="events">
-                        <label>Events: <input type="checkbox" v-model="download_all_e" @click=checkbox_download(download_all_e)></label>
-                    </div>     
+                <div id="co_download">
+
+                    <div class="flexrow space_evenly padding">
+                        <div class="title">Citizen observer</div>
+                    </div>
+
+                    <div id="download_filter" class="padding largeur_min">
+                        <div id ="filter" class="title">
+                            <label>Download filter: <input type="checkbox" v-model="download_filter_co" @click=checkbox_download(download_filter_co)></label>
+                        </div>   
+                    </div>
+
+                    <div id="download_all" class="padding largeur_min">
+                        <div id ="all" class="title">
+                            <label>Download all: <input type="checkbox" v-model="download_all_co" @click=checkbox_download(download_all_co)></label>
+                        </div>   
+                    </div>
+
                 </div>
 
-                <hr style='margin:5px;' v-if="show_download_progression" />
+                <hr style='margin:10px;' v-if="show_download_progression" />
 
                 <div id="progress" class="padding largeur_min">
                     <div v-if="show_fetch_progression">{{fetch_progression}}</div>

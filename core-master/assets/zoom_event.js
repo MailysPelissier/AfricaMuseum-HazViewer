@@ -407,6 +407,72 @@ Vue.createApp({
             }
         },
 
+        // Download
+        async download() {
+
+            // Si aucun mode de download n'est choisi
+            if (!(this.download_e || this.download_p || this.download_e_p)) {
+                alert("No download mode selected!");
+                return;
+            }
+
+            // Liste des propriétés des events
+            let event_download_properties = ["event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
+                "event_time", "bbox_event", "n_languages", "n_source_countries", "n_paragraphs", "n_articles", 
+                "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
+                "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
+                "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
+                "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", 
+                "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
+                "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
+                "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
+
+            // Création du tableau pour le join final, initialisation du texte (header)
+            let event_content_lines = [event_download_properties.join(',')];
+
+            // Affichage de la progression du download
+            this.show_fetch_progression = true;
+            this.show_download_progression = true;
+
+            // Récupération de l'event
+            let f = this.selected_event;
+
+            // Création d'une ligne de texte (event.csv)
+            // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+            if(this.download_e || this.download_e_p) {
+                let row = event_download_properties.map(prop => {
+                    let value = f.get(prop);
+                    if (value == null) return ''; // gérer les null
+                    value = String(value).replace(/"/g, '""');
+                    return `"${value}"`;
+                }).join(',');
+                event_content_lines.push(row);
+            }
+
+            // Création du texte de paragraphs.csv
+            let paragraph_content_lines
+            if(this.download_p || this.download_e_p) {
+                paragraph_content_lines = await this.paragraph_download_text_filter();
+            }
+                
+            // Désaffichage de la progression du download
+            this.show_fetch_progression = false;
+            this.show_download_progression = false;
+            this.fetch_progression = 'Fetch data in progress...';
+            this.download_progression = 0;
+
+            // Téléchargement des events
+            if(this.download_e || this.download_e_p) {
+                this.creation_csv(event_content_lines, `event_${this.event_id}.csv`);
+            }
+
+            // Téléchargement des paragraphs
+            if(this.download_p || this.download_e_p) {
+                this.creation_csv(paragraph_content_lines, `paragraphs_${this.event_id}.csv`);
+            }
+
+        },
+
         // Création du texte de download des paragraphs liés à un event
         async paragraph_download_text_filter() {
 
@@ -418,7 +484,6 @@ Vue.createApp({
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
                 "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
-            let paragraph_properties_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
 
             // Création du tableau pour le join final, initialisation du texte (header)
             let paragraph_content_lines = [paragraph_download_properties.join(',')];
@@ -459,11 +524,8 @@ Vue.createApp({
                 let row = paragraph_download_properties.map(prop => {
                     let value = f.properties[prop];
                     if (value == null) return ''; // gérer les null
-                    if (paragraph_properties_str.includes(prop)) {
-                        value = String(value).replace(/"/g, '""');
-                        return `"${value}"`;
-                    }
-                    return String(value);
+                    value = String(value).replace(/"/g, '""');
+                    return `"${value}"`;
                 }).join(',');
                 paragraph_content_lines.push(row);
 
@@ -479,76 +541,6 @@ Vue.createApp({
             };
 
             return paragraph_content_lines;
-
-        },
-
-        // Download
-        async download() {
-
-            // Si aucun mode de download n'est choisi
-            if (!(this.download_e || this.download_p || this.download_e_p)) {
-                alert("No download mode selected!");
-                return;
-            }
-
-            // Liste des propriétés des events
-            let event_download_properties = ["event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
-                "event_time", "bbox_event", "n_languages", "n_source_countries", "n_paragraphs", "n_articles", 
-                "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
-                "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
-                "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
-                "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", 
-                "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
-                "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
-                "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
-            let event_properties_str = ["bbox_event"];
-
-            // Création du tableau pour le join final, initialisation du texte (header)
-            let event_content_lines = [event_download_properties.join(',')];
-
-            // Affichage de la progression du download
-            this.show_fetch_progression = true;
-            this.show_download_progression = true;
-
-            // Récupération de l'event
-            let f = this.selected_event;
-
-            // Création d'une ligne de texte (event.csv)
-            // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-            if(this.download_e || this.download_e_p) {
-                let row = event_download_properties.map(prop => {
-                    let value = f.get(prop);
-                    if (value == null) return ''; // gérer les null
-                    if (event_properties_str.includes(prop)) {
-                        value = String(value).replace(/"/g, '""');
-                        return `"${value}"`;
-                    }
-                    return String(value);
-                }).join(',');
-                event_content_lines.push(row);
-            }
-
-            // Création du texte de paragraphs.csv
-            let paragraph_content_lines
-            if(this.download_p || this.download_e_p) {
-                paragraph_content_lines = await this.paragraph_download_text_filter();
-            }
-                
-            // Désaffichage de la progression du download
-            this.show_fetch_progression = false;
-            this.show_download_progression = false;
-            this.fetch_progression = 'Fetch data in progress...';
-            this.download_progression = 0;
-
-            // Téléchargement des events
-            if(this.download_e || this.download_e_p) {
-                this.creation_csv(event_content_lines, "event.csv");
-            }
-
-            // Téléchargement des paragraphs
-            if(this.download_p || this.download_e_p) {
-                this.creation_csv(paragraph_content_lines, "paragraphs.csv");
-            }
 
         },
 

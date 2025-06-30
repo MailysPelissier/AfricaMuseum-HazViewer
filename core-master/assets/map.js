@@ -391,7 +391,7 @@ Vue.createApp({
             impact_chiffre_filter_co: [
                 { id: 'nb_morts', label: 'Nombre de morts:', checkbox_null: true, min: 0, max: 300, min_depart: 0, max_depart: 300 },
                 { id: 'nb_blesses', label: 'Nombre de blessés:', checkbox_null: true, min: 0, max: 3000, min_depart: 0, max_depart: 3000 },
-                { id: 'nb_sans_abris', label: 'Nombre de sans abris:', checkbox_null: true, min: 0, max: 5000, min_depart: 0, max_depart: 5000 },
+                { id: 'nb_sansabris', label: 'Nombre de sans abris:', checkbox_null: true, min: 0, max: 5000, min_depart: 0, max_depart: 5000 },
             ],
             impact_bool_filter_co: [
                 { id: 'impact_betail', label: 'Impact bétail:', checkbox_impact: false },
@@ -406,10 +406,16 @@ Vue.createApp({
 
             // Affichage popup download
             show_download_form: false,
-            download_filter_e: true,
-            download_filter_p: false,
-            download_filter_e_p: false,
-            download_all_e: false,
+
+            // Checkbox download
+            download_filter_e_hazminer: true,
+            download_filter_p_hazminer: false,
+            download_filter_e_p_hazminer: false,
+            download_all_e_hazminer: false,
+            download_filter_co: false,
+            download_all_co: false,
+
+            // Barre de progression
             show_fetch_progression: false,
             show_download_progression: false,
             fetch_progression: 0,
@@ -1504,7 +1510,8 @@ Vue.createApp({
 
         // Permet d'avoir une seule checkbox sélectionnée pour le choix du mode de download
         checkbox_download(checkbox_name) {
-            let checkbox_list = ['download_filter_e', 'download_filter_p', 'download_filter_e_p', 'download_all_e']
+            let checkbox_list = ['download_filter_e_hazminer', 'download_filter_p_hazminer', 'download_filter_e_p_hazminer', 'download_all_e_hazminer',
+                'download_filter_co', 'download_all_co']
             for (let checkbox of checkbox_list) {
                 if (checkbox_name != checkbox) {
                     this[checkbox] = false;
@@ -1512,8 +1519,329 @@ Vue.createApp({
             }
         },
 
-        // Crée le filtre cql pour la requête des events vers le Geoserver
-        set_cqlfilter_event(type) {
+        // Download
+        async download() {
+
+            // Définition des données à télécharger
+            let data = null;
+            if (this.download_all_e_hazminer || this.download_filter_e_hazminer || this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
+                data = 'hazminer';
+                this.download_hazminer();
+            }
+            if (this.download_all_co || this.download_filter_co) {
+                data = 'co';
+                this.download_co();
+            }
+
+            // Si aucun mode de download n'est choisi
+            if (data === null) {
+                alert("No download mode selected!");
+                return;
+            }
+
+        },
+
+        // Download des données hazminer
+        async download_hazminer() {
+
+            let type = null;
+            if (this.download_all_e_hazminer) {
+                type = 'all';
+            }
+            if (this.download_filter_e_hazminer || this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
+                type = 'filter';
+            }
+     
+            // Liste des propriétés
+            let event_download_properties = ["event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
+                "event_time", "bbox_event", "n_languages", "n_source_countries", "n_paragraphs", "n_articles", 
+                "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
+                "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
+                "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
+                "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", 
+                "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
+                "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
+                "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
+            let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
+                "paragraph_id", "original_text", "disaster_label", "disaster_score", "hasard_type", "hasard_type_score", "nb_death", "score_death", "answer_death",
+                "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
+                "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
+                "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
+                "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
+                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
+
+            // Création des tableaux pour le join final, initialisation des textes (header)
+            let event_content_lines = [event_download_properties.join(',')];
+            let paragraph_content_lines = [paragraph_download_properties.join(',')];
+
+            // Liste permettent d'éviter les paragraphs en double
+            let seen_paragraph_id = new Set();
+
+            // Récupérer filtres
+            let { cqlFilter, draw_filter } = this.set_cqlfilter_event_hazminer(type);
+
+            // Si la liste des hazard type est vide
+            if (cqlFilter === 'No event') {
+                alert("No event matches the criteria!");
+                return;
+            }
+
+            // Si on ne filtre pas selon un polygone
+            if (draw_filter == 0) {
+
+                // Requête vers le geoserver, on récupère seulement les events correspondant aux filtres
+                let url;
+                if (type == 'all') {
+                    url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
+                        + `&outputFormat=application/json`;
+                }
+                if (type == 'filter' && cqlFilter !== 'No event') {
+                    url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
+                        + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+                }  
+                let result = await fetch(url);
+                let json = await result.json();
+                this.fetch_progression = 'Fetch data completed!';
+
+                // Récupération des events
+                let features = json.features;
+                let n_events = features.length;
+
+                // Si aucun event ne correspond aux critères
+                if (n_events === 0) {
+                    alert("No event matches the criteria!");
+                    return;
+                }
+
+                // Si on veut télécharger des paragraphs et que trop d'events correspondent aux critères (>10000)
+                if (this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
+                    if (n_events > 10000) {
+                        alert("To many events, use more filters!");
+                        return;
+                    }
+                }
+
+                // Affichage de la progression du download
+                this.show_fetch_progression = true;
+                this.show_download_progression = true;
+
+                // Pour chaque event
+                let compteur_features = 0;
+                for (let f of features) {
+
+                    // Création d'une ligne de texte (events.csv)
+                    // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                    if(this.download_all_e_hazminer || this.download_filter_e_hazminer || this.download_filter_e_p_hazminer) {
+                        let row = event_download_properties.map(prop => {
+                            let value = f.properties[prop];
+                            if (value == null) return ''; // gérer les null
+                            value = String(value).replace(/"/g, '""');
+                            return `"${value}"`;
+                        }).join(',');
+                        event_content_lines.push(row);
+                    }
+
+                    // Création du texte de paragraphs.csv
+                    if(this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
+                        ({ paragraph_content_lines, seen_paragraph_id } = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'geoserver'));
+                    }
+
+                    // Calcul de la progression
+                    compteur_features += 1;
+                    this.download_progression = parseInt(compteur_features*100/features.length);
+
+                    // Forcer une pause très courte pour mettre à jour le DOM
+                    if (compteur_features % 100 === 0) {
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                    }
+
+                };
+
+                // Désaffichage de la progression du download
+                this.show_fetch_progression = false;
+                this.show_download_progression = false;
+                this.fetch_progression = 0;
+                this.download_progression = 0;
+
+            }
+            
+            // Si on filtre selon un polygone
+            if (draw_filter == 1) {
+
+                // Récupérer le nombre d'events
+                let event_features = this.events_hazminer_layer.getSource().getFeatures();
+                let n_events_visibles = event_features.filter(f => f.get('visible') === true).length;
+                let nb_total_events = event_features.length;
+
+                // Si aucun event ne correspond aux critères
+                if (n_events_visibles === 0) {
+                    alert("No event matches the criteria!");
+                    return;
+                }
+
+                // Si on veut télécharger des paragraphs et que trop d'events correspondent aux critères (>10000)
+                if (this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
+                    if (n_events_visibles > 10000) {
+                        alert("To many events, use more filters!");
+                        return;
+                    }
+                }
+
+                // Affichage de la progression du download
+                this.show_download_progression = true;
+
+                let compteur_events = 0;
+                // On récupère les events de la couche events 1 par 1
+                for (let f of this.events_hazminer_layer.getSource().getFeatures()) {
+
+                    // Pour chaque event correspondant aux critères
+                    if (f.get('visible')) {
+
+                        // Création d'une ligne de texte (events.csv)
+                        // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                        if(this.download_all_e_hazminer || this.download_filter_e_hazminer || this.download_filter_e_p_hazminer) {
+                            let row = event_download_properties.map(prop => {
+                                let value = f.get(prop);
+                                if (value == null) return ''; // gérer les null
+                                value = String(value).replace(/"/g, '""');
+                                return `"${value}"`;
+                            }).join(',');
+                            event_content_lines.push(row);
+                        }
+
+                        // Création du texte de paragraphs.csv
+                        if(this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
+                            ({ paragraph_content_lines, seen_paragraph_id } = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'event layer'));
+                        }
+
+                    }
+
+                    // Calcul de la progression du download
+                    compteur_events += 1;
+                    this.download_progression = parseInt(compteur_events*100/nb_total_events);
+
+                    // Forcer une pause très courte pour mettre à jour le DOM
+                    if (compteur_features % 100 === 0) {
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                    }
+                    
+                }
+
+                // Désaffichage de la progression du download
+                this.show_download_progression = false;
+                this.download_progression = 0;
+
+            }
+
+            // Téléchargement des events
+            if(this.download_all_e_hazminer || this.download_filter_e_hazminer || this.download_filter_e_p_hazminer) {
+                this.creation_csv(event_content_lines, "hazminer_events.csv");
+            }
+
+            // Téléchargement des paragraphs
+            if(this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
+                this.creation_csv(paragraph_content_lines, "hazminer_paragraphs.csv");
+            }
+
+        },
+
+        // Download des données co
+        async download_co() {
+
+            let type = null;
+            if (this.download_all_co) {
+                type = 'all';
+            }
+            if (this.download_filter_co) {
+                type = 'filter';
+            }
+     
+            // Liste des propriétés
+            let event_download_properties = ["type_event", "event_date", "country_found", "province", "territoire", "nom_collectivite_commune", 
+                "nom_groupement_quartier", "noms_villages", "latitude", "longitude", "donnees_georeferencees", "nb_morts", "nb_blesses", 
+                "nb_sansabris", "surprise_population", "impact_betail", "impact_logement", "impact_routes", "impact_ponts", "impact_autres", 
+                "impact_coupures_elec", "impact_eau_consommation", "impact_cultures", "landslide_new_or_old", "landslide_react_signes", 
+                "landslide_apres", "landslide_cause_habitants", "inondation_duree_jours", "inondation_apres", "grele_duree_minutes", 
+                "vents_violents_duree_jours", "vents_violents_avec_autre_event", "tdt_duree", "tdt_declenche_landslide"];
+
+            // Création du tableau pour le join final, initialisation du texte (header)
+            let event_content_lines = [event_download_properties.join(',')];
+
+            // Récupérer filtres
+            let cqlFilter = this.set_cqlfilter_event_co(type);
+
+            // Si la liste des hazard type est vide
+            if (cqlFilter === 'No event') {
+                alert("No event matches the criteria!");
+                return;
+            }
+
+            // Requête vers le geoserver, on récupère seulement les events correspondant aux filtres
+            let url;
+            if (type == 'all') {
+                url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer`
+                    + `&outputFormat=application/json`;
+            }
+            if (type == 'filter' && cqlFilter !== 'No event') {
+                url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer`
+                    + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+            }  
+            let result = await fetch(url);
+            let json = await result.json();
+            this.fetch_progression = 'Fetch data completed!';
+
+            // Récupération des events
+            let features = json.features;
+            let n_events = features.length;
+
+            // Si aucun event ne correspond aux critères
+            if (n_events === 0) {
+                alert("No event matches the criteria!");
+                return;
+            }
+
+            // Affichage de la progression du download
+            this.show_fetch_progression = true;
+            this.show_download_progression = true;
+
+            // Pour chaque event
+            let compteur_features = 0;
+            for (let f of features) {
+
+                // Création d'une ligne de texte (events.csv)
+                // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                let row = event_download_properties.map(prop => {
+                    let value = f.properties[prop];
+                    if (value == null) return ''; // gérer les null
+                    value = String(value).replace(/"/g, '""');
+                    return `"${value}"`;
+                }).join(',');
+                event_content_lines.push(row);
+
+                // Calcul de la progression
+                compteur_features += 1;
+                this.download_progression = parseInt(compteur_features*100/features.length);
+
+                // Forcer une pause très courte pour mettre à jour le DOM
+                if (compteur_features % 100 === 0) {
+                    await new Promise(resolve => setTimeout(resolve, 0));
+                }
+
+            };
+
+            // Désaffichage de la progression du download
+            this.show_fetch_progression = false;
+            this.show_download_progression = false;
+            this.fetch_progression = 0;
+            this.download_progression = 0;        
+
+            // Téléchargement des events
+            this.creation_csv(event_content_lines, "co_events.csv");
+
+        },
+
+        // Crée le filtre cql pour la requête des events vers le Geoserver (hazminer)
+        set_cqlfilter_event_hazminer(type) {
 
             let cqlFilter = '';
             let draw_filter = 0;
@@ -1588,7 +1916,84 @@ Vue.createApp({
 
         },
 
-        // Création du texte de download des paragraphs liés à un event
+        // Crée le filtre cql pour la requête des events vers le Geoserver (citizen observer)
+        set_cqlfilter_event_co(type) {
+
+            let cqlFilter = '';
+
+            // Cas où on télécharge tous les events
+            if (type == 'all') {
+                return cqlFilter
+            }
+
+            // Cas où on filtre dans la requête Geoserver
+            if (type == 'filter') {
+
+                // Type d'évènement
+                let hazard_type_liste = [];
+                if(this.inondation) {
+                    hazard_type_liste.push('Inondation');
+                }
+                if(this.glissement_terrain) {
+                    hazard_type_liste.push('Glissement de terrain');
+                }
+                if(this.tdt) {
+                    hazard_type_liste.push('Tremblement de terre');
+                }
+                if(this.vents_violents) {
+                    hazard_type_liste.push('Tempête de vents violents');
+                }
+                if(this.grele) {
+                    hazard_type_liste.push('Tempête de grêle');
+                }
+                if(this.foudre) {
+                    hazard_type_liste.push('Foudre');
+                }
+                if (hazard_type_liste.length === 0) {  
+                    cqlFilter = 'No event'                 
+                    return cqlFilter
+                }
+                else {
+                    cqlFilter += "type_event IN (" + hazard_type_liste.map(id => `'${id}'`).join(",") + ")";
+                }
+
+                // Date
+                 let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2);
+                let end_date_co_ymd = this.end_date_co.substring(6,10) + '-' + this.end_date_co.substring(3,5) + '-' + this.end_date_co.substring(0,2);
+                cqlFilter += " AND event_date >= '" + start_date_co_ymd + "'";
+                cqlFilter += " AND event_date <= '" + end_date_co_ymd + "'";
+
+                // Location
+                if (this.chosen_province_co != 'All') {
+                    cqlFilter += " AND province = '" + this.chosen_province_co + "'";
+                }
+                if (this.chosen_territoire_co != 'All') {
+                    cqlFilter += " AND territoire = '" + this.chosen_territoire_co + "'";
+                }
+
+                // Impact
+                for(let i = 0; i < this.impact_chiffre_filter_co.length; i++) {
+                    if (this.impact_chiffre_filter_co[i].checkbox_null) {
+                        cqlFilter += " AND (" + this.impact_chiffre_filter_co[i].id + " BETWEEN " + this.impact_chiffre_filter_co[i].min + " AND " + this.impact_chiffre_filter_co[i].max
+                        + " OR " + this.impact_chiffre_filter_co[i].id + " IS NULL)";
+                    }
+                    else {
+                        cqlFilter += " AND " + this.impact_chiffre_filter_co[i].id + " BETWEEN " + this.impact_chiffre_filter_co[i].min + " AND " + this.impact_chiffre_filter_co[i].max;
+                    }
+                }
+                for(let i = 0; i < this.impact_bool_filter_co.length; i++) {
+                    if (this.impact_bool_filter_co[i].checkbox_impact) {
+                        cqlFilter += " AND " + this.impact_bool_filter_co[i].id + " <> 'non'";
+                    }
+                }
+
+                return cqlFilter
+
+            }
+
+        },
+
+        // Création du texte de download des paragraphs liés à un event (hazminer)
         async paragraph_download_text_filter(feature,paragraph_content_lines,seen_paragraph_id,source) {
 
             // Liste des propriétés des paragraphs
@@ -1599,7 +2004,6 @@ Vue.createApp({
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
                 "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
-            let paragraph_properties_str = ["title", "extracted_text", "original_text", "extracted_location", "ner_score"];
 
             // Récupérer les valeurs d'event_id
             let event_id;
@@ -1641,235 +2045,14 @@ Vue.createApp({
                 let row = paragraph_download_properties.map(prop => {
                     let value = f.properties[prop];
                     if (value == null) return ''; // gérer les null
-                    if (paragraph_properties_str.includes(prop)) {
-                        value = String(value).replace(/"/g, '""');
-                        return `"${value}"`;
-                    }
-                    return String(value);
+                    value = String(value).replace(/"/g, '""');
+                    return `"${value}"`;
                 }).join(',');
                 paragraph_content_lines.push(row);
 
             };
 
             return { paragraph_content_lines, seen_paragraph_id };
-
-        },
-
-        // Download
-        async download() {
-
-            // Définition du type de download
-            let type = null;
-            if (this.download_all_e) {
-                type = 'all';
-            }
-            if (this.download_filter_e || this.download_filter_p || this.download_filter_e_p) {
-                type = 'filter';
-            }
-
-            // Si aucun mode de download n'est choisi
-            if (type === null) {
-                alert("No download mode selected!");
-                return;
-            }
-
-            // Liste des propriétés
-            let event_download_properties = ["event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
-                "event_time", "bbox_event", "n_languages", "n_source_countries", "n_paragraphs", "n_articles", 
-                "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
-                "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
-                "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
-                "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", 
-                "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
-                "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
-                "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
-            let event_properties_str = ["bbox_event"];
-            let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
-                "paragraph_id", "original_text", "disaster_label", "disaster_score", "hasard_type", "hasard_type_score", "nb_death", "score_death", "answer_death",
-                "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
-                "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
-                "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
-                "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
-                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
-
-            // Création des tableaux pour le join final, initialisation des textes (header)
-            let event_content_lines = [event_download_properties.join(',')];
-            let paragraph_content_lines = [paragraph_download_properties.join(',')];
-
-            // Liste permettent d'éviter les paragraphs en double
-            let seen_paragraph_id = new Set();
-
-            // Récupérer filtres
-            let { cqlFilter, draw_filter } = this.set_cqlfilter_event(type);
-
-            // Si la liste des hazard type est vide
-            if (cqlFilter === 'No event') {
-                alert("No event matches the criteria!");
-                return;
-            }
-
-            // Si on ne filtre pas selon un polygone
-            if (draw_filter == 0) {
-
-                // Requête vers le geoserver, on récupère seulement les events correspondant aux filtres
-                let url;
-                if (type == 'all') {
-                    url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
-                        + `&outputFormat=application/json`;
-                }
-                if (type == 'filter' && cqlFilter !== 'No event') {
-                    url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
-                        + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
-                }  
-                let result = await fetch(url);
-                let json = await result.json();
-                this.fetch_progression = 'Fetch data completed!';
-
-                // Récupération des events
-                let features = json.features;
-                let n_events = features.length;
-
-                // Si aucun event ne correspond aux critères
-                if (n_events === 0) {
-                    alert("No event matches the criteria!");
-                    return;
-                }
-
-                // Si on veut télécharger des paragraphs et que trop d'events correspondent aux critères (>10000)
-                if (this.download_filter_p || this.download_filter_e_p) {
-                    if (n_events > 10000) {
-                        alert("To many events, use more filters!");
-                        return;
-                    }
-                }
-
-                // Affichage de la progression du download
-                this.show_fetch_progression = true;
-                this.show_download_progression = true;
-
-                // Pour chaque event
-                let compteur_features = 0;
-                for (let f of features) {
-
-                    // Création d'une ligne de texte (events.csv)
-                    // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                    if(this.download_all_e || this.download_filter_e || this.download_filter_e_p) {
-                        let row = event_download_properties.map(prop => {
-                            let value = f.properties[prop];
-                            if (value == null) return ''; // gérer les null
-                            if (event_properties_str.includes(prop)) {
-                                value = String(value).replace(/"/g, '""');
-                                return `"${value}"`;
-                            }
-                            return String(value);
-                        }).join(',');
-                        event_content_lines.push(row);
-                    }
-
-                    // Création du texte de paragraphs.csv
-                    if(this.download_filter_p || this.download_filter_e_p) {
-                        ({ paragraph_content_lines, seen_paragraph_id } = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'geoserver'));
-                    }
-
-                    // Calcul de la progression
-                    compteur_features += 1;
-                    this.download_progression = parseInt(compteur_features*100/features.length);
-
-                    // Forcer une pause très courte pour mettre à jour le DOM
-                    if (compteur_features % 100 === 0) {
-                        await new Promise(resolve => setTimeout(resolve, 0));
-                    }
-
-                };
-
-                // Désaffichage de la progression du download
-                this.show_fetch_progression = false;
-                this.show_download_progression = false;
-                this.fetch_progression = 0;
-                this.download_progression = 0;
-
-            }
-            
-            // Si on filtre selon un polygone
-            if (draw_filter == 1) {
-
-                // Récupérer le nombre d'events
-                let event_features = this.events_hazminer_layer.getSource().getFeatures();
-                let n_events_visibles = event_features.filter(f => f.get('visible') === true).length;
-                let nb_total_events = event_features.length;
-
-                // Si aucun event ne correspond aux critères
-                if (n_events_visibles === 0) {
-                    alert("No event matches the criteria!");
-                    return;
-                }
-
-                // Si on veut télécharger des paragraphs et que trop d'events correspondent aux critères (>10000)
-                if (this.download_filter_p || this.download_filter_e_p) {
-                    if (n_events_visibles > 10000) {
-                        alert("To many events, use more filters!");
-                        return;
-                    }
-                }
-
-                // Affichage de la progression du download
-                this.show_download_progression = true;
-
-                let compteur_events = 0;
-                // On récupère les events de la couche events 1 par 1
-                for (let f of this.events_hazminer_layer.getSource().getFeatures()) {
-
-                    // Pour chaque event correspondant aux critères
-                    if (f.get('visible')) {
-
-                        // Création d'une ligne de texte (events.csv)
-                        // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                        if(this.download_all_e || this.download_filter_e || this.download_filter_e_p) {
-                            let row = event_download_properties.map(prop => {
-                                let value = f.get(prop);
-                                if (value == null) return ''; // gérer les null
-                                if (event_properties_str.includes(prop)) {
-                                    value = String(value).replace(/"/g, '""');
-                                    return `"${value}"`;
-                                }
-                                return String(value);
-                            }).join(',');
-                            event_content_lines.push(row);
-                        }
-
-                        // Création du texte de paragraphs.csv
-                        if(this.download_filter_p || this.download_filter_e_p) {
-                            ({ paragraph_content_lines, seen_paragraph_id } = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'event layer'));
-                        }
-
-                    }
-
-                    // Calcul de la progression du download
-                    compteur_events += 1;
-                    this.download_progression = parseInt(compteur_events*100/nb_total_events);
-
-                    // Forcer une pause très courte pour mettre à jour le DOM
-                    if (compteur_features % 100 === 0) {
-                        await new Promise(resolve => setTimeout(resolve, 0));
-                    }
-                    
-                }
-
-                // Désaffichage de la progression du download
-                this.show_download_progression = false;
-                this.download_progression = 0;
-
-            }
-
-            // Téléchargement des events
-            if(this.download_all_e || this.download_filter_e || this.download_filter_e_p) {
-                this.creation_csv(event_content_lines, "events.csv");
-            }
-
-            // Téléchargement des paragraphs
-            if(this.download_filter_p || this.download_filter_e_p) {
-                this.creation_csv(paragraph_content_lines, "paragraphs.csv");
-            }
 
         },
 
