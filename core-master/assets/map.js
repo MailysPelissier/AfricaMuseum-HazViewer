@@ -6,6 +6,8 @@ Vue.createApp({
 
             // Initialisation de la carte et des couches
             map: null, // Initialisation de la map
+            landslide_susceptibility_layer: null, // Initialisation de la couche landslide susceptibility
+            rivers_layer: null, // Initialisation de la couche rivières
             countries_layer: null, // Initialisation de la couche countries
             extent_layer: null, // Initialisation de la couche du polygone de l'extent
             draw_layer: null, // Initialisation de la couche de dessin
@@ -2157,25 +2159,67 @@ Vue.createApp({
                         maxZoom: 19,
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     }),
+                    title: 'OpenStreetMap',
+                    type: 'base',
                     zIndex: 1,
                 }),
             ],
         });
 
-        // Couche des pays (source : Natural Earth, https://geojson-maps.kyd.au/?utm_source=self&utm_medium=redirect)
-        this.countries_layer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                projection: 'EPSG:3857',
-                url: '../assets/layers/countries50m.json',
-                format: new ol.format.GeoJSON()
+        // Couche landslide susceptibility
+        this.landslide_susceptibility_layer = new ol.layer.Tile({
+            source: new ol.source.TileWMS({
+                url: 'http://localhost:8080/geoserver/webGIS/wms',
+                params: {
+                    'LAYERS': 'webGIS:landslide_susceptibility',
+                    'TILED': true,
+                    'VERSION': '1.1.1',
+                    'FORMAT': 'image/png',
+                    'CRS': 'EPSG:3857'
+                },
+                serverType: 'geoserver',
+                transition: 0,
             }),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'rgb(0, 0, 0, 0.5)',
-                    width: 1
-                })
-            }),
+            title: 'Landslide susceptibility',
             zIndex: 2,
+        });
+        this.map.addLayer(this.landslide_susceptibility_layer);
+
+        // Couche des rivières
+        this.rivers_layer = new ol.layer.Tile({
+            source: new ol.source.TileWMS({
+                url: 'http://localhost:8080/geoserver/webGIS/wms',
+                params: {
+                    'LAYERS': 'webGIS:HydroRIVERS_flow5max',
+                    'TILED': true,
+                    'VERSION': '1.1.1',
+                    'FORMAT': 'image/png',
+                    'CRS': 'EPSG:3857'
+                },
+                serverType: 'geoserver',
+                transition: 0,
+            }),
+            title: 'Rivers',
+            zIndex: 3,
+        });
+        this.map.addLayer(this.rivers_layer);
+
+        // Couche des pays (source : Natural Earth)
+        this.countries_layer = new ol.layer.Tile({
+            source: new ol.source.TileWMS({
+                url: 'http://localhost:8080/geoserver/ne/wms',
+                params: {
+                    'LAYERS': 'ne:countries',
+                    'TILED': true,
+                    'VERSION': '1.1.1',
+                    'FORMAT': 'image/png',
+                    'CRS': 'EPSG:3857'
+                },
+                serverType: 'geoserver',
+                transition: 0,
+            }),
+            title: 'Countries',
+            zIndex: 4,
         });
         this.map.addLayer(this.countries_layer);
 
@@ -2196,14 +2240,16 @@ Vue.createApp({
                     color: 'rgba(255, 255, 255, 0.2)'
                 })
             }),
-            zIndex: 3,
+            title: 'Extent layer',
+            zIndex: 5,
         });
         this.map.addLayer(this.extent_layer);
 
         // Couche de dessin (pour récupérer l'emprise d'un polygone)
         this.draw_layer = new ol.layer.Vector({
             source: new ol.source.Vector({}),
-            zIndex: 4,
+            title: 'Draw layer',
+            zIndex: 6,
         });
         this.map.addLayer(this.draw_layer);
 
@@ -2223,6 +2269,7 @@ Vue.createApp({
                 },
                 strategy: ol.loadingstrategy.bbox
             }),
+            title: 'Hazminer events',
             zIndex: 10,
         });
         this.map.addLayer(this.events_hazminer_layer);
@@ -2245,6 +2292,7 @@ Vue.createApp({
                 },
                 strategy: ol.loadingstrategy.bbox
             }),
+            title: 'Citizen observer events',
             zIndex: 11,
         });
         this.map.addLayer(this.events_co_layer);
@@ -2263,6 +2311,7 @@ Vue.createApp({
         // Création de la couche event selectionné (vide)
         this.selected_event_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
+            title: 'Selected event',
             zIndex: 12,
         });
         this.map.addLayer(this.selected_event_layer);
@@ -2276,6 +2325,7 @@ Vue.createApp({
         // Création de la couche géolocalisation vide
         this.localisation_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
+            title: 'Localisation',
             zIndex: 13,
         });
         this.map.addLayer(this.localisation_layer);
@@ -2293,6 +2343,14 @@ Vue.createApp({
             positioning: "bottom-center"
         });
         this.map.addOverlay(overlay_clic);
+
+        // Gestionnaire des couches
+        let layerSwitcher = new LayerSwitcher({
+            activationMode: 'click',
+            reverse: true,
+            groupSelectStyle: 'group'
+        });
+        this.map.addControl(layerSwitcher);
 
         // Bouton pour accéder à l'outil filtrage
         let filtrage_control = new ol.control.Control({

@@ -9,7 +9,7 @@ Ajouter couche pays : ne_10m_admin_0_countries.shp (Natural Earth)
 Ajouter dans pg Admin :
 dans l'invite de commande : 
 cd C:\Program Files\PostgreSQL\17\bin
-shp2pgsql -s 4326 -c -D -i -I C:\Mailys\data\ne_10m_admin_0_countries\ne_10m_admin_0_countries.shp countries | psql -h localhost -U postgres -d webGIS
+shp2pgsql -s 4326 -c -D -i -I C:\Mailys\data\countries\ne_10m_admin_0_countries.shp countries | psql -h localhost -U postgres -d webGIS
 
 Tables :
 - Events v3 (21964)

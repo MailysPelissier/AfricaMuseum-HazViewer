@@ -13,8 +13,13 @@ Port : 8080
 
 Geoserver v2.27.1
 
+
+Workspace webGIS
 Créer d’abord un nouveau Workspace (webGIS)
-Créer un Store, lié à votre base PostGIS (webGIS)
+
+
+Store PostGIS
+Créer un Store, lié à votre base PostGIS (PostGIS)
 Créer les layers (la géométrie est utilisée automatiquement) (events, vue_paragaphs_geo, vue_paragraphs_pg, citizen_observer)
 Layer : 
 Declared SRS: EPSG:4326
@@ -37,3 +42,119 @@ Attributes :
 Cliquer sur Refresh
 Sélectionner composite_id pour être l'identifier (clé primaire)
 geom: Type: Point SRID: 4326
+
+
+Store rivers
+Créer un Store format shapefile (rivers)
+Créer la layer (HydroRIVERS_flow5max)
+Connection parameters : url du .tif en local
+Appuyer sur publier la couche
+
+
+Store landslide susceptibility
+Créer un Store format GeoTIFF (landslide susceptibility)
+Créer la layer (landslide susceptibility)
+Connection parameters : url du .tif en local
+Appuyer sur publier la couche
+
+Créer un style (landslide_style)
+Format SLD
+Editeur SLD:
+<StyledLayerDescriptor version="1.0.0"
+xsi:schemaLocation="http://www.opengis.net/sld StyledLayerDescriptor.xsd"
+xmlns="http://www.opengis.net/sld"
+xmlns:ogc="http://www.opengis.net/ogc"
+xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <NamedLayer>
+    <Name>landslide_style</Name>
+    <UserStyle>
+      <Title>Landslide Susceptibility</Title>
+      <FeatureTypeStyle>
+        <Rule>
+          <RasterSymbolizer>
+            <Opacity>1.0</Opacity>
+            <ColorMap>
+              <ColorMapEntry color="#FFFFFF" quantity="0" label="0" opacity="0"/>
+              <ColorMapEntry color="#FFF8DC" quantity="1" label="1" opacity="1"/>
+              <ColorMapEntry color="#DEB887" quantity="2" label="2" opacity="1"/>
+              <ColorMapEntry color="#CD853F" quantity="3" label="3" opacity="1"/>
+              <ColorMapEntry color="#A0522D" quantity="4" label="4" opacity="1"/>
+              <ColorMapEntry color="#8B4513" quantity="5" label="5" opacity="1"/>
+            </ColorMap>
+          </RasterSymbolizer>
+        </Rule>
+      </FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>
+L'appliquer à la couche : dans l'onglet publishing de la couche, changer le default style
+
+
+Countries: 
+Layer ne:countries existe déjà
+Changer le style:
+Créer un style (boundaries)
+Format SLD
+Editeur SLD:
+<?xml version="1.0" encoding="UTF-8"?>
+<StyledLayerDescriptor xmlns="http://www.opengis.net/sld"
+    xmlns:sld="http://www.opengis.net/sld"
+    xmlns:ogc="http://www.opengis.net/ogc"
+    xmlns:gml="http://www.opengis.net/gml"
+    version="1.0.0">
+  <NamedLayer>
+    <Name>boundary_lines</Name>
+    <UserStyle>
+      <FeatureTypeStyle>
+        <Rule>
+          <Title>Boundary</Title>
+          <MinScaleDenominator>7.0E7</MinScaleDenominator>
+          <LineSymbolizer>
+            <Stroke>
+              <CssParameter name="stroke">#000000</CssParameter>
+              <CssParameter name="stroke-width">0.5</CssParameter>
+              <CssParameter name="stroke-dasharray">2 1</CssParameter>
+            </Stroke>
+          </LineSymbolizer>
+        </Rule>
+        <Rule>
+          <Title>Boundary</Title>
+          <MinScaleDenominator>3.5E7</MinScaleDenominator>
+          <MaxScaleDenominator>7.0E7</MaxScaleDenominator>
+          <LineSymbolizer>
+            <Stroke>
+              <CssParameter name="stroke">#000000</CssParameter>
+              <CssParameter name="stroke-width">0.75</CssParameter>
+              <CssParameter name="stroke-dasharray">3 1.5</CssParameter>
+            </Stroke>
+          </LineSymbolizer>
+        </Rule>
+        <Rule>
+          <Title>Boundary</Title>
+          <MinScaleDenominator>2.0E7</MinScaleDenominator>
+          <MaxScaleDenominator>3.5E7</MaxScaleDenominator>
+          <LineSymbolizer>
+            <Stroke>
+              <CssParameter name="stroke">#000000</CssParameter>
+              <CssParameter name="stroke-width">1.00</CssParameter>
+              <CssParameter name="stroke-dasharray">4 2</CssParameter>
+            </Stroke>
+          </LineSymbolizer>
+        </Rule>
+        <Rule>
+          <Title>Boundary</Title>
+          <MaxScaleDenominator>2.0E7</MaxScaleDenominator>
+          <LineSymbolizer>
+            <Stroke>
+              <CssParameter name="stroke">#000000</CssParameter>
+              <CssParameter name="stroke-width">1.50</CssParameter>
+              <CssParameter name="stroke-dasharray">6 3</CssParameter>
+            </Stroke>
+          </LineSymbolizer>
+        </Rule>
+      </FeatureTypeStyle>
+    </UserStyle>
+  </NamedLayer>
+</StyledLayerDescriptor>
+L'appliquer à la couche : dans l'onglet publishing de la couche, changer le default style
