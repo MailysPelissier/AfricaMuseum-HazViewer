@@ -30,12 +30,12 @@ Vue.createApp({
             event_main_properties_hazminer_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des events
-            event_other_properties_hazminer: ["country", "country_found", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
-            event_other_properties_hazminer_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Duration", "Disaster score", 
-                "Hasard type score"],
+            event_other_properties_hazminer: ["country", "country_found", "n_languages", "n_source_countries", "n_domains", "duration", "hazard_score"],
+            event_other_properties_hazminer_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Number of domains",
+                "Duration", "Hazard score"],
             // Propriétés de localisation des events
-            event_location_properties_hazminer: ["latitude", "longitude", "bbox_event"],
-            event_location_properties_hazminer_title: ["Latitude", "Longitude", "Bbox event"],
+            event_location_properties_hazminer: ["latitude", "longitude", "min_lat", "max_lat", "min_lon", "max_lon"],
+            event_location_properties_hazminer_title: ["Latitude", "Longitude", "Minimum latitude", "Maximum latitude", "Minimum longitude", "Maximum longitude"],
             // Propriétés chiffrées des events (souvent null)
             event_number_properties_hazminer: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
                 "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
@@ -63,7 +63,7 @@ Vue.createApp({
 
             // Affichage des propriétés des events (citizen observer)
             // Propriétés principales des events
-            event_main_properties_co: ["type_event", "event_date", "country_found", "province", "territoire", "nom_collectivite_commune", "nom_groupement_quartier", 
+            event_main_properties_co: ["type_event", "event_date", "pays", "province", "territoire", "nom_collectivite_commune", "nom_groupement_quartier", 
                 "noms_villages", "nb_morts", "nb_blesses", "nb_sansabris", "surprise_population"],
             event_main_properties_co_title: ["Type d'évènement", "Date", "Pays", "Province", "Territoire", "Nom de la collectivité/commune", 
                 "Nom du groupement/quartier", "Noms des villages affectés", "Nombre de morts", "Nombre de blessés", "Nombre de sans abris", 
@@ -245,6 +245,14 @@ Vue.createApp({
                 { label: '81 - 100', min: 81, max: 100, size: 12 },
                 { label: '101 - 120', min: 101, max: 120, size: 15 },
             ],
+            size_domains: [
+                { label: '1 - 50', min: 1, max: 50, size: 3 },
+                { label: '51 - 100', min: 51, max: 100, size: 5 },
+                { label: '101 - 150', min: 101, max: 150, size: 7 },
+                { label: '151 - 200', min: 151, max: 200, size: 9 },
+                { label: '201 - 300', min: 201, max: 300, size: 12 },
+                { label: '≥ 300', min: 301, max: Infinity, size: 15 },
+            ],
 
             // Propriétés par défaut du changement de style citizen observer
             style_couleur: 'Type_event',
@@ -366,6 +374,7 @@ Vue.createApp({
                 { id: 'n_paragraphs', label: 'Number of paragraphs:', min: 1, max: 60000, min_depart: 1, max_depart: 60000 },
                 { id: 'n_languages', label: 'Number of languages:', min: 1, max: 34, min_depart: 1, max_depart: 34 },
                 { id: 'n_source_countries', label: 'Number of source countries:', min: 1, max: 113, min_depart: 1, max_depart: 113 },
+                { id: 'n_domains', label: 'Number of domains:', min: 1, max: 3000, min_depart: 1, max_depart: 3000 },
             ],
 
             // Filtres citizen observer
@@ -446,6 +455,7 @@ Vue.createApp({
                 { id: 'n_paragraphs', label: 'Number of paragraphs', table: this.size_paragraphs },
                 { id: 'n_languages', label: 'Number of languages', table: this.size_languages },
                 { id: 'n_source_countries', label: 'Number of source countries', table: this.size_source_countries },
+                { id: 'n_domains', label: 'Number of domains', table: this.size_domains },
             ];
         },
 
@@ -520,8 +530,6 @@ Vue.createApp({
             // Si l'event n'est pas déjà dans la couche :
             let exists = this.events_co_layer.getSource().getFeatureById(feature.getId());
             if (!exists.get('visible')) {
-
-                exists.set('country_found','République démocratique du Congo');
 
                 // Dates du filtre en format y-m-d
                 let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2);
@@ -1555,8 +1563,8 @@ Vue.createApp({
             }
      
             // Liste des propriétés
-            let event_download_properties = ["event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
-                "event_time", "bbox_event", "n_languages", "n_source_countries", "n_paragraphs", "n_articles", 
+            let event_download_properties = ["event_id", "hazard_type", "hazard_score", "latitude", "longitude", 
+                "event_time", "min_lat", "max_lat", "min_lon", "max_lon", "n_languages", "n_source_countries", "n_domains", "n_paragraphs", "n_articles", 
                 "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
                 "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
                 "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
@@ -1570,7 +1578,7 @@ Vue.createApp({
                 "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
-                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
+                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found", "continent", "population_density"];
 
             // Création des tableaux pour le join final, initialisation des textes (header)
             let event_content_lines = [event_download_properties.join(',')];
@@ -1759,7 +1767,7 @@ Vue.createApp({
             }
      
             // Liste des propriétés
-            let event_download_properties = ["type_event", "event_date", "country_found", "province", "territoire", "nom_collectivite_commune", 
+            let event_download_properties = ["type_event", "event_date", "pays", "province", "territoire", "nom_collectivite_commune", 
                 "nom_groupement_quartier", "noms_villages", "latitude", "longitude", "donnees_georeferencees", "nb_morts", "nb_blesses", 
                 "nb_sansabris", "surprise_population", "impact_betail", "impact_logement", "impact_routes", "impact_ponts", "impact_autres", 
                 "impact_coupures_elec", "impact_eau_consommation", "impact_cultures", "landslide_new_or_old", "landslide_react_signes", 
@@ -2005,7 +2013,7 @@ Vue.createApp({
                 "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
-                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
+                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found", "continent", "population_density"];
 
             // Récupérer les valeurs d'event_id
             let event_id;
@@ -2205,22 +2213,21 @@ Vue.createApp({
         this.map.addLayer(this.rivers_layer);
 
         // Couche des pays (source : Natural Earth)
-        this.countries_layer = new ol.layer.Tile({
-            source: new ol.source.TileWMS({
-                url: 'http://localhost:8080/geoserver/ne/wms',
-                params: {
-                    'LAYERS': 'ne:countries',
-                    'TILED': true,
-                    'VERSION': '1.1.1',
-                    'FORMAT': 'image/png',
-                    'CRS': 'EPSG:3857'
-                },
-                serverType: 'geoserver',
-                transition: 0,
+        this.countries_layer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                projection: 'EPSG:3857',
+                url: '../assets/layers/countries50m.json',
+                format: new ol.format.GeoJSON()
+            }),
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'rgb(0, 0, 0, 0.5)',
+                    width: 1
+                })
             }),
             title: 'Countries',
             zIndex: 4,
-        });
+        }),
         this.map.addLayer(this.countries_layer);
 
         // Créer la liste des pays une fois que les entités sont chargées

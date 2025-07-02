@@ -15,11 +15,12 @@ Vue.createApp({
             event_main_properties_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des events
-            event_other_properties: ["country", "country_found", "n_languages", "n_source_countries", "duration", "disaster_score", "hasard_type_score"],
-            event_other_properties_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Duration", "Disaster score", "Hasard type score"],
+            event_other_properties: ["country", "country_found", "n_languages", "n_source_countries", "n_domains", "duration", "hazard_score"],
+            event_other_properties_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Number of domains", 
+                "Duration", "Hazard score"],
             // Propriétés localisations des events
-            event_location_properties: ["latitude", "longitude", "bbox_event"],
-            event_location_properties_title: ["Latitude", "Longitude", "Bbox event"],
+            event_location_properties: ["latitude", "longitude", "min_lat", "max_lat", "min_lon", "max_lon"],
+            event_location_properties_title: ["Latitude", "Longitude", "Minimum latitude", "Maximum latitude", "Minimum longitude", "Maximum longitude"],
             // Propriétés statistiques des events (souvent null)
             event_number_properties: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
                 "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
@@ -43,8 +44,8 @@ Vue.createApp({
             paragraph_main_properties_title: ["Title", "Hasard type", "Publication time", "Paragraph time", "Number of death", "Number of injured", 
                 "Number of affected", "Article language"],
             // Autres propriétés des paragraphs
-            paragraph_other_properties: ["extracted_text", "original_text", "country", "country_found", "source_country", "domain_url", "extracted_location", 
-                "ner_score", "n_locations", "disaster_label", "disaster_score", "hasard_type_score"],
+            paragraph_other_properties: ["extracted_text", "original_text", "country", "country_found", "continent", "population_density", "source_country", 
+                "domain_url", "extracted_location", "ner_score", "n_locations", "disaster_label", "disaster_score", "hasard_type_score"],
             // Propriétés localisations des events
             paragraph_location_properties: ["latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon"],
             // Propriétés statistiques des paragraphs (souvent null)
@@ -164,11 +165,10 @@ Vue.createApp({
         affichage_bbox_event (feature) {
 
             // Récupérer les valeurs de la bbox (en 4326)
-            let bbox = feature.get('bbox_event').replace(/\s+/g, '').replace('{', '').replace('}', '').split(',');
-            let min_lat_4326 = bbox[0].substring(9);
-            let max_lat_4326 = bbox[1].substring(9);
-            let min_lon_4326 = bbox[2].substring(9);
-            let max_lon_4326 = bbox[3].substring(9);
+            let min_lat_4326 = feature.get('min_lat');
+            let max_lat_4326 = feature.get('max_lat');
+            let min_lon_4326 = feature.get('min_lon');
+            let max_lon_4326 = feature.get('max_lon');
 
             // Projection en 3857
             let coord_transfo = [
@@ -417,8 +417,8 @@ Vue.createApp({
             }
 
             // Liste des propriétés des events
-            let event_download_properties = ["event_id", "hazard_type", "disaster_score", "hasard_type_score", "latitude", "longitude", 
-                "event_time", "bbox_event", "n_languages", "n_source_countries", "n_paragraphs", "n_articles", 
+            let event_download_properties = ["event_id", "hazard_type", "hazard_score", "latitude", "longitude", 
+                "event_time", "min_lat", "max_lat", "min_lon", "max_lon", "n_languages", "n_source_countries", "n_domains", "n_paragraphs", "n_articles", 
                 "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
                 "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
                 "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
@@ -483,7 +483,7 @@ Vue.createApp({
                 "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
-                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found"];
+                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found", "continent", "population_density"];
 
             // Création du tableau pour le join final, initialisation du texte (header)
             let paragraph_content_lines = [paragraph_download_properties.join(',')];
