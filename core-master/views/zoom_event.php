@@ -98,6 +98,11 @@
             <button class=open_form_button @click=setup_download_form>Download data</button>
         </div>
 
+        <div id=screenshot_div class='bouton_2 ol-unselectable ol-control'>
+            <button class=open_form_button @click=download_screenshot>Download map</button>
+        </div>
+        <a id="image-download" download="map.png"></a>
+
         <div id="scaleline_div"></div>
 
     </div>  

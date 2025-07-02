@@ -2227,7 +2227,7 @@ Vue.createApp({
             }),
             title: 'Countries',
             zIndex: 4,
-        }),
+        });
         this.map.addLayer(this.countries_layer);
 
         // Créer la liste des pays une fois que les entités sont chargées
