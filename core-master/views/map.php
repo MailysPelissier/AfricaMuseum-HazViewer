@@ -765,6 +765,10 @@
         <div id=download_div class='bouton_3 ol-unselectable ol-control'>
             <button class=open_form_button @click=setup_download_form>Download data</button>
         </div>
+
+        <div id=screenshot_div class='bouton_4 ol-unselectable ol-control'>
+            <button class=open_form_button @click=download_screenshot>Screenshot</button>
+        </div>
  
         <!-- Bouton qui permet d'activer la localisation -->
         <div id="affichage_localisation_div" class='ol-unselectable ol-control'>

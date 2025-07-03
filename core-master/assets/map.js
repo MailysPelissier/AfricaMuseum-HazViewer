@@ -2098,6 +2098,49 @@ Vue.createApp({
 
         },
 
+        // Download d'un screenshot de la map
+        download_screenshot() {
+
+            let mapCanvas = document.createElement('canvas');
+            let size = this.map.getSize();
+            mapCanvas.width = size[0];
+            mapCanvas.height = size[1];
+            let mapContext = mapCanvas.getContext('2d');
+            Array.prototype.forEach.call(
+                this.map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer'),
+                function (canvas) {
+                    if (canvas.width > 0) {
+                        let opacity = canvas.parentNode.style.opacity || canvas.style.opacity;
+                        mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+                        let matrix;
+                        let transform = canvas.style.transform;
+                        if (transform) {
+                            // Get the transform parameters from the style's transform matrix
+                            matrix = transform.match(/^matrix\(([^\(]*)\)$/)[1].split(',').map(Number);
+                        } else {
+                            matrix = [parseFloat(canvas.style.width) / canvas.width, 0, 0, parseFloat(canvas.style.height) / canvas.height, 0, 0];
+                        }
+                        // Apply the transform to the export map context
+                        CanvasRenderingContext2D.prototype.setTransform.apply(mapContext, matrix);
+                        let backgroundColor = canvas.parentNode.style.backgroundColor;
+                        if (backgroundColor) {
+                            mapContext.fillStyle = backgroundColor;
+                            mapContext.fillRect(0, 0, canvas.width, canvas.height);
+                        }
+                        mapContext.drawImage(canvas, 0, 0);
+                    }
+                },
+            );
+            mapContext.globalAlpha = 1;
+            mapContext.setTransform(1, 0, 0, 1, 0, 0);
+
+            let link = document.createElement("a");
+            link.href = mapCanvas.toDataURL();
+            link.download = "test.png";
+            link.click();
+
+        },
+
         // Récupérer la localisation et l'afficher
         affichage_localisation() {
 
@@ -2164,6 +2207,7 @@ Vue.createApp({
                 new ol.layer.Tile({
                     source: new ol.source.XYZ({
                         url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                        crossOrigin: 'anonymous',
                         maxZoom: 19,
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     }),
@@ -2185,6 +2229,7 @@ Vue.createApp({
                     'FORMAT': 'image/png',
                     'CRS': 'EPSG:3857'
                 },
+                crossOrigin: 'anonymous',
                 serverType: 'geoserver',
                 transition: 0,
             }),
@@ -2204,6 +2249,7 @@ Vue.createApp({
                     'FORMAT': 'image/png',
                     'CRS': 'EPSG:3857'
                 },
+                crossOrigin: 'anonymous',
                 serverType: 'geoserver',
                 transition: 0,
             }),
@@ -2376,6 +2422,12 @@ Vue.createApp({
             element: document.getElementById("download_div"),
         });
         this.map.addControl(download_control);
+
+        // Bouton screenshot
+        let screenshot_control = new ol.control.Control({
+            element: document.getElementById("screenshot_div"),
+        });
+        this.map.addControl(screenshot_control);
 
         // Bouton pour activer la localisation
         let localisation_control = new ol.control.Control({

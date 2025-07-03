@@ -50,6 +50,11 @@ html, body {
     left: 17.5em;
 }
 
+.bouton_4 {
+    top: .5em;
+    left: 26em;
+}
+
 .open_form_button {
     height: 2em !important;
     width: 8em !important;

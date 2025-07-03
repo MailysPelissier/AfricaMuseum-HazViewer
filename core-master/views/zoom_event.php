@@ -99,9 +99,8 @@
         </div>
 
         <div id=screenshot_div class='bouton_2 ol-unselectable ol-control'>
-            <button class=open_form_button @click=download_screenshot>Download map</button>
+            <button class=open_form_button @click=download_screenshot>Screenshot</button>
         </div>
-        <a id="image-download" download="map.png"></a>
 
         <div id="scaleline_div"></div>
 
