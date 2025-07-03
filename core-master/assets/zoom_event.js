@@ -1,46 +1,57 @@
 Vue.createApp({
 
     data() {
+
         return {
+
+            // Initialisation de la carte et des couches
             map: null, // Initialisation de la map
+            landslide_susceptibility_layer: null, // Initialisation de la couche landslide susceptibility
+            rivers_layer: null, // Initialisation de la couche rivières
             countries_layer: null, // Initialisation de la couche countries
             bbox_events_layer: null, // Initialisation de la couche bbox events
             bbox_paragraphs_layer: null, // Initialisation de la couche bbox paragraphs
             selected_event_layer: null, // Initialisation de la couche selected event
             paragraphs_layer: null, // Initialisation de la couche paragraphs
             selected_paragraph_layer: null, // Initialisation de la couche selected paragraph
+            localisation_layer: null, // Initialisation de la couche de géolocalisation
+
+            // Event et paragraph sélectionnés
+            event_id: '', // Permet de récupérer l'event
+            selected_event: null, // Permet de conserver l'event sélectionné
+            selected_paragraph: null, // Permet de conserver le paragraph sélectionné
+            
+            // Affichage des propriétés des events et des paragraphs hazminer
             // Propriétés principales des events
-            event_main_properties: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
-                 "n_paragraphs", "n_articles"],
-            event_main_properties_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
+            event_main_properties: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected","n_paragraphs", 
+                "n_articles"],
+            event_main_properties_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected", 
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des events
             event_other_properties: ["country", "country_found", "n_languages", "n_source_countries", "n_domains", "duration", "hazard_score"],
-            event_other_properties_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Number of domains", 
-                "Duration", "Hazard score"],
+            event_other_properties_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Number of domains", "Duration", 
+                "Hazard score"],
             // Propriétés localisations des events
             event_location_properties: ["latitude", "longitude", "min_lat", "max_lat", "min_lon", "max_lon"],
             event_location_properties_title: ["Latitude", "Longitude", "Minimum latitude", "Maximum latitude", "Minimum longitude", "Maximum longitude"],
             // Propriétés statistiques des events (souvent null)
-            event_number_properties: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
-                "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
-                "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", 
-                "n_max_injured", "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", 
-                "max_affected", "n_max_affected", "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", 
-                "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", 
-                "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated"],
+            event_number_properties: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", "median_death", 
+                "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", "time_max_homeless", "median_homeless", 
+                "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", "time_max_injured", "median_injured", 
+                "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", "time_max_affected", "median_affected", 
+                "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", 
+                "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", 
+                "median_evacuated"],
             event_number_properties_title: ["Most frequent death", "Number of most frequent death", "Time of most frequent death", "Max death", 
                 "Number of max death", "Time of max death", "Median death", "Most frequent homeless", "Number of most frequent homeless", 
                 "Time of most frequent homeless", "Max homeless", "Number of max homeless", "Time of max homeless", "Median homeless", "Most frequent injured", 
-                "Number of most frequent injured", "Time of most frequent injured", "Max injured", "Number of max injured", "Time of max injured", 
-                "Median injured", "Most frequent affected", "Number of most frequent affected", "Time of most frequent affected", "Max affected", 
-                "Number of max affected", "Time of max affected", "Median affected", "Most frequent missing", "Number of most frequent missing", 
-                "Time of most frequent missing", "Max missing", "Number of max missing", "Time of max missing", "Median missing", "Most frequent evacuated", 
-                "Number of most frequent evacuated", "Time of most frequent evacuated", "Max evacuated", "Number of max evacuated", "Time of max evacuated", 
-                "Median evacuated"],
+                "Number of most frequent injured", "Time of most frequent injured", "Max injured", "Number of max injured", "Time of max injured", "Median injured", 
+                "Most frequent affected", "Number of most frequent affected", "Time of most frequent affected", "Max affected", "Number of max affected", 
+                "Time of max affected", "Median affected", "Most frequent missing", "Number of most frequent missing", "Time of most frequent missing", 
+                "Max missing", "Number of max missing", "Time of max missing", "Median missing", "Most frequent evacuated", "Number of most frequent evacuated", 
+                "Time of most frequent evacuated", "Max evacuated", "Number of max evacuated", "Time of max evacuated", "Median evacuated"],
             // Propriétés principales des paragraphs
-            paragraph_main_properties: ["title", "hasard_type", "publication_time", "paragraph_time", "nb_death", "nb_injured", "nb_affected",
-                "article_language"],
+            paragraph_main_properties: ["title", "hasard_type", "publication_time", "paragraph_time", "nb_death", "nb_injured", "nb_affected", "article_language"],
             paragraph_main_properties_title: ["Title", "Hasard type", "Publication time", "Paragraph time", "Number of death", "Number of injured", 
                 "Number of affected", "Article language"],
             // Autres propriétés des paragraphs
@@ -49,38 +60,41 @@ Vue.createApp({
             // Propriétés localisations des events
             paragraph_location_properties: ["latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon"],
             // Propriétés statistiques des paragraphs (souvent null)
-            paragraph_number_properties: ["nb_death", "score_death", "answer_death", "nb_homeless", "score_homeless", "answer_homeless", 
-                "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", "answer_affected", "nb_missing",
-                "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "nb_death_min",
-                "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min",
-                "nb_affected_max", "nb_missing_min", "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max"],
+            paragraph_number_properties: ["nb_death", "score_death", "answer_death", "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", 
+                "score_injured", "answer_injured", "nb_affected", "score_affected", "answer_affected", "nb_missing","score_missing", "answer_missing", 
+                "nb_evacuated", "score_evacuated", "answer_evacuated", "nb_death_min","nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", 
+                "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min", "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max"],
             event_main_text: '', // Texte sur les events (haut droite de l'écran)
             event_other_text: '', // Texte sur les events, partie optionnelle autres (haut droite de l'écran)
             event_location_text: '', // Texte sur les events, partie optionnelle localisations (haut droite de l'écran)
             event_number_text: '', // Texte sur les events, partie optionnelle statistiques (haut droite de l'écran)
             paragraph_text: '', // Texte sur les paragraphs (bas droite de l'écran)
-            selected_paragraph: null, // Permet de conserver le paragraph sélectionné
-            event_id: '', // Permet de récupérer l'event
-            selected_event: null, // Permet de garder l'event
             other_information: false, // Affichage des informations supplémentaires ou non (inactif par défaut)
             location_information: false, // Affichage des informations de localisation ou non (inactif par défaut)
             number_information: false, // Affichage des informations statistiques ou non (inactif par défaut)  
+
             // Affichage popup download
             show_download_form: false,
+
+            // Checkbox download
             download_e: true,
             download_p: false,
             download_e_p: false,
+
+            // Barre de progression
             show_fetch_progression: false,
             show_download_progression: false,
             fetch_progression: 'Fetch data in progress...',
             download_progression: 0,
+
         };
+
     },
 
     methods: {
 
         // Récupération de l'évènement, mise en place de la page
-        recuperer_event () {
+        recuperer_event() {
 
             // Récupération de l'event_id depuis le php
             this.event_id = document.getElementById('app').dataset.event_id;
@@ -118,7 +132,7 @@ Vue.createApp({
         },
 
         // Crée le texte en récupérant les infos sur l'event
-        affichage_selection_event (feature) {
+        affichage_selection_event(feature) {
 
             // Chargement et affichage du texte sur l'event
             this.event_main_text = '<ul>';
@@ -162,7 +176,7 @@ Vue.createApp({
         },
 
         // Affichage de la bbox de l'event et zoom sur cette emprise
-        affichage_bbox_event (feature) {
+        affichage_bbox_event(feature) {
 
             // Récupérer les valeurs de la bbox (en 4326)
             let min_lat_4326 = feature.get('min_lat');
@@ -234,7 +248,7 @@ Vue.createApp({
         },
 
         // Crée le texte en récupérant les infos sur le paragraph, change le style du paragraph
-        affichage_selection_paragraph (feature) {
+        affichage_selection_paragraph(feature) {
 
             // Garder le paragraph
             this.selected_paragraph = feature
@@ -269,7 +283,7 @@ Vue.createApp({
         },
 
         // Affichage bbox et standard deviation du paragraph
-        affichage_bbox_paragraph (feature) {
+        affichage_bbox_paragraph(feature) {
 
             // Couche bbox paragraphs vidée
             this.bbox_paragraphs_layer.getSource().clear();
@@ -417,15 +431,14 @@ Vue.createApp({
             }
 
             // Liste des propriétés des events
-            let event_download_properties = ["event_id", "hazard_type", "hazard_score", "latitude", "longitude", 
-                "event_time", "min_lat", "max_lat", "min_lon", "max_lon", "n_languages", "n_source_countries", "n_domains", "n_paragraphs", "n_articles", 
-                "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
-                "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
-                "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
-                "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", 
-                "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
-                "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
-                "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
+            let event_download_properties = ["event_id", "hazard_type", "hazard_score", "latitude", "longitude", "event_time", "min_lat", "max_lat", "min_lon", 
+                "max_lon", "n_languages", "n_source_countries", "n_domains", "n_paragraphs", "n_articles", "start_time", "end_time", "duration", "mostfreq_death", 
+                "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", 
+                "time_mostfreq_homeless", "max_homeless", "n_max_homeless", "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", 
+                "time_mostfreq_injured", "max_injured", "n_max_injured", "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", 
+                "time_mostfreq_affected", "max_affected", "n_max_affected", "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", 
+                "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", 
+                "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
 
             // Création du tableau pour le join final, initialisation du texte (header)
             let event_content_lines = [event_download_properties.join(',')];
@@ -614,8 +627,59 @@ Vue.createApp({
 
             let link = document.createElement("a");
             link.href = mapCanvas.toDataURL();
-            link.download = "test.png";
+            link.download = `map_${this.event_id}.png`;
             link.click();
+
+        },
+
+        // Récupérer la localisation et l'afficher
+        affichage_localisation() {
+
+            navigator.geolocation.getCurrentPosition((position) => {
+
+                // Récupérer les valeurs sur le position de l'appareil
+                let latitude_pos = position.coords.latitude;
+                let longitude_pos = position.coords.longitude;
+                let precision_pos = position.coords.accuracy;
+
+                // Vider la couche localisation
+                this.localisation_layer.getSource().clear();
+
+                // Transformer les coordonnées en EPSG:3857
+                let center = ol.proj.fromLonLat([longitude_pos, latitude_pos]);
+
+                // Feature pour le point central
+                let pointFeature = new ol.Feature(new ol.geom.Point(center));
+
+                // Feature pour le cercle de précision (en mètres, donc dans la projection EPSG:3857)
+                let circleFeature = new ol.Feature(new ol.geom.Circle(center, precision_pos));
+
+                // Ajouter les deux features à la couche
+                this.localisation_layer.getSource().addFeatures([circleFeature, pointFeature]);
+
+                // Appliquer les styles
+                this.localisation_layer.setStyle((feature) => {
+                    let geometry = feature.getGeometry();
+                    if (geometry instanceof ol.geom.Point) {
+                        return new ol.style.Style({
+                            image: new ol.style.Circle({
+                                radius: 8,
+                                fill: new ol.style.Fill({ color: 'rgba(0, 100, 255, 1)' }),
+                                stroke: new ol.style.Stroke({ color: 'white', width: 2 }),
+                            }),
+                        });
+                    } else if (geometry instanceof ol.geom.Circle) {
+                        return new ol.style.Style({
+                            fill: new ol.style.Fill({ color: 'rgba(0, 100, 255, 0.3)' }),
+                            stroke: new ol.style.Stroke({ color: 'rgba(0, 100, 255, 0.8)', width: 1 }),
+                        });
+                    }
+                });
+
+                // Centrer la vue sur la position
+                this.map.getView().setCenter(center);
+
+            });
 
         },
 
@@ -627,8 +691,8 @@ Vue.createApp({
         this.map = new ol.Map({
             target: 'map',
             view: new ol.View({
-                center: ol.proj.fromLonLat([4.517, 50.830]),
-                zoom: 15,
+                center: ol.proj.fromLonLat([28.85, -0.1]),
+                zoom: 7,
             }),
             layers: [
                 new ol.layer.Tile({
@@ -638,12 +702,56 @@ Vue.createApp({
                         maxZoom: 19,
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                     }),
+                    title: 'OpenStreetMap',
+                    type: 'base',
                     zIndex: 1,
                 }),
             ],
         });
 
-        // Couche des pays (source : Natural Earth, https://geojson-maps.kyd.au/?utm_source=self&utm_medium=redirect)
+        // Couche landslide susceptibility
+        this.landslide_susceptibility_layer = new ol.layer.Tile({
+            source: new ol.source.TileWMS({
+                url: 'http://localhost:8080/geoserver/webGIS/wms',
+                params: {
+                    'LAYERS': 'webGIS:landslide_susceptibility',
+                    'TILED': true,
+                    'VERSION': '1.1.1',
+                    'FORMAT': 'image/png',
+                    'CRS': 'EPSG:3857'
+                },
+                crossOrigin: 'anonymous',
+                serverType: 'geoserver',
+                transition: 0,
+            }),
+            title: 'Landslide susceptibility',
+            zIndex: 2,
+            visible: false,
+        });
+        this.map.addLayer(this.landslide_susceptibility_layer);
+
+        // Couche des rivières
+        this.rivers_layer = new ol.layer.Tile({
+            source: new ol.source.TileWMS({
+                url: 'http://localhost:8080/geoserver/webGIS/wms',
+                params: {
+                    'LAYERS': 'webGIS:HydroRIVERS_flow5max',
+                    'TILED': true,
+                    'VERSION': '1.1.1',
+                    'FORMAT': 'image/png',
+                    'CRS': 'EPSG:3857'
+                },
+                crossOrigin: 'anonymous',
+                serverType: 'geoserver',
+                transition: 0,
+            }),
+            title: 'Rivers',
+            zIndex: 3,
+            visible: false,
+        });
+        this.map.addLayer(this.rivers_layer);
+
+        // Couche des pays (source : Natural Earth)
         this.countries_layer = new ol.layer.Vector({
             source: new ol.source.Vector({
                 projection: 'EPSG:3857',
@@ -656,8 +764,9 @@ Vue.createApp({
                     width: 1
                 })
             }),
-            zIndex: 2,
-        }),
+            title: 'Countries',
+            zIndex: 4,
+        });
         this.map.addLayer(this.countries_layer);
 
         // Création de la couche bbox events (vide)
@@ -672,6 +781,7 @@ Vue.createApp({
                     width: 2
                 })
             }),
+            title: 'Bbox event',
             zIndex: 10,
         });
         this.map.addLayer(this.bbox_events_layer);
@@ -688,6 +798,7 @@ Vue.createApp({
                     width: 1
                 })
             }),
+            title: 'Bbox paragraph',
             zIndex: 11,
         });
         this.map.addLayer(this.bbox_paragraphs_layer);
@@ -703,6 +814,7 @@ Vue.createApp({
                     }),
                 }),
             }),
+            title: 'Event',
             zIndex: 12,
         });
         this.map.addLayer(this.selected_event_layer);
@@ -721,6 +833,7 @@ Vue.createApp({
                     }),
                 }),
             }),
+            title: 'Paragraphs',
             zIndex: 13,
         });
         this.map.addLayer(this.paragraphs_layer);
@@ -736,23 +849,40 @@ Vue.createApp({
                     }),
                 }),
             }),
+            title: 'Selected paragraph',
             zIndex: 14,
         });
         this.map.addLayer(this.selected_paragraph_layer);
 
+        // Création de la couche géolocalisation vide
+        this.localisation_layer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            title: 'Localisation',
+            zIndex: 15,
+        });
+        this.map.addLayer(this.localisation_layer);
+
         // Création du popup vide pour le pointermove
-        let var_popup_pointermove = new ol.Overlay({
+        let overlay_pointermove = new ol.Overlay({
             element: document.getElementById("popup_pointermove"),
             positioning: "bottom-center"
         });
-        this.map.addOverlay(var_popup_pointermove);
+        this.map.addOverlay(overlay_pointermove);
 
         // Création du popup vide pour le clic
-        let var_popup_clic = new ol.Overlay({
+        let overlay_clic = new ol.Overlay({
             element: document.getElementById("popup_clic"),
             positioning: "bottom-center"
         });
-        this.map.addOverlay(var_popup_clic);
+        this.map.addOverlay(overlay_clic);
+
+        // Gestionnaire des couches
+        let layerSwitcher = new LayerSwitcher({
+            activationMode: 'click',
+            reverse: true,
+            groupSelectStyle: 'group'
+        });
+        this.map.addControl(layerSwitcher);
 
         // Bouton download
         let download_control = new ol.control.Control({
@@ -765,6 +895,12 @@ Vue.createApp({
             element: document.getElementById("screenshot_div"),
         });
         this.map.addControl(screenshot_control);
+
+        // Bouton pour activer la localisation
+        let localisation_control = new ol.control.Control({
+            element: document.getElementById("affichage_localisation_div"),
+        });
+        this.map.addControl(localisation_control);
 
         // Scale line
         let scaleline = new ol.control.ScaleLine({
@@ -792,7 +928,7 @@ Vue.createApp({
             // Si il y a plusieurs paragraphs, le popup affiche "n paragraphs"
             if (paragraph_features.length > 1) {
                 document.getElementById("popup_pointermove").innerHTML = paragraph_features.length + " paragraphs";
-                var_popup_pointermove.setPosition(evt.coordinate);
+                overlay_pointermove.setPosition(evt.coordinate);
                 document.getElementById("popup_pointermove").style.display = "block";
             }
 
@@ -836,7 +972,7 @@ Vue.createApp({
                         this.affichage_selection_paragraph(paragraph_feature);
                     });
                 });
-                var_popup_clic.setPosition(evt.coordinate);
+                overlay_clic.setPosition(evt.coordinate);
                 document.getElementById("popup_clic").style.display = "block";
             }
 

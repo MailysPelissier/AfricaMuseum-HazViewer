@@ -25,34 +25,33 @@ Vue.createApp({
 
             // Affichage des propriétés des events (hazminer)
             // Propriétés principales des events
-            event_main_properties_hazminer: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected",
+            event_main_properties_hazminer: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected", 
                 "n_paragraphs", "n_articles"],
             event_main_properties_hazminer_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des events
             event_other_properties_hazminer: ["country", "country_found", "n_languages", "n_source_countries", "n_domains", "duration", "hazard_score"],
-            event_other_properties_hazminer_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Number of domains",
-                "Duration", "Hazard score"],
+            event_other_properties_hazminer_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Number of domains", "Duration", 
+                "Hazard score"],
             // Propriétés de localisation des events
             event_location_properties_hazminer: ["latitude", "longitude", "min_lat", "max_lat", "min_lon", "max_lon"],
             event_location_properties_hazminer_title: ["Latitude", "Longitude", "Minimum latitude", "Maximum latitude", "Minimum longitude", "Maximum longitude"],
             // Propriétés chiffrées des events (souvent null)
             event_number_properties_hazminer: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", 
-                "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
-                "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", 
-                "n_max_injured", "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", 
-                "max_affected", "n_max_affected", "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", 
-                "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", 
-                "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated"],
+                "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", "time_max_homeless", 
+                "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", "time_max_injured", 
+                "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", "time_max_affected", 
+                "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", 
+                "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", 
+                "median_evacuated"],
             event_number_properties_hazminer_title: ["Most frequent death", "Number of most frequent death", "Time of most frequent death", "Max death", 
                 "Number of max death", "Time of max death", "Median death", "Most frequent homeless", "Number of most frequent homeless", 
                 "Time of most frequent homeless", "Max homeless", "Number of max homeless", "Time of max homeless", "Median homeless", "Most frequent injured", 
-                "Number of most frequent injured", "Time of most frequent injured", "Max injured", "Number of max injured", "Time of max injured", 
-                "Median injured", "Most frequent affected", "Number of most frequent affected", "Time of most frequent affected", "Max affected", 
-                "Number of max affected", "Time of max affected", "Median affected", "Most frequent missing", "Number of most frequent missing", 
-                "Time of most frequent missing", "Max missing", "Number of max missing", "Time of max missing", "Median missing", "Most frequent evacuated", 
-                "Number of most frequent evacuated", "Time of most frequent evacuated", "Max evacuated", "Number of max evacuated", "Time of max evacuated", 
-                "Median evacuated"],
+                "Number of most frequent injured", "Time of most frequent injured", "Max injured", "Number of max injured", "Time of max injured", "Median injured", 
+                "Most frequent affected", "Number of most frequent affected", "Time of most frequent affected", "Max affected", "Number of max affected", 
+                "Time of max affected", "Median affected", "Most frequent missing", "Number of most frequent missing",  "Time of most frequent missing", 
+                "Max missing", "Number of max missing", "Time of max missing", "Median missing", "Most frequent evacuated", "Number of most frequent evacuated", 
+                "Time of most frequent evacuated", "Max evacuated", "Number of max evacuated", "Time of max evacuated", "Median evacuated"],
             event_main_text_hazminer: '', // Texte sur les events (haut droite de l'écran)
             event_other_text_hazminer: '', // Texte sur les events, partie optionnelle autres (haut droite de l'écran)
             event_location_text_hazminer: '', // Texte sur les events, partie optionnelle localisations (haut droite de l'écran)
@@ -486,7 +485,7 @@ Vue.createApp({
 
         // Calcul de l'emprise de l'écran
         // Pas utilisée
-        emprise_ecran () {
+        emprise_ecran() {
 
             // Récupération de l'emprise de l'écran
             let extent3857 = this.map.getView().calculateExtent(this.map.getSize());
@@ -580,7 +579,7 @@ Vue.createApp({
         },
 
         // Crée le texte en récupérant les infos sur l'event, change le style de l'event
-        affichage_selection_event (feature) {
+        affichage_selection_event(feature) {
 
             if (feature.get('hazard_type')) {
 
@@ -733,7 +732,7 @@ Vue.createApp({
 
         // Fonction appelée quand on appuie sur le bouton pour avoir plus d'infos
         // Ouvre un autre onglet qui affiche les paragraphs et la bbox associés
-        more_infos_page () {
+        more_infos_page() {
 
             // Récupérer event_id
             let eventId = this.selected_event.get('event_id');
@@ -750,7 +749,7 @@ Vue.createApp({
         },
 
         // Change la / les variable passée en paramètre (true/false)
-        change_true_false (parameters) {
+        change_true_false(parameters) {
             for (let parameter of parameters) {
                 this[parameter] = !this[parameter];
             }
@@ -1563,15 +1562,14 @@ Vue.createApp({
             }
      
             // Liste des propriétés
-            let event_download_properties = ["event_id", "hazard_type", "hazard_score", "latitude", "longitude", 
-                "event_time", "min_lat", "max_lat", "min_lon", "max_lon", "n_languages", "n_source_countries", "n_domains", "n_paragraphs", "n_articles", 
-                "start_time", "end_time", "duration", "mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", 
-                "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", 
-                "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", 
-                "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", 
-                "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", 
-                "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", 
-                "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
+            let event_download_properties = ["event_id", "hazard_type", "hazard_score", "latitude", "longitude", "event_time", "min_lat", "max_lat", "min_lon", 
+                "max_lon", "n_languages", "n_source_countries", "n_domains", "n_paragraphs", "n_articles", "start_time", "end_time", "duration", "mostfreq_death", 
+                "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", 
+                "time_mostfreq_homeless", "max_homeless", "n_max_homeless", "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", 
+                "time_mostfreq_injured", "max_injured", "n_max_injured", "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", 
+                "time_mostfreq_affected", "max_affected", "n_max_affected", "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", 
+                "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", 
+                "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
             let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
                 "paragraph_id", "original_text", "disaster_label", "disaster_score", "hasard_type", "hasard_type_score", "nb_death", "score_death", "answer_death",
                 "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
@@ -1767,12 +1765,11 @@ Vue.createApp({
             }
      
             // Liste des propriétés
-            let event_download_properties = ["type_event", "event_date", "pays", "province", "territoire", "nom_collectivite_commune", 
-                "nom_groupement_quartier", "noms_villages", "latitude", "longitude", "donnees_georeferencees", "nb_morts", "nb_blesses", 
-                "nb_sansabris", "surprise_population", "impact_betail", "impact_logement", "impact_routes", "impact_ponts", "impact_autres", 
-                "impact_coupures_elec", "impact_eau_consommation", "impact_cultures", "landslide_new_or_old", "landslide_react_signes", 
-                "landslide_apres", "landslide_cause_habitants", "inondation_duree_jours", "inondation_apres", "grele_duree_minutes", 
-                "vents_violents_duree_jours", "vents_violents_avec_autre_event", "tdt_duree", "tdt_declenche_landslide"];
+            let event_download_properties = ["type_event", "event_date", "pays", "province", "territoire", "nom_collectivite_commune", "nom_groupement_quartier", 
+                "noms_villages", "latitude", "longitude", "donnees_georeferencees", "nb_morts", "nb_blesses", "nb_sansabris", "surprise_population", 
+                "impact_betail", "impact_logement", "impact_routes", "impact_ponts", "impact_autres", "impact_coupures_elec", "impact_eau_consommation", 
+                "impact_cultures", "landslide_new_or_old", "landslide_react_signes", "landslide_apres", "landslide_cause_habitants", "inondation_duree_jours", 
+                "inondation_apres", "grele_duree_minutes", "vents_violents_duree_jours", "vents_violents_avec_autre_event", "tdt_duree", "tdt_declenche_landslide"];
 
             // Création du tableau pour le join final, initialisation du texte (header)
             let event_content_lines = [event_download_properties.join(',')];
@@ -2136,7 +2133,7 @@ Vue.createApp({
 
             let link = document.createElement("a");
             link.href = mapCanvas.toDataURL();
-            link.download = "test.png";
+            link.download = "map.png";
             link.click();
 
         },
@@ -2235,6 +2232,7 @@ Vue.createApp({
             }),
             title: 'Landslide susceptibility',
             zIndex: 2,
+            visible: false,
         });
         this.map.addLayer(this.landslide_susceptibility_layer);
 
@@ -2255,6 +2253,7 @@ Vue.createApp({
             }),
             title: 'Rivers',
             zIndex: 3,
+            visible: false,
         });
         this.map.addLayer(this.rivers_layer);
 

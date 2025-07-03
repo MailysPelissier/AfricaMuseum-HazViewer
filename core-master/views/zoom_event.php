@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="assets/map.css">
     <script src="https://unpkg.com/ol/dist/ol.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol-layerswitcher@4.1.2/dist/ol-layerswitcher.css" />
 </head>
 
 <body>
@@ -102,11 +103,17 @@
             <button class=open_form_button @click=download_screenshot>Screenshot</button>
         </div>
 
+        <!-- Bouton qui permet d'activer la localisation -->
+        <div id="affichage_localisation_div" class='ol-unselectable ol-control'>
+            <button @click=affichage_localisation>&#8857;</button>
+        </div>
+
         <div id="scaleline_div"></div>
 
     </div>  
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ol-layerswitcher@4.1.2/dist/ol-layerswitcher.js"></script>
     <script src="assets/zoom_event.js"></script> 
     
 </body>
