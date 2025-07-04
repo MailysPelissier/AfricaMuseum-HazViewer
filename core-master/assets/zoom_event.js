@@ -23,40 +23,40 @@ Vue.createApp({
             
             // Affichage des propriétés des events et des paragraphs hazminer
             // Propriétés principales des events
-            event_main_properties: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected","n_paragraphs", 
+            event_main_properties: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected", "n_paragraphs", 
                 "n_articles"],
-            event_main_properties_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected", 
+            event_main_properties_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des events
-            event_other_properties: ["country", "country_found", "n_languages", "n_source_countries", "n_domains", "duration", "hazard_score"],
-            event_other_properties_title: ["Country code", "Country", "Number of languages", "Number of source countries", "Number of domains", "Duration", 
-                "Hazard score"],
+            event_other_properties: ["country_found", "n_languages", "n_source_countries", "n_domains", "duration", "hazard_score"],
+            event_other_properties_title: ["Country", "Number of languages", "Number of source countries", "Number of domains", "Duration", "Hazard score"],
             // Propriétés localisations des events
             event_location_properties: ["latitude", "longitude", "min_lat", "max_lat", "min_lon", "max_lon"],
             event_location_properties_title: ["Latitude", "Longitude", "Minimum latitude", "Maximum latitude", "Minimum longitude", "Maximum longitude"],
             // Propriétés statistiques des events (souvent null)
-            event_number_properties: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", "median_death", 
-                "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "max_homeless", "n_max_homeless", "time_max_homeless", "median_homeless", 
-                "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "max_injured", "n_max_injured", "time_max_injured", "median_injured", 
-                "mostfreq_affected", "n_mostfreq_affected", "time_mostfreq_affected", "max_affected", "n_max_affected", "time_max_affected", "median_affected", 
-                "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", 
-                "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", 
-                "median_evacuated"],
-            event_number_properties_title: ["Most frequent death", "Number of most frequent death", "Time of most frequent death", "Max death", 
-                "Number of max death", "Time of max death", "Median death", "Most frequent homeless", "Number of most frequent homeless", 
-                "Time of most frequent homeless", "Max homeless", "Number of max homeless", "Time of max homeless", "Median homeless", "Most frequent injured", 
-                "Number of most frequent injured", "Time of most frequent injured", "Max injured", "Number of max injured", "Time of max injured", "Median injured", 
-                "Most frequent affected", "Number of most frequent affected", "Time of most frequent affected", "Max affected", "Number of max affected", 
-                "Time of max affected", "Median affected", "Most frequent missing", "Number of most frequent missing", "Time of most frequent missing", 
-                "Max missing", "Number of max missing", "Time of max missing", "Median missing", "Most frequent evacuated", "Number of most frequent evacuated", 
-                "Time of most frequent evacuated", "Max evacuated", "Number of max evacuated", "Time of max evacuated", "Median evacuated"],
+            event_number_properties: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", 
+                "time_mostfreq_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "median_injured", "mostfreq_affected", 
+                "n_mostfreq_affected", "time_mostfreq_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "median_missing", 
+                "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "median_evacuated"],
+            event_number_properties_title: ["Most frequent death", "Number of most frequent death", "Time of most frequent death", "Median death", 
+                "Most frequent homeless", "Number of most frequent homeless", "Time of most frequent homeless", "Median homeless", "Most frequent injured", 
+                "Number of most frequent injured", "Time of most frequent injured", "Median injured", "Most frequent affected", "Number of most frequent affected", 
+                "Time of most frequent affected", "Median affected", "Most frequent missing", "Number of most frequent missing",  "Time of most frequent missing", 
+                "Median missing", "Most frequent evacuated", "Number of most frequent evacuated", "Time of most frequent evacuated", "Median evacuated"],
+            // Propriétés des events à télécharger
+            event_download_properties: ["event_id", "n_paragraphs", "n_articles", "hazard_type", "hazard_score", "latitude", "longitude", "min_lat", "max_lat", 
+                "min_lon", "max_lon", "event_time", "start_time", "end_time", "duration", "n_languages", "n_source_countries", "n_domains", "mostfreq_death", 
+                "n_mostfreq_death", "time_mostfreq_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "median_homeless",
+                "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", 
+                "time_mostfreq_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "median_missing", "mostfreq_evacuated", 
+                "n_mostfreq_evacuated", "time_mostfreq_evacuated", "median_evacuated", "country_found"],
             // Propriétés principales des paragraphs
-            paragraph_main_properties: ["title", "hasard_type", "publication_time", "paragraph_time", "nb_death", "nb_injured", "nb_affected", "article_language"],
-            paragraph_main_properties_title: ["Title", "Hasard type", "Publication time", "Paragraph time", "Number of death", "Number of injured", 
+            paragraph_main_properties: ["title", "hazard_type", "publication_time", "paragraph_time", "nb_death", "nb_injured", "nb_affected", "article_language"],
+            paragraph_main_properties_title: ["Title", "Hazard type", "Publication time", "Paragraph time", "Number of death", "Number of injured", 
                 "Number of affected", "Article language"],
             // Autres propriétés des paragraphs
             paragraph_other_properties: ["extracted_text", "original_text", "country", "country_found", "continent", "population_density", "source_country", 
-                "domain_url", "extracted_location", "ner_score", "n_locations", "disaster_label", "disaster_score", "hasard_type_score"],
+                "domain_url", "extracted_location", "ner_score", "n_locations", "disaster_label", "disaster_score", "hazard_type_score"],
             // Propriétés localisations des events
             paragraph_location_properties: ["latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon"],
             // Propriétés statistiques des paragraphs (souvent null)
@@ -64,6 +64,14 @@ Vue.createApp({
                 "score_injured", "answer_injured", "nb_affected", "score_affected", "answer_affected", "nb_missing","score_missing", "answer_missing", 
                 "nb_evacuated", "score_evacuated", "answer_evacuated", "nb_death_min","nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", 
                 "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min", "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max"],
+            // Propriétés des paragraphs à télécharger
+            paragraph_download_properties: ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
+                "paragraph_id", "original_text", "disaster_label", "disaster_score", "hazard_type", "hazard_type_score", "nb_death", "score_death", "answer_death",
+                "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
+                "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
+                "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
+                "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
+                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found", "continent", "population_density"],
             event_main_text: '', // Texte sur les events (haut droite de l'écran)
             event_other_text: '', // Texte sur les events, partie optionnelle autres (haut droite de l'écran)
             event_location_text: '', // Texte sur les events, partie optionnelle localisations (haut droite de l'écran)
@@ -430,18 +438,8 @@ Vue.createApp({
                 return;
             }
 
-            // Liste des propriétés des events
-            let event_download_properties = ["event_id", "hazard_type", "hazard_score", "latitude", "longitude", "event_time", "min_lat", "max_lat", "min_lon", 
-                "max_lon", "n_languages", "n_source_countries", "n_domains", "n_paragraphs", "n_articles", "start_time", "end_time", "duration", "mostfreq_death", 
-                "n_mostfreq_death", "time_mostfreq_death", "max_death", "n_max_death", "time_max_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", 
-                "time_mostfreq_homeless", "max_homeless", "n_max_homeless", "time_max_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", 
-                "time_mostfreq_injured", "max_injured", "n_max_injured", "time_max_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", 
-                "time_mostfreq_affected", "max_affected", "n_max_affected", "time_max_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", 
-                "time_mostfreq_missing", "max_missing", "n_max_missing", "time_max_missing", "median_missing", "mostfreq_evacuated", "n_mostfreq_evacuated", 
-                "time_mostfreq_evacuated", "max_evacuated", "n_max_evacuated", "time_max_evacuated", "median_evacuated", "country", "country_found"];
-
             // Création du tableau pour le join final, initialisation du texte (header)
-            let event_content_lines = [event_download_properties.join(',')];
+            let event_content_lines = [this.event_download_properties.join(',')];
 
             // Affichage de la progression du download
             this.show_fetch_progression = true;
@@ -453,7 +451,7 @@ Vue.createApp({
             // Création d'une ligne de texte (event.csv)
             // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
             if(this.download_e || this.download_e_p) {
-                let row = event_download_properties.map(prop => {
+                let row = this.event_download_properties.map(prop => {
                     let value = f.get(prop);
                     if (value == null) return ''; // gérer les null
                     value = String(value).replace(/"/g, '""');
@@ -489,17 +487,8 @@ Vue.createApp({
         // Création du texte de download des paragraphs liés à un event
         async paragraph_download_text_filter() {
 
-            // Liste des propriétés des paragraphs
-            let paragraph_download_properties = ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
-                "paragraph_id", "original_text", "disaster_label", "disaster_score", "hasard_type", "hasard_type_score", "nb_death", "score_death", "answer_death",
-                "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
-                "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
-                "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
-                "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
-                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found", "continent", "population_density"];
-
             // Création du tableau pour le join final, initialisation du texte (header)
-            let paragraph_content_lines = [paragraph_download_properties.join(',')];
+            let paragraph_content_lines = [this.paragraph_download_properties.join(',')];
 
             // Liste permettent d'éviter les paragraphs en double
             let seen_paragraph_id = new Set();
@@ -534,7 +523,7 @@ Vue.createApp({
 
                 // Création d'une ligne de texte (paragraphs.csv)
                 // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
-                let row = paragraph_download_properties.map(prop => {
+                let row = this.paragraph_download_properties.map(prop => {
                     let value = f.properties[prop];
                     if (value == null) return ''; // gérer les null
                     value = String(value).replace(/"/g, '""');
