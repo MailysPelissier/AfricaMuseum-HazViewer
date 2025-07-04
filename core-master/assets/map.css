@@ -122,6 +122,29 @@ html, body {
     border: none;
 }
 
+.layer-switcher {
+    top: unset !important;
+    bottom: 4em;
+}
+
+.layer-switcher.shown.layer-switcher-activation-mode-click > button {
+    left: unset !important;
+    bottom: 0;
+}
+
+.layer-switcher li {
+    display: grid;
+    align-items: center;
+}
+
+.layer-switcher li label {
+    padding-left: 1.5em !important;
+}
+
+.layer-switcher li input {
+    left: unset !important;
+}
+
 #affichage_localisation_div {
     top: .5em;
     right: .5em;
