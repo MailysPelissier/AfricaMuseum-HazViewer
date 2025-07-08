@@ -527,6 +527,11 @@ Vue.createApp({
         // Création de la variable visibilité de l'event hazminer selon les filtres actifs
         visibilite_features_hazminer_ajoutees(feature) {
 
+            // Dates ne dépendent plus du fuseau horaire
+            feature.set('event_time', dayjs(feature.get('event_time')).format("YYYY-MM-DD HH:mm:ss"));
+            feature.set('start_time', dayjs(feature.get('start_time')).format("YYYY-MM-DD HH:mm:ss"));
+            feature.set('end_time', dayjs(feature.get('end_time')).format("YYYY-MM-DD HH:mm:ss"));
+
             // Si l'event n'est pas déjà dans la couche :
             let exists = this.events_hazminer_layer.getSource().getFeatureById(feature.getId());
             if (!exists.get('visible')) {
@@ -544,6 +549,9 @@ Vue.createApp({
 
         // Création de la variable visibilité de l'event citizen observer selon les filtres actifs
         visibilite_features_co_ajoutees(feature) {
+
+            // Date ne dépend plus du fuseau horaire
+            feature.set('event_date', dayjs(feature.get('event_date')).format("YYYY-MM-DD HH:mm:ss"));
 
             // Si l'event n'est pas déjà dans la couche :
             let exists = this.events_co_layer.getSource().getFeatureById(feature.getId());
