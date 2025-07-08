@@ -217,7 +217,12 @@ Vue.createApp({
 
             // Zoom sur l'emprise de l'event
             this.map.getView().fit([min_lon, min_lat, max_lon, max_lat], this.map.getSize());
-            this.map.getView().setZoom(this.map.getView().getZoom() - 0.5);
+            if (min_lon === max_lon || min_lat === max_lat) {
+                this.map.getView().setZoom(10);
+            }
+            else {
+                this.map.getView().setZoom(this.map.getView().getZoom() - 1);
+            }
 
         },
 
@@ -850,7 +855,7 @@ Vue.createApp({
         // Création de la couche géolocalisation vide
         this.localisation_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
-            title: 'Localisation',
+            title: 'Your location',
             zIndex: 15,
         });
         this.map.addLayer(this.localisation_layer);

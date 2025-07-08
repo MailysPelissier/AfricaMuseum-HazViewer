@@ -127,9 +127,22 @@ html, body {
     bottom: 4em;
 }
 
-.layer-switcher.shown.layer-switcher-activation-mode-click > button {
+.layer-switcher button {
     left: unset !important;
     bottom: 0;
+}
+
+.layer-switcher.shown button {
+    background-color: white !important;
+    right: 0 !important;
+}
+
+.layer-switcher .panel {
+    position: relative;
+    right: 3em;
+    border: unset !important;
+    box-shadow: 0px 0px 10px rgba(0,0,0,0.3); 
+    padding: 5px; 
 }
 
 .layer-switcher li {

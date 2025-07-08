@@ -2382,7 +2382,7 @@ Vue.createApp({
         // Création de la couche géolocalisation vide
         this.localisation_layer = new ol.layer.Vector({
             source: new ol.source.Vector(),
-            title: 'Localisation',
+            title: 'Your location',
             zIndex: 13,
         });
         this.map.addLayer(this.localisation_layer);
