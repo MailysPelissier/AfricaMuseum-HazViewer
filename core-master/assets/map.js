@@ -537,8 +537,8 @@ Vue.createApp({
             if (!exists.get('visible')) {
 
                 // Dates du filtre en format y-m-d
-                let start_date_hazminer_ymd = this.start_date_hazminer.substring(6,10) + '-' + this.start_date_hazminer.substring(3,5) + '-' + this.start_date_hazminer.substring(0,2);
-                let end_date_hazminer_ymd = this.end_date_hazminer.substring(6,10) + '-' + this.end_date_hazminer.substring(3,5) + '-' + this.end_date_hazminer.substring(0,2);
+                let start_date_hazminer_ymd = this.start_date_hazminer.substring(6,10) + '-' + this.start_date_hazminer.substring(3,5) + '-' + this.start_date_hazminer.substring(0,2) + ' 00:00:00';
+                let end_date_hazminer_ymd = this.end_date_hazminer.substring(6,10) + '-' + this.end_date_hazminer.substring(3,5) + '-' + this.end_date_hazminer.substring(0,2) + ' 00:00:00';
 
                 // Propriété visibilité dépend des filtres
                 this.set_feature_hazminer_visibility(exists, start_date_hazminer_ymd, end_date_hazminer_ymd);
@@ -558,8 +558,8 @@ Vue.createApp({
             if (!exists.get('visible')) {
 
                 // Dates du filtre en format y-m-d
-                let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2);
-                let end_date_co_ymd = this.end_date_co.substring(6,10) + '-' + this.end_date_co.substring(3,5) + '-' + this.end_date_co.substring(0,2);
+                let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2) + ' 00:00:00';
+                let end_date_co_ymd = this.end_date_co.substring(6,10) + '-' + this.end_date_co.substring(3,5) + '-' + this.end_date_co.substring(0,2) + ' 00:00:00';
 
                 // Propriété visibilité dépend des filtres
                 this.set_feature_co_visibility(exists, start_date_co_ymd, end_date_co_ymd);
@@ -1528,10 +1528,10 @@ Vue.createApp({
         appliquer_filtres() {
 
             // Dates des filtres en format y-m-d
-            let start_date_hazminer_ymd = this.start_date_hazminer.substring(6,10) + '-' + this.start_date_hazminer.substring(3,5) + '-' + this.start_date_hazminer.substring(0,2);
-            let end_date_hazminer_ymd = this.end_date_hazminer.substring(6,10) + '-' + this.end_date_hazminer.substring(3,5) + '-' + this.end_date_hazminer.substring(0,2);
-            let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2);
-            let end_date_co_ymd = this.end_date_co.substring(6,10) + '-' + this.end_date_co.substring(3,5) + '-' + this.end_date_co.substring(0,2);
+            let start_date_hazminer_ymd = this.start_date_hazminer.substring(6,10) + '-' + this.start_date_hazminer.substring(3,5) + '-' + this.start_date_hazminer.substring(0,2) + ' 00:00:00';
+            let end_date_hazminer_ymd = this.end_date_hazminer.substring(6,10) + '-' + this.end_date_hazminer.substring(3,5) + '-' + this.end_date_hazminer.substring(0,2) + ' 00:00:00';
+            let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2) + ' 00:00:00';
+            let end_date_co_ymd = this.end_date_co.substring(6,10) + '-' + this.end_date_co.substring(3,5) + '-' + this.end_date_co.substring(0,2) + ' 00:00:00';
 
             // Pour chaque feature, sa propriété visibilité est modifiée selon le filtre
             for (let feature of this.events_hazminer_layer.getSource().getFeatures()) {
@@ -1750,7 +1750,7 @@ Vue.createApp({
                     this.download_progression = parseInt(compteur_events*100/nb_total_events);
 
                     // Forcer une pause très courte pour mettre à jour le DOM
-                    if (compteur_features % 100 === 0) {
+                    if (compteur_events % 100 === 0) {
                         await new Promise(resolve => setTimeout(resolve, 0));
                     }
                     
@@ -1901,8 +1901,8 @@ Vue.createApp({
                 }
 
                 // Date
-                let start_date_hazminer_ymd = this.start_date_hazminer.substring(6,10) + '-' + this.start_date_hazminer.substring(3,5) + '-' + this.start_date_hazminer.substring(0,2);
-                let end_date_hazminer_ymd = this.end_date_hazminer.substring(6,10) + '-' + this.end_date_hazminer.substring(3,5) + '-' + this.end_date_hazminer.substring(0,2);
+                let start_date_hazminer_ymd = this.start_date_hazminer.substring(6,10) + '-' + this.start_date_hazminer.substring(3,5) + '-' + this.start_date_hazminer.substring(0,2) + ' 00:00:00';
+                let end_date_hazminer_ymd = this.end_date_hazminer.substring(6,10) + '-' + this.end_date_hazminer.substring(3,5) + '-' + this.end_date_hazminer.substring(0,2) + ' 00:00:00';
                 cqlFilter += " AND event_time >= '" + start_date_hazminer_ymd + "'";
                 cqlFilter += " AND event_time <= '" + end_date_hazminer_ymd + "'";
                 cqlFilter += " AND " + this.duration_filter[0].id + " BETWEEN " + this.duration_filter[0].min + " AND " + this.duration_filter[0].max;
@@ -1979,8 +1979,8 @@ Vue.createApp({
                 }
 
                 // Date
-                 let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2);
-                let end_date_co_ymd = this.end_date_co.substring(6,10) + '-' + this.end_date_co.substring(3,5) + '-' + this.end_date_co.substring(0,2);
+                let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2) + ' 00:00:00';
+                let end_date_co_ymd = this.end_date_co.substring(6,10) + '-' + this.end_date_co.substring(3,5) + '-' + this.end_date_co.substring(0,2) + ' 00:00:00';
                 cqlFilter += " AND event_date >= '" + start_date_co_ymd + "'";
                 cqlFilter += " AND event_date <= '" + end_date_co_ymd + "'";
 
