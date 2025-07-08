@@ -294,8 +294,8 @@
 
                 <div id=choix_filtre_data class="flexrow space_between padding">
                     <button class="btn btn-secondary" type="button" v-if=show_general_menu_filter_hazminer>Hazminer</button>
-                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_filter_hazminer @click="change_true_false(['show_general_menu_filter_hazminer','show_general_menu_filter_co'])">Citizen observer</button>
-                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_filter_co @click="change_true_false(['show_general_menu_filter_hazminer','show_general_menu_filter_co'])">Hazminer</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_filter_hazminer @click="setup_filter_change_menu">Citizen observer</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_filter_co @click="setup_filter_change_menu">Hazminer</button>
                     <button class="btn btn-secondary" type="button" v-if=show_general_menu_filter_co>Citizen observer</button>
                 </div>
 

@@ -1035,6 +1035,17 @@ Vue.createApp({
 
         },
 
+        // Affiche le bon menu du filtre
+        // Initialisation des calendriers
+        setup_filter_change_menu() {
+
+            this.show_general_menu_filter_hazminer = !this.show_general_menu_filter_hazminer;
+            this.show_general_menu_filter_co = !this.show_general_menu_filter_co;
+
+            this.set_flatpickr();
+
+        },
+
         // Affiche le filtre dates hazminer
         // Initialisation des calendriers
         display_hazminer_date_filter() {
@@ -1058,7 +1069,7 @@ Vue.createApp({
         // Initialise les calendriers
         set_flatpickr() {
 
-            if (this.show_date_filter_hazminer) {
+            if (this.show_date_filter_hazminer && this.show_general_menu_filter_hazminer) {
 
                 this.$nextTick(() => {
 
@@ -1090,7 +1101,7 @@ Vue.createApp({
 
             }
 
-            if (this.show_date_filter_co) {
+            if (this.show_date_filter_co && this.show_general_menu_filter_co) {
 
                 this.$nextTick(() => {
 

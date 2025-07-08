@@ -123,6 +123,10 @@ Vue.createApp({
                 // L'event est sauvegardé et ajouté à la couche selected event
                 features.forEach(event => {
                     this.selected_event = event;
+                    // Dates ne dépendent plus du fuseau horaire
+                    this.selected_event.set('event_time', dayjs(this.selected_event.get('event_time')).format("YYYY-MM-DD HH:mm:ss"));
+                    this.selected_event.set('start_time', dayjs(this.selected_event.get('start_time')).format("YYYY-MM-DD HH:mm:ss"));
+                    this.selected_event.set('end_time', dayjs(this.selected_event.get('end_time')).format("YYYY-MM-DD HH:mm:ss"));
                     this.selected_event_layer.getSource().addFeature(event);
                 });
 
