@@ -305,7 +305,7 @@ CREATE INDEX IF NOT EXISTS event_paragraphs_paragraph_id_idx
     TABLESPACE pg_default;
 
 INSERT INTO event_paragraphs (event_id, paragraph_id)
-SELECT event_id, UNNEST(string_to_array(regexp_replace(paragraphs_list,'''|\(|\)|\s','','g'),',')::varchar[])
+SELECT event_id, UNNEST(string_to_array(trim(both '{}' from paragraphs_list), ','))
 FROM public.events2017_23;
 
 
