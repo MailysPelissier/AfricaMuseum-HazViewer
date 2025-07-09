@@ -779,7 +779,7 @@ Vue.createApp({
                         }),
                     ],
                 }),
-                this.hazminer_group = new ol.layer.Group({
+                new ol.layer.Group({
                     title: 'Hazminer data',
                     layers: [
                         new ol.layer.Group({
