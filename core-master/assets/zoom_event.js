@@ -633,51 +633,61 @@ Vue.createApp({
         // Récupérer la localisation et l'afficher
         affichage_localisation() {
 
-            navigator.geolocation.getCurrentPosition((position) => {
+            if (this.localisation_layer.getVisible()) {
+                this.localisation_layer.setVisible(false);
+            }
 
-                // Récupérer les valeurs sur le position de l'appareil
-                let latitude_pos = position.coords.latitude;
-                let longitude_pos = position.coords.longitude;
-                let precision_pos = position.coords.accuracy;
+            else {
 
-                // Vider la couche localisation
-                this.localisation_layer.getSource().clear();
+                this.localisation_layer.setVisible(true);
 
-                // Transformer les coordonnées en EPSG:3857
-                let center = ol.proj.fromLonLat([longitude_pos, latitude_pos]);
+                navigator.geolocation.getCurrentPosition((position) => {
 
-                // Feature pour le point central
-                let pointFeature = new ol.Feature(new ol.geom.Point(center));
+                    // Récupérer les valeurs sur le position de l'appareil
+                    let latitude_pos = position.coords.latitude;
+                    let longitude_pos = position.coords.longitude;
+                    let precision_pos = position.coords.accuracy;
 
-                // Feature pour le cercle de précision (en mètres, donc dans la projection EPSG:3857)
-                let circleFeature = new ol.Feature(new ol.geom.Circle(center, precision_pos));
+                    // Vider la couche localisation
+                    this.localisation_layer.getSource().clear();
 
-                // Ajouter les deux features à la couche
-                this.localisation_layer.getSource().addFeatures([circleFeature, pointFeature]);
+                    // Transformer les coordonnées en EPSG:3857
+                    let center = ol.proj.fromLonLat([longitude_pos, latitude_pos]);
 
-                // Appliquer les styles
-                this.localisation_layer.setStyle((feature) => {
-                    let geometry = feature.getGeometry();
-                    if (geometry instanceof ol.geom.Point) {
-                        return new ol.style.Style({
-                            image: new ol.style.Circle({
-                                radius: 8,
-                                fill: new ol.style.Fill({ color: 'rgba(0, 100, 255, 1)' }),
-                                stroke: new ol.style.Stroke({ color: 'white', width: 2 }),
-                            }),
-                        });
-                    } else if (geometry instanceof ol.geom.Circle) {
-                        return new ol.style.Style({
-                            fill: new ol.style.Fill({ color: 'rgba(0, 100, 255, 0.3)' }),
-                            stroke: new ol.style.Stroke({ color: 'rgba(0, 100, 255, 0.8)', width: 1 }),
-                        });
-                    }
+                    // Feature pour le point central
+                    let pointFeature = new ol.Feature(new ol.geom.Point(center));
+
+                    // Feature pour le cercle de précision (en mètres, donc dans la projection EPSG:3857)
+                    let circleFeature = new ol.Feature(new ol.geom.Circle(center, precision_pos));
+
+                    // Ajouter les deux features à la couche
+                    this.localisation_layer.getSource().addFeatures([circleFeature, pointFeature]);
+
+                    // Appliquer les styles
+                    this.localisation_layer.setStyle((feature) => {
+                        let geometry = feature.getGeometry();
+                        if (geometry instanceof ol.geom.Point) {
+                            return new ol.style.Style({
+                                image: new ol.style.Circle({
+                                    radius: 8,
+                                    fill: new ol.style.Fill({ color: 'rgba(0, 100, 255, 1)' }),
+                                    stroke: new ol.style.Stroke({ color: 'white', width: 2 }),
+                                }),
+                            });
+                        } else if (geometry instanceof ol.geom.Circle) {
+                            return new ol.style.Style({
+                                fill: new ol.style.Fill({ color: 'rgba(0, 100, 255, 0.3)' }),
+                                stroke: new ol.style.Stroke({ color: 'rgba(0, 100, 255, 0.8)', width: 1 }),
+                            });
+                        }
+                    });
+
+                    // Centrer la vue sur la position
+                    this.map.getView().setCenter(center);
+
                 });
 
-                // Centrer la vue sur la position
-                this.map.getView().setCenter(center);
-
-            });
+            }
 
         },
 
@@ -693,172 +703,180 @@ Vue.createApp({
                 zoom: 7,
             }),
             layers: [
-                new ol.layer.Tile({
-                    source: new ol.source.XYZ({
-                        url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                        crossOrigin: 'anonymous',
-                        maxZoom: 19,
-                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                    }),
-                    title: 'OpenStreetMap',
-                    type: 'base',
-                    zIndex: 1,
+                new ol.layer.Group({
+                    title: 'Base maps',
+                    layers: [
+                        // Couche OSM
+                        new ol.layer.Tile({
+                            source: new ol.source.XYZ({
+                                url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                crossOrigin: 'anonymous',
+                                maxZoom: 19,
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                            }),
+                            title: 'OpenStreetMap',
+                            type: 'base',
+                            zIndex: 1,
+                        }),
+                    ],
+                }),
+                new ol.layer.Group({
+                    title: 'Raster layers',
+                    layers: [
+                        // Couche landslide susceptibility
+                        this.landslide_susceptibility_layer = new ol.layer.Tile({
+                            source: new ol.source.TileWMS({
+                                url: 'http://localhost:8080/geoserver/webGIS/wms',
+                                params: {
+                                    'LAYERS': 'webGIS:landslide_susceptibility',
+                                    'TILED': true,
+                                    'VERSION': '1.1.1',
+                                    'FORMAT': 'image/png',
+                                    'CRS': 'EPSG:3857'
+                                },
+                                crossOrigin: 'anonymous',
+                                serverType: 'geoserver',
+                                transition: 0,
+                            }),
+                            title: 'Landslide susceptibility',
+                            zIndex: 2,
+                            visible: false,
+                        }),
+                        // Couche des rivières
+                        this.rivers_layer = new ol.layer.Tile({
+                            source: new ol.source.TileWMS({
+                                url: 'http://localhost:8080/geoserver/webGIS/wms',
+                                params: {
+                                    'LAYERS': 'webGIS:HydroRIVERS_flow5max',
+                                    'TILED': true,
+                                    'VERSION': '1.1.1',
+                                    'FORMAT': 'image/png',
+                                    'CRS': 'EPSG:3857'
+                                },
+                                crossOrigin: 'anonymous',
+                                serverType: 'geoserver',
+                                transition: 0,
+                            }),
+                            title: 'Rivers',
+                            zIndex: 3,
+                            visible: false,
+                        }),
+                        // Couche des pays (source : Natural Earth)
+                        this.countries_layer = new ol.layer.Vector({
+                            source: new ol.source.Vector({
+                                projection: 'EPSG:3857',
+                                url: '../assets/layers/countries50m.json',
+                                format: new ol.format.GeoJSON()
+                            }),
+                            style: new ol.style.Style({
+                                stroke: new ol.style.Stroke({
+                                    color: 'rgb(0, 0, 0, 0.5)',
+                                    width: 1
+                                })
+                            }),
+                            title: 'Countries',
+                            zIndex: 4,
+                        }),
+                    ],
+                }),
+                this.hazminer_group = new ol.layer.Group({
+                    title: 'Hazminer data',
+                    layers: [
+                        new ol.layer.Group({
+                            title: 'Event',
+                            layers: [
+                                // Création de la couche bbox events (vide)
+                                this.bbox_events_layer = new ol.layer.Vector({
+                                    source: new ol.source.Vector(),
+                                    style: new ol.style.Style({
+                                        fill: new ol.style.Fill({
+                                            color: 'rgba(255, 255, 255, 0.2)'
+                                        }),
+                                        stroke: new ol.style.Stroke({
+                                            color: 'rgb(216, 231, 81)',
+                                            width: 2
+                                        })
+                                    }),
+                                    title: 'Bbox event',
+                                    zIndex: 10,
+                                }),
+                                // Création de la couche event selectionné (vide)
+                                this.selected_event_layer = new ol.layer.Vector({
+                                    source: new ol.source.Vector(),
+                                    style: new ol.style.Style({
+                                        image: new ol.style.Circle({
+                                            radius: 10,
+                                            fill: new ol.style.Fill({
+                                                color: 'rgba(0, 255, 0, 1)',
+                                            }),
+                                        }),
+                                    }),
+                                    title: 'Event',
+                                    zIndex: 12,
+                                }),
+                            ],
+                        }),
+                        // Création de la couche paragraphs (vide)
+                        this.paragraphs_layer = new ol.layer.Vector({
+                            source: new ol.source.Vector(),
+                            style: new ol.style.Style({
+                                image: new ol.style.Circle({
+                                    radius: 5,
+                                    fill: new ol.style.Fill({
+                                        color: 'rgba(0, 0, 0, 1)',
+                                    }),
+                                }),
+                            }),
+                            title: 'Paragraphs',
+                            zIndex: 13,
+                        }),
+                        new ol.layer.Group({
+                            title: 'Selected paragraph',
+                            layers: [
+                                // Création de la couche bbox paragraphs (vide)
+                                this.bbox_paragraphs_layer = new ol.layer.Vector({
+                                    source: new ol.source.Vector(),
+                                    style: new ol.style.Style({
+                                        fill: new ol.style.Fill({
+                                            color: 'rgba(255, 255, 255, 0.2)'
+                                        }),
+                                        stroke: new ol.style.Stroke({
+                                            color: 'rgba(0, 0, 0, 1)',
+                                            width: 1
+                                        })
+                                    }),
+                                    title: 'Bbox paragraph',
+                                    zIndex: 11,
+                                }),                               
+                                // Création de la couche paragraph selectionné (vide)
+                                this.selected_paragraph_layer = new ol.layer.Vector({
+                                    source: new ol.source.Vector(),
+                                    style: new ol.style.Style({
+                                        image: new ol.style.Circle({
+                                            radius: 5,
+                                            fill: new ol.style.Fill({
+                                                color: 'rgba(255, 0, 0, 1)',
+                                            }),
+                                        }),
+                                    }),
+                                    title: 'Selected paragraph',
+                                    zIndex: 14,
+                                }),
+                            ],
+                        }),
+                    ],
+                }),
+                // Création de la couche géolocalisation vide
+                this.localisation_layer = new ol.layer.Vector({
+                    source: new ol.source.Vector(),
+                    zIndex: 15,
+                    visible: false,
                 }),
             ],
         });
 
-        // Couche landslide susceptibility
-        this.landslide_susceptibility_layer = new ol.layer.Tile({
-            source: new ol.source.TileWMS({
-                url: 'http://localhost:8080/geoserver/webGIS/wms',
-                params: {
-                    'LAYERS': 'webGIS:landslide_susceptibility',
-                    'TILED': true,
-                    'VERSION': '1.1.1',
-                    'FORMAT': 'image/png',
-                    'CRS': 'EPSG:3857'
-                },
-                crossOrigin: 'anonymous',
-                serverType: 'geoserver',
-                transition: 0,
-            }),
-            title: 'Landslide susceptibility',
-            zIndex: 2,
-            visible: false,
-        });
-        this.map.addLayer(this.landslide_susceptibility_layer);
-
-        // Couche des rivières
-        this.rivers_layer = new ol.layer.Tile({
-            source: new ol.source.TileWMS({
-                url: 'http://localhost:8080/geoserver/webGIS/wms',
-                params: {
-                    'LAYERS': 'webGIS:HydroRIVERS_flow5max',
-                    'TILED': true,
-                    'VERSION': '1.1.1',
-                    'FORMAT': 'image/png',
-                    'CRS': 'EPSG:3857'
-                },
-                crossOrigin: 'anonymous',
-                serverType: 'geoserver',
-                transition: 0,
-            }),
-            title: 'Rivers',
-            zIndex: 3,
-            visible: false,
-        });
-        this.map.addLayer(this.rivers_layer);
-
-        // Couche des pays (source : Natural Earth)
-        this.countries_layer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                projection: 'EPSG:3857',
-                url: '../assets/layers/countries50m.json',
-                format: new ol.format.GeoJSON()
-            }),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: 'rgb(0, 0, 0, 0.5)',
-                    width: 1
-                })
-            }),
-            title: 'Countries',
-            zIndex: 4,
-        });
-        this.map.addLayer(this.countries_layer);
-
-        // Création de la couche bbox events (vide)
-        this.bbox_events_layer = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                fill: new ol.style.Fill({
-                    color: 'rgba(255, 255, 255, 0.2)'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: 'rgb(216, 231, 81)',
-                    width: 2
-                })
-            }),
-            title: 'Bbox event',
-            zIndex: 10,
-        });
-        this.map.addLayer(this.bbox_events_layer);
-
-        // Création de la couche bbox paragraphs (vide)
-        this.bbox_paragraphs_layer = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                fill: new ol.style.Fill({
-                    color: 'rgba(255, 255, 255, 0.2)'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: 'rgba(0, 0, 0, 1)',
-                    width: 1
-                })
-            }),
-            title: 'Bbox paragraph',
-            zIndex: 11,
-        });
-        this.map.addLayer(this.bbox_paragraphs_layer);
-
-        // Création de la couche event selectionné (vide)
-        this.selected_event_layer = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 10,
-                    fill: new ol.style.Fill({
-                        color: 'rgba(0, 255, 0, 1)',
-                    }),
-                }),
-            }),
-            title: 'Event',
-            zIndex: 12,
-        });
-        this.map.addLayer(this.selected_event_layer);
-
         // Récupérer l'event et le rajouter dans la couche event selectionné
         this.recuperer_event()
-
-        // Création de la couche paragraphs (vide)
-        this.paragraphs_layer = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 5,
-                    fill: new ol.style.Fill({
-                        color: 'rgba(0, 0, 0, 1)',
-                    }),
-                }),
-            }),
-            title: 'Paragraphs',
-            zIndex: 13,
-        });
-        this.map.addLayer(this.paragraphs_layer);
-
-        // Création de la couche paragraph selectionné (vide)
-        this.selected_paragraph_layer = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            style: new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 5,
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255, 0, 0, 1)',
-                    }),
-                }),
-            }),
-            title: 'Selected paragraph',
-            zIndex: 14,
-        });
-        this.map.addLayer(this.selected_paragraph_layer);
-
-        // Création de la couche géolocalisation vide
-        this.localisation_layer = new ol.layer.Vector({
-            source: new ol.source.Vector(),
-            title: 'Your location',
-            zIndex: 15,
-        });
-        this.map.addLayer(this.localisation_layer);
 
         // Création du popup vide pour le pointermove
         let overlay_pointermove = new ol.Overlay({
@@ -878,7 +896,7 @@ Vue.createApp({
         let layerSwitcher = new LayerSwitcher({
             activationMode: 'click',
             reverse: true,
-            groupSelectStyle: 'group'
+            groupSelectStyle: 'children'
         });
         this.map.addControl(layerSwitcher);
 

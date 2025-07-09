@@ -146,16 +146,17 @@ html, body {
 }
 
 .layer-switcher li {
-    display: grid;
-    align-items: center;
+    margin-top: 0 !important;
 }
 
 .layer-switcher li label {
     padding-left: 1.5em !important;
+    margin-top: 0 !important;
 }
 
 .layer-switcher li input {
     left: unset !important;
+    top: 0.3em;
 }
 
 #affichage_localisation_div {
