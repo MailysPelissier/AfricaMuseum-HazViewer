@@ -118,6 +118,15 @@ Vue.createApp({
             show_general_menu_style_hazminer: true,
             show_general_menu_style_co: false,
 
+            // Facteur permettant de changer la taille des évènements selon le niveau de zoom
+            facteur_zoom_actuel: 0.5,
+            zoom_table: [
+                { min_zoom: 0, max_zoom: 5, facteur: 0.25 },
+                { min_zoom: 5, max_zoom: 8, facteur: 0.5 },
+                { min_zoom: 8, max_zoom: 10, facteur: 0.75 },
+                { min_zoom: 10, max_zoom: Infinity, facteur: 1 },
+            ],
+
             // Propriétés par défaut du changement de style hazminer
             color_style: 'Event_type',
             color_flood: '#3252a8',
@@ -880,7 +889,7 @@ Vue.createApp({
             
                     return new ol.style.Style({
                         image: new ol.style.Circle({
-                            radius: size,
+                            radius: size * this.facteur_zoom_actuel,
                             fill: new ol.style.Fill({
                                 color: color,
                             }),
@@ -984,7 +993,7 @@ Vue.createApp({
                     
                     return new ol.style.Style({
                         image: new ol.style.Circle({
-                            radius: size,
+                            radius: size * this.facteur_zoom_actuel,
                             fill: new ol.style.Fill({
                                 color: color,
                             }),
@@ -2521,9 +2530,22 @@ Vue.createApp({
         });
         this.map.addControl(scaleline);
 
-        // A chaque déplacement/zoom, suppression du popup clic
+        // A chaque déplacement/zoom :
         this.map.on('moveend', () => {
+
+            // Suppression du popup clic
             document.getElementById("popup_clic").style.display = "none";
+
+            // Changement de la taille des events selon le niveau de zoom
+            let zoom = this.map.getView().getZoom();
+            let new_facteur_zoom = this.zoom_table.find(interval => {
+                return zoom >= interval.min_zoom && zoom <= interval.max_zoom;
+            });
+            if (new_facteur_zoom.id != this.facteur_zoom_actuel) {
+                this.facteur_zoom_actuel = new_facteur_zoom.facteur;
+                this.change_style_all();
+            }
+
         });
 
         // A chaque déplacement du pointer, si plusieurs events sont superposées au niveau du pointer, on affiche leur nombre
