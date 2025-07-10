@@ -2108,6 +2108,8 @@ Vue.createApp({
             mapCanvas.width = size[0];
             mapCanvas.height = size[1];
             let mapContext = mapCanvas.getContext('2d');
+
+            // Dessine tous les canvas de la carte (layers)
             Array.prototype.forEach.call(
                 this.map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer'),
                 function (canvas) {
@@ -2133,12 +2135,73 @@ Vue.createApp({
                     }
                 },
             );
+
+            // Reset le contexte
             mapContext.globalAlpha = 1;
             mapContext.setTransform(1, 0, 0, 1, 0, 0);
 
+            // Flèche nord (en haut à droite)
+            let arrow_width = 25;
+            let arrow_height = 40;
+            mapContext.strokeStyle = 'black';
+            mapContext.lineWidth = 1;                
+            // Triangle vers le haut
+            // Partie gauche
+            mapContext.save();  
+            mapContext.translate(size[0] - arrow_width - 10, 25 + arrow_height);
+            mapContext.beginPath();
+            mapContext.moveTo(arrow_width / 2, -arrow_height);
+            mapContext.lineTo(0, 0);
+            mapContext.lineTo(arrow_width / 2 , -arrow_height / 3);
+            mapContext.closePath();
+            mapContext.fillStyle = 'rgba(255, 255, 255, 0.7)';          
+            mapContext.fill();
+            mapContext.stroke();
+            mapContext.restore();
+            // Partie droite
+            mapContext.save();
+            mapContext.translate(size[0] - 10, 25 + arrow_height);
+            mapContext.beginPath();
+            mapContext.moveTo(-arrow_width / 2, -arrow_height);
+            mapContext.lineTo(0, 0);
+            mapContext.lineTo(-arrow_width / 2 , -arrow_height / 3);
+            mapContext.closePath();
+            mapContext.fillStyle = 'rgba(0, 0, 0, 1)';
+            mapContext.fill();
+            mapContext.stroke();
+            mapContext.restore();
+            // "N"
+            mapContext.save();
+            mapContext.translate(size[0] - arrow_width / 2 - 15, 20);
+            mapContext.fillStyle = 'black';
+            mapContext.font = 'bold 16px sans-serif';
+            mapContext.fillText('N', 0, 0);
+            mapContext.restore();
+            
+            // Scale line (en bas à gauche)
+            let scaleLineEl = document.querySelector('.ol-scale-line-inner');
+            mapContext.save();
+            let scaleText = scaleLineEl.innerText;
+            let scaleWidth = scaleLineEl.offsetWidth;
+            let barHeight = 8;
+            let x = 10;
+            let y = size[1] - barHeight - 30;
+            // Barre
+            mapContext.fillStyle = 'white';
+            mapContext.strokeStyle = 'black';
+            mapContext.lineWidth = 1;
+            mapContext.fillRect(x, y, scaleWidth, barHeight);
+            mapContext.strokeRect(x, y, scaleWidth, barHeight);
+            // Texte
+            mapContext.fillStyle = 'black';
+            mapContext.font = '12px sans-serif';
+            mapContext.fillText(scaleText, x, y + barHeight + 14);
+            mapContext.restore();
+
+            // Téléchargement
             let link = document.createElement("a");
             link.href = mapCanvas.toDataURL();
-            link.download = "map.png";
+            link.download = `map.png`;
             link.click();
 
         },
