@@ -59,6 +59,9 @@
 
             </div>
 
+            <div id="form_time_series" class="form popup scroll_box time_series_form"  v-if="show_time_series_form">
+            </div>
+
         </div>
 
         <div id=event_data_zoom_event_scroll_box class="scroll_box margin padding">
@@ -95,11 +98,15 @@
 
         <div id=popup_clic class="popup petit_popup scroll_box"></div>
 
-        <div id=download_div class='bouton_1 ol-unselectable ol-control'>
+        <div id=time_series_div class='bouton_1 ol-unselectable ol-control'>
+            <button class=open_form_button @click=time_series_form>Time series</button>
+        </div>
+
+        <div id=download_div class='bouton_2 ol-unselectable ol-control'>
             <button class=open_form_button @click=setup_download_form>Download data</button>
         </div>
 
-        <div id=screenshot_div class='bouton_2 ol-unselectable ol-control'>
+        <div id=screenshot_div class='bouton_3 ol-unselectable ol-control'>
             <button class=open_form_button @click=download_screenshot>Screenshot</button>
         </div>
 
@@ -115,6 +122,7 @@
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <script src="https://cdn.jsdelivr.net/npm/ol-layerswitcher@4.1.2/dist/ol-layerswitcher.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
     <script src="assets/zoom_event.js"></script> 
     
 </body>

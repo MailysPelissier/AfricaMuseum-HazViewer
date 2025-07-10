@@ -83,6 +83,11 @@ html, body {
     max-height: 90%;
 }
 
+.time_series_form {
+    min-height: 30em;
+    min-width: 30em;
+}
+
 .center_popup {
     top: 0.5em; 
     left: 50%;

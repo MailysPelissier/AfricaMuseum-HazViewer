@@ -81,6 +81,13 @@ Vue.createApp({
             location_information: false, // Affichage des informations de localisation ou non (inactif par défaut)
             number_information: false, // Affichage des informations statistiques ou non (inactif par défaut)  
 
+            // Affichage popup time series
+            show_time_series_form: false,
+
+            publication_time_list: [],
+            publication_time_array: [],
+
+
             // Affichage popup download
             show_download_form: false,
 
@@ -250,9 +257,10 @@ Vue.createApp({
                     featureProjection: 'EPSG:3857'       // Projection de la carte (Web Mercator)
                 });
 
-                // Chaque paragraph récupéré est ajouté à la couche paragraphs
+                // Chaque paragraph récupéré est ajouté à la couche paragraphs, sa date de publication est ajoutée à la liste
                 features.forEach(feature => {
                     this.paragraphs_layer.getSource().addFeature(feature);
+                    this.publication_time_list.push({date: feature.get('publication_time')});
                 });
 
             })
@@ -423,9 +431,59 @@ Vue.createApp({
 
         },
 
+        time_series_form() {
+
+            this.show_time_series_form = !this.show_time_series_form;
+            this.show_download_form = false;
+
+            let dictionnaire_dates = this.publication_time_list.reduce((valeur, {date}) => {
+                valeur[date] = valeur[date] || {date: date, count: 0};
+                valeur[date]['count'] += 1;        
+                return valeur;
+            }, {});
+            this.publication_time_array = Object.values(dictionnaire_dates);
+            console.log(this.publication_time_array)
+            let min_date = this.publication_time_array[0].date;
+            let max_date = this.publication_time_array[this.publication_time_array.length-1].date;
+            let max_publi = this.publication_time_array.reduce(function(prev, current) {
+                return (prev && prev.count > current.count) ? prev : current;
+            })
+            console.log(min_date,max_date,max_publi.count)
+            let publication_time_date_array = this.publication_time_array.map(a => a.date);
+            let publication_time_sum_array = this.publication_time_array.map(a => a.count);
+            console.log(publication_time_date_array,publication_time_sum_array)
+
+            if (this.show_time_series_form) {
+
+                this.$nextTick(() => {
+
+                    let data = [
+                        {
+                            // x: ['2013-10-04 22:23:00', '2013-11-04 22:23:00', '2013-12-04 22:23:00'],
+                            x: publication_time_date_array,
+                            y: publication_time_sum_array,
+                            type: 'bar'
+                        }
+                    ];
+                    var layout = {
+                        title: {
+                            text: 'Publication time'
+                        }
+                    };
+                    Plotly.newPlot('form_time_series', data, layout, {scrollZoom: true});
+                
+                })
+
+            }
+            
+        },
+
         // Affiche le form de download
         setup_download_form() {
+
             this.show_download_form = !this.show_download_form;
+            this.show_time_series_form = false;
+
         },
 
         // Permet d'avoir une seule checkbox sélectionnée pour le choix du mode de download
@@ -962,6 +1020,12 @@ Vue.createApp({
             groupSelectStyle: 'children'
         });
         this.map.addControl(layerSwitcher);
+
+        // Bouton time series
+        let time_series_control = new ol.control.Control({
+            element: document.getElementById("time_series_div"),
+        });
+        this.map.addControl(time_series_control);
 
         // Bouton download
         let download_control = new ol.control.Control({
