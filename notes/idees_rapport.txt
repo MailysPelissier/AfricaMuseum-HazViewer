@@ -1,0 +1,14 @@
+Idées parties :
+- comment afficher paragraphs : comparatif vues
+- postgres (pg connect) vs geoserver
+- promesses vs appel global
+- format des données (wfs, wms, raster, vecteur)
+
+Ouverture / prolongement :
+Automatiser processus maj data (QGIS?)
+Ajout nouveau type data
+
+
+A faire :
+Maj nex data Bram (valeurs max)
+ICT
