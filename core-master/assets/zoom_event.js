@@ -84,9 +84,16 @@ Vue.createApp({
             // Affichage popup time series
             show_time_series_form: false,
 
-            publication_time_list: [],
-            publication_time_array: [],
+            // Affichage graphe série temporelle par minute / jour
+            show_time_series_minute: true,
+            show_time_series_jour: false,
 
+            // Données sur la date de publication des paragraphes pour créer les séries temporelles
+            publication_time_list: [],
+            publication_time_minute_array: [],
+            publication_time_minute_sum_array: [],
+            publication_time_jour_array: [],
+            publication_time_jour_sum_array: [],
 
             // Affichage popup download
             show_download_form: false,
@@ -265,11 +272,39 @@ Vue.createApp({
 
             })
             .then(data => {
+                // Création des données sur la date de publication des paragraphes pour créer les séries temporelles
+                this.create_time_series_data();
+            })
+            .then(data => {
                 // Désffichage du popup qui indique que les données chargent
                 document.getElementById("loading_popup").style.display = "none";
                 return data;
             })
        
+        },
+
+        // Création des données sur la date de publication des paragraphes pour créer les séries temporelles
+        create_time_series_data() {
+
+            // Données par minute
+            let dictionnaire_minute = this.publication_time_list.reduce((valeur, {date}) => {
+                valeur[date] = valeur[date] || {date: date, count: 0};
+                valeur[date]['count'] += 1;        
+                return valeur;
+            }, {});
+            this.publication_time_minute_array = Object.values(dictionnaire_minute).map(a => a.date);
+            this.publication_time_minute_sum_array = Object.values(dictionnaire_minute).map(a => a.count);
+
+            // Données par jour
+            let dictionnaire_jour = this.publication_time_list.reduce((valeur, {date}) => {
+                let day = date.substring(0,10);
+                valeur[day] = valeur[day] || {date: day, count: 0};
+                valeur[day]['count'] += 1;        
+                return valeur;
+            }, {});
+            this.publication_time_jour_array = Object.values(dictionnaire_jour).map(a => a.date);
+            this.publication_time_jour_sum_array = Object.values(dictionnaire_jour).map(a => a.count);
+
         },
 
         // Crée le texte en récupérant les infos sur le paragraph, change le style du paragraph
@@ -431,54 +466,101 @@ Vue.createApp({
 
         },
 
-        time_series_form() {
+        // Affiche le form de time series, ferme les autres forms ouverts
+        setup_time_series_form() {
 
             this.show_time_series_form = !this.show_time_series_form;
             this.show_download_form = false;
 
-            let dictionnaire_dates = this.publication_time_list.reduce((valeur, {date}) => {
-                valeur[date] = valeur[date] || {date: date, count: 0};
-                valeur[date]['count'] += 1;        
-                return valeur;
-            }, {});
-            this.publication_time_array = Object.values(dictionnaire_dates);
-            console.log(this.publication_time_array)
-            let min_date = this.publication_time_array[0].date;
-            let max_date = this.publication_time_array[this.publication_time_array.length-1].date;
-            let max_publi = this.publication_time_array.reduce(function(prev, current) {
-                return (prev && prev.count > current.count) ? prev : current;
-            })
-            console.log(min_date,max_date,max_publi.count)
-            let publication_time_date_array = this.publication_time_array.map(a => a.date);
-            let publication_time_sum_array = this.publication_time_array.map(a => a.count);
-            console.log(publication_time_date_array,publication_time_sum_array)
+            if (this.show_time_series_form) {
+                this.create_time_series_plot();
+            }
+
+        },
+
+        // Affiche le bon menu du form time series (minute / jour) selon le bouton sélectionné
+        setup_time_series_change_menu() {
+
+            this.show_time_series_minute = !this.show_time_series_minute;
+            this.show_time_series_jour = !this.show_time_series_jour;
 
             if (this.show_time_series_form) {
-
-                this.$nextTick(() => {
-
-                    let data = [
-                        {
-                            // x: ['2013-10-04 22:23:00', '2013-11-04 22:23:00', '2013-12-04 22:23:00'],
-                            x: publication_time_date_array,
-                            y: publication_time_sum_array,
-                            type: 'bar'
-                        }
-                    ];
-                    var layout = {
-                        title: {
-                            text: 'Publication time'
-                        }
-                    };
-                    Plotly.newPlot('form_time_series', data, layout, {scrollZoom: true});
-                
-                })
-
+                this.create_time_series_plot();
             }
+
+        },
+        
+        // Création des graphes des séries temporelles
+        create_time_series_plot() {
+
+            let x;
+            let y;
+            let subtitle;
+            let div_name;
+            let filename;
+
+            if (this.show_time_series_minute) {
+                x = this.publication_time_minute_array;
+                y = this.publication_time_minute_sum_array;
+                subtitle = 'By minute';
+                div_name = 'time_series_minute_plot';   
+                filename = `graph_by_minute_${this.event_id}`;
+            }
+
+            if (this.show_time_series_jour) {
+                x = this.publication_time_jour_array;
+                y = this.publication_time_jour_sum_array;
+                subtitle = 'By day';
+                div_name = 'time_series_jour_plot';
+                filename = `graph_by_day_${this.event_id}`;
+            }
+
+            this.$nextTick(() => {
+
+                let data = [
+                    {
+                        x: x,
+                        y: y,
+                        type: 'bar',
+                    }
+                ];
+
+                let layout = {
+                    title: {
+                        text: 'Publication time',
+                        subtitle: {
+                            text: subtitle
+                        }
+                    },
+                    xaxis: {
+                        title: {
+                            text: 'Date',
+                        }
+                    },
+                    yaxis: {
+                        title: {
+                            text: 'Number of paragraphs published',
+                        }
+                    },
+                };
+
+                let config = {
+                    scrollZoom: true,
+                    editable: true,
+                    toImageButtonOptions: { filename: filename },
+                    displayModeBar: true,
+                    modeBarButtonsToRemove: ['select2d', 'lasso2d', 'resetScale2d'],
+                    displaylogo: false,
+                    responsive: true,
+                };
+
+                Plotly.newPlot(div_name, data, layout, config);
+            
+            })
             
         },
 
-        // Affiche le form de download
+        // Affiche le form de download, ferme les autres forms ouverts
         setup_download_form() {
 
             this.show_download_form = !this.show_download_form;

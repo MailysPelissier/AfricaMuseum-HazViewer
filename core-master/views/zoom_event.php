@@ -22,6 +22,26 @@
 
             <div id=loading_popup class="popup center_popup">Loading...</div>
 
+            <div id="form_time_series" class="time_series_form popup scroll_box"  v-if="show_time_series_form">
+
+                <div id="top_form" class="flexrow space_between padding">
+                    <h5>Time series</h5>
+                    <button class="vertical_center" @click="setup_time_series_form">&#215;</button>
+                </div> 
+
+                <div id=choix_time_series class="flexrow space_evenly padding">
+                    <button class="btn btn-secondary" type="button" v-if=show_time_series_minute>By minute</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_minute @click="setup_time_series_change_menu">By day</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_jour @click="setup_time_series_change_menu">By minute</button>
+                    <button class="btn btn-secondary" type="button" v-if=show_time_series_jour>By day</button>
+                </div>
+
+                <div id="time_series_minute_plot" v-if="show_time_series_minute"></div>
+
+                <div id="time_series_jour_plot" v-if="show_time_series_jour"></div>
+
+            </div>
+
             <div id="form_download" class="form popup scroll_box" v-if="show_download_form">
 
                 <div id="top_form" class="flexrow space_between padding">
@@ -57,9 +77,6 @@
                     <button id="cancel" @click="setup_download_form">Close</button>
                 </div>
 
-            </div>
-
-            <div id="form_time_series" class="form popup scroll_box time_series_form"  v-if="show_time_series_form">
             </div>
 
         </div>
@@ -99,7 +116,7 @@
         <div id=popup_clic class="popup petit_popup scroll_box"></div>
 
         <div id=time_series_div class='bouton_1 ol-unselectable ol-control'>
-            <button class=open_form_button @click=time_series_form>Time series</button>
+            <button class=open_form_button @click=setup_time_series_form>Time series</button>
         </div>
 
         <div id=download_div class='bouton_2 ol-unselectable ol-control'>
