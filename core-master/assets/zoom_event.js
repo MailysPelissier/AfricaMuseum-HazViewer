@@ -5,35 +5,35 @@ Vue.createApp({
         return {
 
             // Initialisation de la carte et des couches
-            map: null, // Initialisation de la map
-            landslide_susceptibility_layer: null, // Initialisation de la couche landslide susceptibility
-            rivers_layer: null, // Initialisation de la couche rivières
-            countries_layer: null, // Initialisation de la couche countries
-            bbox_events_layer: null, // Initialisation de la couche bbox events
-            bbox_paragraphs_layer: null, // Initialisation de la couche bbox paragraphs
-            selected_event_layer: null, // Initialisation de la couche selected event
-            paragraphs_layer: null, // Initialisation de la couche paragraphs
-            selected_paragraph_layer: null, // Initialisation de la couche selected paragraph
-            localisation_layer: null, // Initialisation de la couche de géolocalisation
+            map: null, // Initialisation de la carte
+            landslide_susceptibility_layer: null, // Initialisation de la couche de susceptibilité des tremblements de terre
+            rivers_layer: null, // Initialisation de la couche des rivières
+            countries_layer: null, // Initialisation de la couche des pays
+            bbox_events_layer: null, // Initialisation de la couche de l'emprise des évènements
+            bbox_paragraphs_layer: null, // Initialisation de la couche de l'emprise des paragraphes
+            selected_event_layer: null, // Initialisation de la couche contenant uniquement l'évènement sélectionné
+            paragraphs_layer: null, // Initialisation de la couche des paragraphes
+            selected_paragraph_layer: null, // Initialisation de la couche contenant uniquement le paragraphe sélectionné
+            location_layer: null, // Initialisation de la couche de géolocalisation
 
-            // Event et paragraph sélectionnés
-            event_id: '', // Permet de récupérer l'event
-            selected_event: null, // Permet de conserver l'event sélectionné
-            selected_paragraph: null, // Permet de conserver le paragraph sélectionné
+            // Evènement et paragraphe sélectionnés
+            event_id: '', // Permet de récupérer l'évènement par son identifiant
+            selected_event: null, // Permet de conserver l'évènement sélectionné
+            selected_paragraph: null, // Permet de conserver le paragraphe sélectionné
             
-            // Affichage des propriétés des events et des paragraphs hazminer
-            // Propriétés principales des events
+            // Affichage des propriétés des évènements et des paragraphes hazminer
+            // Propriétés principales des évènements
             event_main_properties: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected", "n_paragraphs", 
                 "n_articles"],
             event_main_properties_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
                 "Number of paragraphs", "Number of articles"],
-            // Autres propriétés des events
+            // Autres propriétés des évènements
             event_other_properties: ["country_found", "n_languages", "n_source_countries", "n_domains", "duration", "hazard_score"],
             event_other_properties_title: ["Country", "Number of languages", "Number of source countries", "Number of domains", "Duration", "Hazard score"],
-            // Propriétés localisations des events
+            // Propriétés localisations des évènements
             event_location_properties: ["latitude", "longitude", "min_lat", "max_lat", "min_lon", "max_lon"],
             event_location_properties_title: ["Latitude", "Longitude", "Minimum latitude", "Maximum latitude", "Minimum longitude", "Maximum longitude"],
-            // Propriétés statistiques des events (souvent null)
+            // Propriétés statistiques des évènements (souvent null)
             event_number_properties: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", 
                 "time_mostfreq_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "median_injured", "mostfreq_affected", 
                 "n_mostfreq_affected", "time_mostfreq_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "median_missing", 
@@ -43,28 +43,28 @@ Vue.createApp({
                 "Number of most frequent injured", "Time of most frequent injured", "Median injured", "Most frequent affected", "Number of most frequent affected", 
                 "Time of most frequent affected", "Median affected", "Most frequent missing", "Number of most frequent missing",  "Time of most frequent missing", 
                 "Median missing", "Most frequent evacuated", "Number of most frequent evacuated", "Time of most frequent evacuated", "Median evacuated"],
-            // Propriétés des events à télécharger
+            // Propriétés des évènements à télécharger
             event_download_properties: ["event_id", "n_paragraphs", "n_articles", "hazard_type", "hazard_score", "latitude", "longitude", "min_lat", "max_lat", 
                 "min_lon", "max_lon", "event_time", "start_time", "end_time", "duration", "n_languages", "n_source_countries", "n_domains", "mostfreq_death", 
                 "n_mostfreq_death", "time_mostfreq_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "median_homeless",
                 "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", 
                 "time_mostfreq_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "median_missing", "mostfreq_evacuated", 
                 "n_mostfreq_evacuated", "time_mostfreq_evacuated", "median_evacuated", "country_found"],
-            // Propriétés principales des paragraphs
+            // Propriétés principales des paragraphes
             paragraph_main_properties: ["title", "hazard_type", "publication_time", "paragraph_time", "nb_death", "nb_injured", "nb_affected", "article_language"],
             paragraph_main_properties_title: ["Title", "Hazard type", "Publication time", "Paragraph time", "Number of death", "Number of injured", 
                 "Number of affected", "Article language"],
-            // Autres propriétés des paragraphs
+            // Autres propriétés des paragraphes
             paragraph_other_properties: ["extracted_text", "original_text", "country", "country_found", "continent", "population_density", "source_country", 
                 "domain_url", "extracted_location", "ner_score", "n_locations", "disaster_label", "disaster_score", "hazard_type_score"],
-            // Propriétés localisations des events
+            // Propriétés localisations des paragraphes
             paragraph_location_properties: ["latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon"],
-            // Propriétés statistiques des paragraphs (souvent null)
+            // Propriétés statistiques des paragraphes (souvent null)
             paragraph_number_properties: ["nb_death", "score_death", "answer_death", "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", 
                 "score_injured", "answer_injured", "nb_affected", "score_affected", "answer_affected", "nb_missing","score_missing", "answer_missing", 
                 "nb_evacuated", "score_evacuated", "answer_evacuated", "nb_death_min","nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", 
                 "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min", "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max"],
-            // Propriétés des paragraphs à télécharger
+            // Propriétés des paragraphes à télécharger
             paragraph_download_properties: ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
                 "paragraph_id", "original_text", "disaster_label", "disaster_score", "hazard_type", "hazard_type_score", "nb_death", "score_death", "answer_death",
                 "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
@@ -72,19 +72,19 @@ Vue.createApp({
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
                 "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found", "continent", "population_density"],
-            event_main_text: '', // Texte sur les events (haut droite de l'écran)
-            event_other_text: '', // Texte sur les events, partie optionnelle autres (haut droite de l'écran)
-            event_location_text: '', // Texte sur les events, partie optionnelle localisations (haut droite de l'écran)
-            event_number_text: '', // Texte sur les events, partie optionnelle statistiques (haut droite de l'écran)
-            paragraph_text: '', // Texte sur les paragraphs (bas droite de l'écran)
-            other_information: false, // Affichage des informations supplémentaires ou non (inactif par défaut)
-            location_information: false, // Affichage des informations de localisation ou non (inactif par défaut)
-            number_information: false, // Affichage des informations statistiques ou non (inactif par défaut)  
+            event_main_text: '', // Texte sur les évènements (haut droite de l'écran)
+            event_other_text: '', // Texte sur les évènements, partie optionnelle autres (haut droite de l'écran)
+            event_location_text: '', // Texte sur les évènements, partie optionnelle localisations (haut droite de l'écran)
+            event_number_text: '', // Texte sur les évènements, partie optionnelle statistiques (haut droite de l'écran)
+            paragraph_text: '', // Texte sur les paragraphes (bas droite de l'écran)
+            other_information: false, // Affichage des informations supplémentaires des évènements ou non (inactif par défaut)
+            location_information: false, // Affichage des informations de localisation des évènements ou non (inactif par défaut)
+            number_information: false, // Affichage des informations statistiques des évènements ou non (inactif par défaut)  
 
-            // Affichage popup time series
+            // Affichage de la fenêtre des séries temporelles
             show_time_series_form: false,
 
-            // Affichage graphe série temporelle par minute / jour
+            // Choix de la série temporelle à afficher (par minute / par jour)
             show_time_series_minute: true,
             show_time_series_jour: false,
 
@@ -95,15 +95,15 @@ Vue.createApp({
             publication_time_jour_array: [],
             publication_time_jour_sum_array: [],
 
-            // Affichage popup download
+            // Affichage de la fenêtre de téléchargement
             show_download_form: false,
 
-            // Checkbox download
+            // Choix du mode de téléchargement
             download_e: true,
             download_p: false,
             download_e_p: false,
 
-            // Barre de progression
+            // Barre de progression du téléchargement
             show_fetch_progression: false,
             show_download_progression: false,
             fetch_progression: 'Fetch data in progress...',
@@ -116,25 +116,25 @@ Vue.createApp({
     methods: {
 
         // Récupération de l'évènement, mise en place de la page
-        recuperer_event() {
+        get_event() {
 
-            // Récupération de l'event_id depuis le php
+            // Récupération de l'identifiant de l'évènement depuis le php
             this.event_id = document.getElementById('app').dataset.event_id;
 
-            // Requête vers le geoserver, on récupère l'event
-            let cqlFilter = `event_id = '${this.event_id}'`;
+            // Requête vers le geoserver, on récupère l'évènement
+            let cql_filter = `event_id = '${this.event_id}'`;
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
-                + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+                + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
             fetch(url)
             .then(result => result.json())
             .then(json => {
 
-                // Récupération de l'event
+                // Récupération de l'évènement
                 let features = new ol.format.GeoJSON().readFeatures(json, {
-                    featureProjection: 'EPSG:3857'
+                    featureProjection: 'EPSG:3857',
                 });
 
-                // L'event est sauvegardé et ajouté à la couche selected event
+                // L'évènement est sauvegardé et ajouté à la couche évènement sélectionné
                 features.forEach(event => {
                     this.selected_event = event;
                     // Dates ne dépendent plus du fuseau horaire
@@ -144,23 +144,23 @@ Vue.createApp({
                     this.selected_event_layer.getSource().addFeature(event);
                 });
 
-                // Afficher le texte sur l'event
-                this.affichage_selection_event(this.selected_event)
+                // Afficher le texte sur l'évènement
+                this.show_selected_event_data(this.selected_event);
 
-                // Afficher la bbox de l'event
-                this.affichage_bbox_event(this.selected_event);
+                // Afficher l'emprise de l'évènement
+                this.show_selected_event_bbox(this.selected_event);
 
-                // Afficher les paragraphs liés à l'event
-                this.affichage_paragraphs_geoserver();
+                // Afficher les paragraphes liés à l'évènement
+                this.get_paragraphs();
 
             })
             
         },
 
-        // Crée le texte en récupérant les infos sur l'event
-        affichage_selection_event(feature) {
+        // Crée le texte en récupérant les infos sur l'évènement
+        show_selected_event_data(feature) {
 
-            // Chargement et affichage du texte sur l'event
+            // Chargement et affichage du texte sur l'évènement
             this.event_main_text = '<ul>';
             this.event_other_text = '<ul>';
             this.event_location_text = '<ul>';
@@ -168,12 +168,10 @@ Vue.createApp({
             // Les propriétés principales s'affichent tout le temps
             for (let i = 0; i < this.event_main_properties.length; i++) {
                 if (["event_time", "start_time", "end_time"].includes(this.event_main_properties[i])) {
-                    this.event_main_text += '<li>' + this.event_main_properties_title[i] + ': ' 
-                    + feature.get(this.event_main_properties[i]).substring(0,10) + '</li>';
+                    this.event_main_text += '<li>' + this.event_main_properties_title[i] + ': ' + feature.get(this.event_main_properties[i]).substring(0,10) + '</li>';
                 }
                 else {
-                    this.event_main_text += '<li>' + this.event_main_properties_title[i] + ': ' 
-                    + feature.get(this.event_main_properties[i]) + '</li>';
+                    this.event_main_text += '<li>' + this.event_main_properties_title[i] + ': ' + feature.get(this.event_main_properties[i]) + '</li>';
                 } 
             }
             // Les propriétés supplémentaires se chargent, mais elles ne s'affichent que si la checkbox Show other information est cochée
@@ -201,10 +199,10 @@ Vue.createApp({
 
         },
 
-        // Affichage de la bbox de l'event et zoom sur cette emprise
-        affichage_bbox_event(feature) {
+        // Affichage de l'emprise de l'évènement et zoom sur cette emprise
+        show_selected_event_bbox(feature) {
 
-            // Récupérer les valeurs de la bbox (en 4326)
+            // Récupérer les valeurs de l'emprise (en 4326)
             let min_lat_4326 = feature.get('min_lat');
             let max_lat_4326 = feature.get('max_lat');
             let min_lon_4326 = feature.get('min_lon');
@@ -221,15 +219,16 @@ Vue.createApp({
             let max_lon = extent3857[2];
             let max_lat = extent3857[3];
             
-            // Création de la feature à l'aide de ses coordonnées
-            let new_event = new ol.Feature(
+            // Création du rectangle de l'emprise à l'aide de ses coordonnées
+            let event_bbox = new ol.Feature(
                 ol.geom.Polygon.fromExtent([min_lon, min_lat, max_lon, max_lat])
             );
 
-            // Ajout à la couche bbox events
-            this.bbox_events_layer.getSource().addFeature(new_event);
+            // Ajout à la couche emprise de l'évènement
+            this.bbox_events_layer.getSource().addFeature(event_bbox);
 
-            // Zoom sur l'emprise de l'event
+            // Zoom sur l'emprise de l'évènement si cette emprise est non nulle
+            // Zoom par défaut à 10 si l'emprise est nulle
             this.map.getView().fit([min_lon, min_lat, max_lon, max_lat], this.map.getSize());
             if (min_lon === max_lon || min_lat === max_lat) {
                 this.map.getView().setZoom(10);
@@ -240,31 +239,27 @@ Vue.createApp({
 
         },
 
-        // Affichage des paragraphs correspondant à l'event (depuis Geoserver)
-        affichage_paragraphs_geoserver() {
+        // Affichage des paragraphs correspondant à l'évènement (depuis Geoserver)
+        get_paragraphs() {
 
             // Affichage du popup qui indique que les données chargent
             document.getElementById("loading_popup").style.display = "block";
 
-            // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
-            // Requête vue virtuelle geoserver
-            // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_geo`
-            //     + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
-            // Requête vue matérialisée postgres
-            let cqlFilter = `event_id = '${this.event_id}'`;
+            // Requête vers le geoserver, on récupère seulement les paragraphes de l'évènement
+            let cql_filter = `event_id = '${this.event_id}'`;
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
-                + `&outputFormat=application/json`  + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+                + `&outputFormat=application/json`  + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
             fetch(url)
             .then(result => result.json())
             .then(json => {
                 
-                // Récupération des groupes de paragraphs
+                // Récupération des groupes de paragraphes
                 let features = new ol.format.GeoJSON().readFeatures(json, {
                     dataProjection: 'EPSG:4326',         // Projection des données dans le GeoJSON
-                    featureProjection: 'EPSG:3857'       // Projection de la carte (Web Mercator)
+                    featureProjection: 'EPSG:3857',       // Projection de la carte (Web Mercator)
                 });
 
-                // Chaque paragraph récupéré est ajouté à la couche paragraphs, sa date de publication est ajoutée à la liste
+                // Chaque paragraphe récupéré est ajouté à la couche paragraphes, sa date de publication est ajoutée à la liste
                 features.forEach(feature => {
                     this.paragraphs_layer.getSource().addFeature(feature);
                     this.publication_time_list.push({date: feature.get('publication_time')});
@@ -276,44 +271,20 @@ Vue.createApp({
                 this.create_time_series_data();
             })
             .then(data => {
-                // Désffichage du popup qui indique que les données chargent
+                // Désaffichage du popup qui indique que les données chargent
                 document.getElementById("loading_popup").style.display = "none";
                 return data;
             })
        
         },
 
-        // Création des données sur la date de publication des paragraphes pour créer les séries temporelles
-        create_time_series_data() {
+        // Crée le texte en récupérant les infos sur le paragraphe, change le style du paragraphe
+        show_selected_paragraph_data(feature) {
 
-            // Données par minute
-            let dictionnaire_minute = this.publication_time_list.reduce((valeur, {date}) => {
-                valeur[date] = valeur[date] || {date: date, count: 0};
-                valeur[date]['count'] += 1;        
-                return valeur;
-            }, {});
-            this.publication_time_minute_array = Object.values(dictionnaire_minute).map(a => a.date);
-            this.publication_time_minute_sum_array = Object.values(dictionnaire_minute).map(a => a.count);
+            // Garder le paragraphe
+            this.selected_paragraph = feature;
 
-            // Données par jour
-            let dictionnaire_jour = this.publication_time_list.reduce((valeur, {date}) => {
-                let day = date.substring(0,10);
-                valeur[day] = valeur[day] || {date: day, count: 0};
-                valeur[day]['count'] += 1;        
-                return valeur;
-            }, {});
-            this.publication_time_jour_array = Object.values(dictionnaire_jour).map(a => a.date);
-            this.publication_time_jour_sum_array = Object.values(dictionnaire_jour).map(a => a.count);
-
-        },
-
-        // Crée le texte en récupérant les infos sur le paragraph, change le style du paragraph
-        affichage_selection_paragraph(feature) {
-
-            // Garder le paragraph
-            this.selected_paragraph = feature
-
-            // Chargement et affichage du texte sur le paragraph
+            // Chargement et affichage du texte sur le paragraphe
             this.paragraph_text = '<ul>';
             // Les propriétés principales s'affichent tout le temps
             for (let i = 0; i < this.paragraph_main_properties.length; i++) {
@@ -331,24 +302,24 @@ Vue.createApp({
             // Affichage contours scrollbox
             document.getElementById('paragraph_data_scroll_box').style.border = "1px solid #ccc";
 
-            // Couche selected paragraph vidée
+            // Couche du paragraphe sélectionné vidée
             this.selected_paragraph_layer.getSource().clear();
 
-            // Couche selected paragraph contient le paragraph sélectionné : permet de voir le paragraph
+            // Paragraphe sélectionné ajouté à la couche du paragraphe sélectionné : permet de voir le paragraphe
             this.selected_paragraph_layer.getSource().addFeature(feature);
 
-            // Affichage bbox et standard deviation du paragraph
-            this.affichage_bbox_paragraph(feature)
+            // Affichage emprise et écart-type associés à l'emprise du paragraphe
+            this.show_selected_paragraph_bbox(feature);
 
         },
 
-        // Affichage bbox et standard deviation du paragraph
-        affichage_bbox_paragraph(feature) {
+        // Affichage emprise et écart-type associés à l'emprise du paragraphe
+        show_selected_paragraph_bbox(feature) {
 
-            // Couche bbox paragraphs vidée
+            // Couche emprise des paragraphes vidée
             this.bbox_paragraphs_layer.getSource().clear();
 
-            // Récupérer les valeurs de la bbox (en 4326)
+            // Récupérer les valeurs de l'emprise (en 4326)
             let min_lat_4326 = feature.get('min_lat');
             let max_lat_4326 = feature.get('max_lat');
             let min_lon_4326 = feature.get('min_lon');
@@ -365,13 +336,13 @@ Vue.createApp({
             let max_lon = extent3857[2];
             let max_lat = extent3857[3];
             
-            // Création de la feature à l'aide de ses coordonnées
-            let new_paragraph = new ol.Feature(
+            // Création du rectangle de l'emprise à l'aide de ses coordonnées
+            let paragraph_bbox = new ol.Feature(
                 ol.geom.Polygon.fromExtent([min_lon, min_lat, max_lon, max_lat])
             );
 
-            // Ajout à la couche bbox paragraphs
-            this.bbox_paragraphs_layer.getSource().addFeature(new_paragraph);
+            // Ajout à la couche emprise des paragraphes
+            this.bbox_paragraphs_layer.getSource().addFeature(paragraph_bbox);
 
             // Affichage de l'écart-type s'il existe
             if (feature.get('std_dev') != null) {
@@ -448,7 +419,7 @@ Vue.createApp({
                     [RightRight[0], RightRight[1] + std_dev/10]
                 ]));
                 
-                // Ajout à la couche bbox paragraphs
+                // Ajout à la couche emprise des paragraphes
                 this.bbox_paragraphs_layer.getSource().addFeature(lineTop);
                 this.bbox_paragraphs_layer.getSource().addFeature(lineBottom);
                 this.bbox_paragraphs_layer.getSource().addFeature(lineLeft);
@@ -466,7 +437,31 @@ Vue.createApp({
 
         },
 
-        // Affiche le form de time series, ferme les autres forms ouverts
+        // Création des données sur la date de publication des paragraphes pour créer les séries temporelles
+        create_time_series_data() {
+
+            // Données par minute
+            let minute_dictionnary = this.publication_time_list.reduce((value, {date}) => {
+                value[date] = value[date] || {date: date, count: 0};
+                value[date]['count'] += 1;        
+                return value;
+            }, {});
+            this.publication_time_minute_array = Object.values(minute_dictionnary).map(a => a.date);
+            this.publication_time_minute_sum_array = Object.values(minute_dictionnary).map(a => a.count);
+
+            // Données par jour
+            let day_dictionnary = this.publication_time_list.reduce((value, {date}) => {
+                let day = date.substring(0,10);
+                value[day] = value[day] || {date: day, count: 0};
+                value[day]['count'] += 1;        
+                return value;
+            }, {});
+            this.publication_time_jour_array = Object.values(day_dictionnary).map(a => a.date);
+            this.publication_time_jour_sum_array = Object.values(day_dictionnary).map(a => a.count);
+
+        },
+
+        // Affiche la fenêtre des séries temporelles, ferme les autres fenêtres ouvertes
         setup_time_series_form() {
 
             this.show_time_series_form = !this.show_time_series_form;
@@ -478,7 +473,7 @@ Vue.createApp({
 
         },
 
-        // Affiche le bon menu du form time series (minute / jour) selon le bouton sélectionné
+        // Affiche le bon menu de la fenêtre des séries temporelles (par minute / par jour) selon le bouton sélectionné
         setup_time_series_change_menu() {
 
             this.show_time_series_minute = !this.show_time_series_minute;
@@ -490,7 +485,7 @@ Vue.createApp({
 
         },
         
-        // Création des graphes des séries temporelles
+        // Création des graphes des séries temporelles (utilisation de Plotly)
         create_time_series_plot() {
 
             let x;
@@ -529,7 +524,7 @@ Vue.createApp({
                     title: {
                         text: 'Publication time',
                         subtitle: {
-                            text: subtitle
+                            text: subtitle,
                         }
                     },
                     xaxis: {
@@ -560,7 +555,7 @@ Vue.createApp({
             
         },
 
-        // Affiche le form de download, ferme les autres forms ouverts
+        // Affiche la fenêtre de téléchargement, ferme les autres fenêtres ouvertes
         setup_download_form() {
 
             this.show_download_form = !this.show_download_form;
@@ -568,9 +563,9 @@ Vue.createApp({
 
         },
 
-        // Permet d'avoir une seule checkbox sélectionnée pour le choix du mode de download
+        // Permet d'avoir une seule checkbox sélectionnée pour le choix du mode de téléchargement
         checkbox_download(checkbox_name) {
-            let checkbox_list = ['download_e', 'download_p', 'download_e_p']
+            let checkbox_list = ['download_e', 'download_p', 'download_e_p'];
             for (let checkbox of checkbox_list) {
                 if (checkbox_name != checkbox) {
                     this[checkbox] = false;
@@ -578,27 +573,27 @@ Vue.createApp({
             }
         },
 
-        // Download
+        // Téléchargement
         async download() {
 
-            // Si aucun mode de download n'est choisi
+            // Si aucun mode de téléchargement n'est choisi
             if (!(this.download_e || this.download_p || this.download_e_p)) {
                 alert("No download mode selected!");
                 return;
             }
 
-            // Création du tableau pour le join final, initialisation du texte (header)
+            // Création du tableau pour la jointure finale, initialisation du texte (header)
             let event_content_lines = [this.event_download_properties.join(',')];
 
-            // Affichage de la progression du download
+            // Affichage de la progression du téléchargement
             this.show_fetch_progression = true;
             this.show_download_progression = true;
 
-            // Récupération de l'event
+            // Récupération de l'évènement
             let f = this.selected_event;
 
             // Création d'une ligne de texte (event.csv)
-            // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+            // Toutes les valeurs sont entourées de guillemets
             if(this.download_e || this.download_e_p) {
                 let row = this.event_download_properties.map(prop => {
                     let value = f.get(prop);
@@ -609,10 +604,10 @@ Vue.createApp({
                 event_content_lines.push(row);
             }
 
-            // Création du texte de paragraphs.csv
-            let paragraph_content_lines
+            // Création du texte concernant les paragraphes (paragraphs.csv)
+            let paragraph_content_lines;
             if(this.download_p || this.download_e_p) {
-                paragraph_content_lines = await this.paragraph_download_text_filter();
+                paragraph_content_lines = await this.create_paragraph_download_text();
             }
                 
             // Désaffichage de la progression du download
@@ -621,44 +616,40 @@ Vue.createApp({
             this.fetch_progression = 'Fetch data in progress...';
             this.download_progression = 0;
 
-            // Téléchargement des events
+            // Téléchargement des évènements
             if(this.download_e || this.download_e_p) {
-                this.creation_csv(event_content_lines, `event_${this.event_id}.csv`);
+                this.create_csv(event_content_lines, `event_${this.event_id}.csv`);
             }
 
-            // Téléchargement des paragraphs
+            // Téléchargement des paragraphes
             if(this.download_p || this.download_e_p) {
-                this.creation_csv(paragraph_content_lines, `paragraphs_${this.event_id}.csv`);
+                this.create_csv(paragraph_content_lines, `paragraphs_${this.event_id}.csv`);
             }
 
         },
 
-        // Création du texte de download des paragraphs liés à un event
-        async paragraph_download_text_filter() {
+        // Création du texte de téléchargement des paragraphes liés à un évènement
+        async create_paragraph_download_text() {
 
-            // Création du tableau pour le join final, initialisation du texte (header)
+            // Création du tableau pour la jointure finale, initialisation du texte (header)
             let paragraph_content_lines = [this.paragraph_download_properties.join(',')];
 
-            // Liste permettent d'éviter les paragraphs en double
+            // Liste permettant d'éviter les paragraphes en double
             let seen_paragraph_id = new Set();
 
-            // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
-            // Requête vue virtuelle geoserver
-            // let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_geo`
-            //     + `&outputFormat=application/json` + `&viewparams=event_id:${this.event_id}`;
-            // Requête vue matérialisée postgres
-            let cqlFilter = `event_id = '${this.event_id}'`
+            // Requête vers le geoserver, on récupère seulement les paragraphes de l'évènement
+            let cql_filter = `event_id = '${this.event_id}'`
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
-                + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cqlFilter);
+                + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
             let result = await fetch(url);
             let json = await result.json();
             this.fetch_progression = 'Fetch data completed!';
                 
-            // Récupération des paragraphs
+            // Récupération des paragraphes
             let features = json.features;
 
-            // Pour chaque paragraph
-            let compteur_features = 0;
+            // Pour chaque paragraphe
+            let count_features = 0;
             for (let f of features) {
 
                 let paragraph_id = f.properties.paragraph_id;
@@ -671,7 +662,7 @@ Vue.createApp({
                 seen_paragraph_id.add(paragraph_id);
 
                 // Création d'une ligne de texte (paragraphs.csv)
-                // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                // Toutes les valeurs sont entourées de guillemets
                 let row = this.paragraph_download_properties.map(prop => {
                     let value = f.properties[prop];
                     if (value == null) return ''; // gérer les null
@@ -681,11 +672,11 @@ Vue.createApp({
                 paragraph_content_lines.push(row);
 
                 // Calcul de la progression
-                compteur_features += 1;
-                this.download_progression = parseInt(compteur_features*100/features.length);
+                count_features += 1;
+                this.download_progression = parseInt(count_features*100/features.length);
 
                 // Forcer une pause très courte pour mettre à jour le DOM
-                if (compteur_features % 100 === 0) {
+                if (count_features % 100 === 0) {
                     await new Promise(resolve => setTimeout(resolve, 0));
                 }
 
@@ -696,11 +687,11 @@ Vue.createApp({
         },
 
         // Crée le csv à partir du texte
-        creation_csv(contentLines, filename) {
+        create_csv(content_lines, filename) {
 
             try {
 
-                let content = contentLines.join('\n');
+                let content = content_lines.join('\n');
 
                 // Essayer de créer le blob et de le télécharger
                 let blob;
@@ -727,14 +718,14 @@ Vue.createApp({
 
         },
 
-        // Download d'un screenshot de la map
+        // Téléchargement d'une capture d'écran de la carte
         download_screenshot() {
 
-            let mapCanvas = document.createElement('canvas');
+            let map_canvas = document.createElement('canvas');
             let size = this.map.getSize();
-            mapCanvas.width = size[0];
-            mapCanvas.height = size[1];
-            let mapContext = mapCanvas.getContext('2d');
+            map_canvas.width = size[0];
+            map_canvas.height = size[1];
+            let map_context = map_canvas.getContext('2d');
 
             // Dessine tous les canvas de la carte (layers)
             Array.prototype.forEach.call(
@@ -742,107 +733,104 @@ Vue.createApp({
                 function (canvas) {
                     if (canvas.width > 0) {
                         let opacity = canvas.parentNode.style.opacity || canvas.style.opacity;
-                        mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+                        map_context.globalAlpha = opacity === '' ? 1 : Number(opacity);
                         let matrix;
                         let transform = canvas.style.transform;
                         if (transform) {
-                            // Get the transform parameters from the style's transform matrix
                             matrix = transform.match(/^matrix\(([^\(]*)\)$/)[1].split(',').map(Number);
                         } else {
                             matrix = [parseFloat(canvas.style.width) / canvas.width, 0, 0, parseFloat(canvas.style.height) / canvas.height, 0, 0];
                         }
-                        // Apply the transform to the export map context
-                        CanvasRenderingContext2D.prototype.setTransform.apply(mapContext, matrix);
-                        let backgroundColor = canvas.parentNode.style.backgroundColor;
-                        if (backgroundColor) {
-                            mapContext.fillStyle = backgroundColor;
-                            mapContext.fillRect(0, 0, canvas.width, canvas.height);
+                        CanvasRenderingContext2D.prototype.setTransform.apply(map_context, matrix);
+                        let background_color = canvas.parentNode.style.backgroundColor;
+                        if (background_color) {
+                            map_context.fillStyle = background_color;
+                            map_context.fillRect(0, 0, canvas.width, canvas.height);
                         }
-                        mapContext.drawImage(canvas, 0, 0);
+                        map_context.drawImage(canvas, 0, 0);
                     }
                 },
             );
 
-            // Reset le contexte
-            mapContext.globalAlpha = 1;
-            mapContext.setTransform(1, 0, 0, 1, 0, 0);
+            map_context.globalAlpha = 1;
+            map_context.setTransform(1, 0, 0, 1, 0, 0);
 
             // Flèche nord (en haut à droite)
             let arrow_width = 25;
             let arrow_height = 40;
-            mapContext.strokeStyle = 'black';
-            mapContext.lineWidth = 1;                
+            map_context.strokeStyle = 'black';
+            map_context.lineWidth = 1;                
             // Triangle vers le haut
             // Partie gauche
-            mapContext.save();  
-            mapContext.translate(size[0] - arrow_width - 10, 25 + arrow_height);
-            mapContext.beginPath();
-            mapContext.moveTo(arrow_width / 2, -arrow_height);
-            mapContext.lineTo(0, 0);
-            mapContext.lineTo(arrow_width / 2 , -arrow_height / 3);
-            mapContext.closePath();
-            mapContext.fillStyle = 'rgba(255, 255, 255, 0.7)';          
-            mapContext.fill();
-            mapContext.stroke();
-            mapContext.restore();
+            map_context.save();  
+            map_context.translate(size[0] - arrow_width - 10, 25 + arrow_height);
+            map_context.beginPath();
+            map_context.moveTo(arrow_width / 2, -arrow_height);
+            map_context.lineTo(0, 0);
+            map_context.lineTo(arrow_width / 2 , -arrow_height / 3);
+            map_context.closePath();
+            map_context.fillStyle = 'rgba(255, 255, 255, 0.7)';          
+            map_context.fill();
+            map_context.stroke();
+            map_context.restore();
             // Partie droite
-            mapContext.save();
-            mapContext.translate(size[0] - 10, 25 + arrow_height);
-            mapContext.beginPath();
-            mapContext.moveTo(-arrow_width / 2, -arrow_height);
-            mapContext.lineTo(0, 0);
-            mapContext.lineTo(-arrow_width / 2 , -arrow_height / 3);
-            mapContext.closePath();
-            mapContext.fillStyle = 'rgba(0, 0, 0, 1)';
-            mapContext.fill();
-            mapContext.stroke();
-            mapContext.restore();
+            map_context.save();
+            map_context.translate(size[0] - 10, 25 + arrow_height);
+            map_context.beginPath();
+            map_context.moveTo(-arrow_width / 2, -arrow_height);
+            map_context.lineTo(0, 0);
+            map_context.lineTo(-arrow_width / 2 , -arrow_height / 3);
+            map_context.closePath();
+            map_context.fillStyle = 'rgba(0, 0, 0, 1)';
+            map_context.fill();
+            map_context.stroke();
+            map_context.restore();
             // "N"
-            mapContext.save();
-            mapContext.translate(size[0] - arrow_width / 2 - 15, 20);
-            mapContext.fillStyle = 'black';
-            mapContext.font = 'bold 16px sans-serif';
-            mapContext.fillText('N', 0, 0);
-            mapContext.restore();
+            map_context.save();
+            map_context.translate(size[0] - arrow_width / 2 - 15, 20);
+            map_context.fillStyle = 'black';
+            map_context.font = 'bold 16px sans-serif';
+            map_context.fillText('N', 0, 0);
+            map_context.restore();
             
-            // Scale line (en bas à gauche)
-            let scaleLineEl = document.querySelector('.ol-scale-line-inner');
-            mapContext.save();
-            let scaleText = scaleLineEl.innerText;
-            let scaleWidth = scaleLineEl.offsetWidth;
+            // Echelle (en bas à gauche)
+            let scaleline = document.querySelector('.ol-scale-line-inner');
+            map_context.save();
+            let scaleText = scaleline.innerText;
+            let scaleWidth = scaleline.offsetWidth;
             let barHeight = 8;
             let x = 10;
             let y = size[1] - barHeight - 30;
             // Barre
-            mapContext.fillStyle = 'white';
-            mapContext.strokeStyle = 'black';
-            mapContext.lineWidth = 1;
-            mapContext.fillRect(x, y, scaleWidth, barHeight);
-            mapContext.strokeRect(x, y, scaleWidth, barHeight);
+            map_context.fillStyle = 'white';
+            map_context.strokeStyle = 'black';
+            map_context.lineWidth = 1;
+            map_context.fillRect(x, y, scaleWidth, barHeight);
+            map_context.strokeRect(x, y, scaleWidth, barHeight);
             // Texte
-            mapContext.fillStyle = 'black';
-            mapContext.font = '12px sans-serif';
-            mapContext.fillText(scaleText, x, y + barHeight + 14);
-            mapContext.restore();
+            map_context.fillStyle = 'black';
+            map_context.font = '12px sans-serif';
+            map_context.fillText(scaleText, x, y + barHeight + 14);
+            map_context.restore();
 
             // Téléchargement
             let link = document.createElement("a");
-            link.href = mapCanvas.toDataURL();
+            link.href = map_canvas.toDataURL();
             link.download = `map_${this.event_id}.png`;
             link.click();
 
         },
 
-        // Récupérer la localisation et l'afficher
-        affichage_localisation() {
+        // Récupérer la localisation et l'afficher / la désafficher
+        show_location() {
 
-            if (this.localisation_layer.getVisible()) {
-                this.localisation_layer.setVisible(false);
+            if (this.location_layer.getVisible()) {
+                this.location_layer.setVisible(false);
             }
 
             else {
 
-                this.localisation_layer.setVisible(true);
+                this.location_layer.setVisible(true);
 
                 navigator.geolocation.getCurrentPosition((position) => {
 
@@ -852,22 +840,22 @@ Vue.createApp({
                     let precision_pos = position.coords.accuracy;
 
                     // Vider la couche localisation
-                    this.localisation_layer.getSource().clear();
+                    this.location_layer.getSource().clear();
 
                     // Transformer les coordonnées en EPSG:3857
                     let center = ol.proj.fromLonLat([longitude_pos, latitude_pos]);
 
-                    // Feature pour le point central
-                    let pointFeature = new ol.Feature(new ol.geom.Point(center));
+                    // Point central
+                    let point_feature = new ol.Feature(new ol.geom.Point(center));
 
-                    // Feature pour le cercle de précision (en mètres, donc dans la projection EPSG:3857)
-                    let circleFeature = new ol.Feature(new ol.geom.Circle(center, precision_pos));
+                    // Cercle de précision (en mètres, donc dans la projection EPSG:3857)
+                    let circle_feature = new ol.Feature(new ol.geom.Circle(center, precision_pos));
 
-                    // Ajouter les deux features à la couche
-                    this.localisation_layer.getSource().addFeatures([circleFeature, pointFeature]);
+                    // Ajouter les deux objets à la couche
+                    this.location_layer.getSource().addFeatures([circle_feature, point_feature]);
 
                     // Appliquer les styles
-                    this.localisation_layer.setStyle((feature) => {
+                    this.location_layer.setStyle((feature) => {
                         let geometry = feature.getGeometry();
                         if (geometry instanceof ol.geom.Point) {
                             return new ol.style.Style({
@@ -926,7 +914,7 @@ Vue.createApp({
                 new ol.layer.Group({
                     title: 'Raster layers',
                     layers: [
-                        // Couche landslide susceptibility
+                        // Couche de susceptibilité des tremblements de terre
                         this.landslide_susceptibility_layer = new ol.layer.Tile({
                             source: new ol.source.TileWMS({
                                 url: 'http://localhost:8080/geoserver/webGIS/wms',
@@ -988,7 +976,7 @@ Vue.createApp({
                         new ol.layer.Group({
                             title: 'Event',
                             layers: [
-                                // Création de la couche bbox events (vide)
+                                // Création de la couche de l'emprise des évènements
                                 this.bbox_events_layer = new ol.layer.Vector({
                                     source: new ol.source.Vector(),
                                     style: new ol.style.Style({
@@ -1003,7 +991,7 @@ Vue.createApp({
                                     title: 'Bbox event',
                                     zIndex: 10,
                                 }),
-                                // Création de la couche event selectionné (vide)
+                                // Création de la couche contenant uniquement l'évènement sélectionné (vide)
                                 this.selected_event_layer = new ol.layer.Vector({
                                     source: new ol.source.Vector(),
                                     style: new ol.style.Style({
@@ -1019,7 +1007,7 @@ Vue.createApp({
                                 }),
                             ],
                         }),
-                        // Création de la couche paragraphs (vide)
+                        // Création de la couche des paragraphes (vide)
                         this.paragraphs_layer = new ol.layer.Vector({
                             source: new ol.source.Vector(),
                             style: new ol.style.Style({
@@ -1036,7 +1024,7 @@ Vue.createApp({
                         new ol.layer.Group({
                             title: 'Selected paragraph',
                             layers: [
-                                // Création de la couche bbox paragraphs (vide)
+                                // Création de la couche de l'emprise des paragraphes (vide)
                                 this.bbox_paragraphs_layer = new ol.layer.Vector({
                                     source: new ol.source.Vector(),
                                     style: new ol.style.Style({
@@ -1051,7 +1039,7 @@ Vue.createApp({
                                     title: 'Bbox paragraph',
                                     zIndex: 11,
                                 }),                               
-                                // Création de la couche paragraph selectionné (vide)
+                                // Création de la couche  contenant uniquement le paragraphe selectionné (vide)
                                 this.selected_paragraph_layer = new ol.layer.Vector({
                                     source: new ol.source.Vector(),
                                     style: new ol.style.Style({
@@ -1069,8 +1057,8 @@ Vue.createApp({
                         }),
                     ],
                 }),
-                // Création de la couche géolocalisation vide
-                this.localisation_layer = new ol.layer.Vector({
+                // Création de la couche de géolocalisation vide
+                this.location_layer = new ol.layer.Vector({
                     source: new ol.source.Vector(),
                     zIndex: 15,
                     visible: false,
@@ -1078,8 +1066,8 @@ Vue.createApp({
             ],
         });
 
-        // Récupérer l'event et le rajouter dans la couche event selectionné
-        this.recuperer_event()
+        // Récupérer l'évènement et le rajouter dans la couche évènement selectionné
+        this.get_event()
 
         // Création du popup vide pour le pointermove
         let overlay_pointermove = new ol.Overlay({
@@ -1123,7 +1111,7 @@ Vue.createApp({
 
         // Bouton pour activer la localisation
         let localisation_control = new ol.control.Control({
-            element: document.getElementById("affichage_localisation_div"),
+            element: document.getElementById("affichage_location_div"),
         });
         this.map.addControl(localisation_control);
 
@@ -1178,7 +1166,7 @@ Vue.createApp({
             // Si la feature est un seul paragraph, le texte contenant les infos sur ce paragraph s'affiche en bas à droite de l'écran
             if (paragraph_features.length == 1) {
                 document.getElementById("popup_clic").style.display = "none";
-                this.affichage_selection_paragraph(paragraph_features[0]);
+                this.show_selected_paragraph_data(paragraph_features[0]);
             }
 
             // Si plusieurs paragraphs sont sélectionnés, on affiche la liste sous forme de liens cliquables
@@ -1194,7 +1182,7 @@ Vue.createApp({
                 paragraph_features.forEach((paragraph_feature, index) => {
                     document.getElementById(`paragraph_link_${index}`).addEventListener('click', (e) => {
                         e.preventDefault(); // empêcher le scroll en haut de page
-                        this.affichage_selection_paragraph(paragraph_feature);
+                        this.show_selected_paragraph_data(paragraph_feature);
                     });
                 });
                 overlay_clic.setPosition(evt.coordinate);

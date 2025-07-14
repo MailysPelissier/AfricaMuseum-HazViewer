@@ -51,7 +51,7 @@
 
                 <br>
 
-                <div class="padding largeur_min">
+                <div class="padding min_width">
                     <div id="event">
                         <label>Event: <input type="checkbox" v-model="download_e" @click=checkbox_download(download_e)></label>
                     </div> 
@@ -65,7 +65,7 @@
 
                 <hr style='margin:5px;' v-if="show_download_progression" />
 
-                <div id="progress" class="padding largeur_min">
+                <div id="progress" class="padding min_width">
                     <div v-if="show_fetch_progression">{{fetch_progression}}</div>
                     <div v-if="show_download_progression">Prepare download: {{download_progression}}%</div>
                 </div>
@@ -111,9 +111,9 @@
 
         </div>
 
-        <div id=popup_pointermove class="popup petit_popup scroll_box"></div>
+        <div id=popup_pointermove class="popup small_popup scroll_box"></div>
 
-        <div id=popup_clic class="popup petit_popup scroll_box"></div>
+        <div id=popup_clic class="popup small_popup scroll_box"></div>
 
         <div id=time_series_div class='bouton_1 ol-unselectable ol-control'>
             <button class=open_form_button @click=setup_time_series_form>Time series</button>
@@ -128,8 +128,8 @@
         </div>
 
         <!-- Bouton qui permet d'activer la localisation -->
-        <div id="affichage_localisation_div" class='ol-unselectable ol-control'>
-            <button @click=affichage_localisation>&#8857;</button>
+        <div id="affichage_location_div" class='ol-unselectable ol-control'>
+            <button @click=show_location>&#8857;</button>
         </div>
 
         <div id="scaleline_div"></div>

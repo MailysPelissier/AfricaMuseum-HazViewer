@@ -303,13 +303,13 @@
 
                 <div id=hazminer_filter v-if=show_general_menu_filter_hazminer>
 
-                    <button id="event_type_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_event_type_filter_hazminer'])">
+                    <button id="event_type_button" class="flexrow space_between padding min_width width_100" @click="change_true_false(['show_event_type_filter_hazminer'])">
                         <h6>Hazard type</h6>
                         <div class="vertical_center" v-if="!show_event_type_filter_hazminer">&#62;</div>
                         <div class="vertical_center" v-if="show_event_type_filter_hazminer">&#60;</div>
                     </button>
 
-                    <div id="event_type_filter" class="flexrow space_between padding largeur_min" v-if="show_event_type_filter_hazminer">
+                    <div id="event_type_filter" class="flexrow space_between padding min_width" v-if="show_event_type_filter_hazminer">
                         <div class="vertical_center">
                             <button class='back_button' @click="change_true_false(['show_event_type_filter_hazminer'])">&#60;</button>
                         </div>
@@ -330,13 +330,13 @@
 
                     <hr style='margin:5px;' />
 
-                    <button id="date_button" class="flexrow space_between padding largeur_min largeur_auto" @click="display_hazminer_date_filter">
+                    <button id="date_button" class="flexrow space_between padding min_width width_100" @click="display_hazminer_date_filter">
                         <h6>Date</h6>
                         <div class="vertical_center" v-if="!show_date_filter_hazminer">&#62;</div>
                         <div class="vertical_center" v-if="show_date_filter_hazminer">&#60;</div>
                     </button>
 
-                    <div id="date_filter" class="flexrow space_between padding largeur_min" v-if="show_date_filter_hazminer">
+                    <div id="date_filter" class="flexrow space_between padding min_width" v-if="show_date_filter_hazminer">
                         <div class="vertical_center">
                             <button class='back_button' @click="display_hazminer_date_filter">&#60;</button>
                         </div>
@@ -361,13 +361,13 @@
 
                     <hr style='margin:5px' />
 
-                    <button id="location_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_location_filter_hazminer'])">
+                    <button id="location_button" class="flexrow space_between padding min_width width_100" @click="change_true_false(['show_location_filter_hazminer'])">
                         <h6>Location</h6>
                         <div class="vertical_center" v-if="!show_location_filter_hazminer">&#62;</div>
                         <div class="vertical_center" v-if="show_location_filter_hazminer">&#60;</div>
                     </button>
                     
-                    <div id="location_filter" class="flexrow space_between padding largeur_min" v-if="show_location_filter_hazminer">
+                    <div id="location_filter" class="flexrow space_between padding min_width" v-if="show_location_filter_hazminer">
                         <div class="vertical_center">
                             <button class='back_button' @click="change_true_false(['show_location_filter_hazminer'])">&#60;</button>
                         </div>
@@ -415,13 +415,13 @@
 
                     <hr style='margin:5px' />
 
-                    <button id="casualties_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_casualties_filter_hazminer'])">
+                    <button id="casualties_button" class="flexrow space_between padding min_width width_100" @click="change_true_false(['show_casualties_filter_hazminer'])">
                         <h6>Casualties</h6>
                         <div class="vertical_center" v-if="!show_casualties_filter_hazminer">&#62;</div>
                         <div class="vertical_center" v-if="show_casualties_filter_hazminer">&#60;</div>
                     </button>
 
-                    <div id="casualties_filter" class="flexrow space_between padding largeur_min" v-if="show_casualties_filter_hazminer">
+                    <div id="casualties_filter" class="flexrow space_between padding min_width" v-if="show_casualties_filter_hazminer">
                         <div class="vertical_center">
                             <button class='back_button' @click="change_true_false(['show_casualties_filter_hazminer'])">&#60;</button>
                         </div>
@@ -445,13 +445,13 @@
 
                     <hr style='margin:5px' />
 
-                    <button id="popularity_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_popularity_filter_hazminer'])">
+                    <button id="popularity_button" class="flexrow space_between padding min_width width_100" @click="change_true_false(['show_popularity_filter_hazminer'])">
                         <h6>Popularity</h6>
                         <div class="vertical_center" v-if="!show_popularity_filter_hazminer">&#62;</div>
                         <div class="vertical_center" v-if="show_popularity_filter_hazminer">&#60;</div>
                     </button>
                     
-                    <div id="popularity_filter" class="flexrow space_between padding largeur_min" v-if="show_popularity_filter_hazminer">
+                    <div id="popularity_filter" class="flexrow space_between padding min_width" v-if="show_popularity_filter_hazminer">
                         <div class="vertical_center">
                             <button class='back_button' @click="change_true_false(['show_popularity_filter_hazminer'])">&#60;</button>
                         </div>
@@ -474,13 +474,13 @@
 
                 <div id=co_filter v-if=show_general_menu_filter_co>
 
-                    <button id="type_event_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_type_event_filter_co'])">
+                    <button id="type_event_button" class="flexrow space_between padding min_width width_100" @click="change_true_false(['show_type_event_filter_co'])">
                         <h6>Type d'évènement</h6>
                         <div class="vertical_center" v-if="!show_type_event_filter_co">&#62;</div>
                         <div class="vertical_center" v-if="show_type_event_filter_co">&#60;</div>
                     </button>
 
-                    <div id="type_event_filter" class="flexrow space_between padding largeur_min" v-if="show_type_event_filter_co">
+                    <div id="type_event_filter" class="flexrow space_between padding min_width" v-if="show_type_event_filter_co">
                         <div class="vertical_center">
                             <button class='back_button' @click="change_true_false(['show_type_event_filter_co'])">&#60;</button>
                         </div>
@@ -510,13 +510,13 @@
 
                     <hr style='margin:5px;' />
 
-                    <button id="date_button" class="flexrow space_between padding largeur_min largeur_auto" @click="display_co_date_filter">
+                    <button id="date_button" class="flexrow space_between padding min_width width_100" @click="display_co_date_filter">
                         <h6>Date</h6>
                         <div class="vertical_center" v-if="!show_date_filter_co">&#62;</div>
                         <div class="vertical_center" v-if="show_date_filter_co">&#60;</div>
                     </button>
 
-                    <div id="date_filter" class="flexrow space_between padding largeur_min" v-if="show_date_filter_co">
+                    <div id="date_filter" class="flexrow space_between padding min_width" v-if="show_date_filter_co">
                         <div class="vertical_center">
                             <button class='back_button' @click="display_co_date_filter">&#60;</button>
                         </div>
@@ -536,13 +536,13 @@
 
                     <hr style='margin:5px' />
 
-                    <button id="location_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_location_filter_co'])">
+                    <button id="location_button" class="flexrow space_between padding min_width width_100" @click="change_true_false(['show_location_filter_co'])">
                         <h6>Localisation</h6>
                         <div class="vertical_center" v-if="!show_location_filter_co">&#62;</div>
                         <div class="vertical_center" v-if="show_location_filter_co">&#60;</div>
                     </button>
                     
-                    <div id="location_filter" class="flexrow space_between padding largeur_min" v-if="show_location_filter_co">
+                    <div id="location_filter" class="flexrow space_between padding min_width" v-if="show_location_filter_co">
                         <div class="vertical_center">
                             <button class='back_button' @click="change_true_false(['show_location_filter_co'])">&#60;</button>
                         </div>
@@ -574,13 +574,13 @@
 
                     <hr style='margin:5px' />
 
-                    <button id="impact_button" class="flexrow space_between padding largeur_min largeur_auto" @click="change_true_false(['show_impact_filter_co'])">
+                    <button id="impact_button" class="flexrow space_between padding min_width width_100" @click="change_true_false(['show_impact_filter_co'])">
                         <h6>Impact</h6>
                         <div class="vertical_center" v-if="!show_impact_filter_co">&#62;</div>
                         <div class="vertical_center" v-if="show_impact_filter_co">&#60;</div>
                     </button>
 
-                    <div id="impact_filter" class="flexrow space_between padding largeur_min" v-if="show_impact_filter_co">
+                    <div id="impact_filter" class="flexrow space_between padding min_width" v-if="show_impact_filter_co">
                         <div class="vertical_center">
                             <button class='back_button' @click="change_true_false(['show_impact_filter_co'])">&#60;</button>
                         </div>
@@ -632,7 +632,7 @@
                         <div class="title">Hazminer</div>
                     </div>
 
-                    <div id="download_filter" class="padding largeur_min">
+                    <div id="download_filter" class="padding min_width">
                         <div class="title">Download filter:</div>
                         <div id="events">
                             <label>Events: <input type="checkbox" v-model="download_filter_e_hazminer" @click=checkbox_download(download_filter_e_hazminer)></label>
@@ -645,7 +645,7 @@
                         </div>    
                     </div>
 
-                    <div id="download_all" class="padding largeur_min">
+                    <div id="download_all" class="padding min_width">
                         <div class="title">Download all:</div>
                         <div id="events">
                             <label>Events: <input type="checkbox" v-model="download_all_e_hazminer" @click=checkbox_download(download_all_e_hazminer)></label>
@@ -662,13 +662,13 @@
                         <div class="title">Citizen observer</div>
                     </div>
 
-                    <div id="download_filter" class="padding largeur_min">
+                    <div id="download_filter" class="padding min_width">
                         <div id ="filter" class="title">
                             <label>Download filter: <input type="checkbox" v-model="download_filter_co" @click=checkbox_download(download_filter_co)></label>
                         </div>   
                     </div>
 
-                    <div id="download_all" class="padding largeur_min">
+                    <div id="download_all" class="padding min_width">
                         <div id ="all" class="title">
                             <label>Download all: <input type="checkbox" v-model="download_all_co" @click=checkbox_download(download_all_co)></label>
                         </div>   
@@ -678,7 +678,7 @@
 
                 <hr style='margin:10px;' v-if="show_download_progression" />
 
-                <div id="progress" class="padding largeur_min">
+                <div id="progress" class="padding min_width">
                     <div v-if="show_fetch_progression">{{fetch_progression}}</div>
                     <div v-if="show_download_progression">Prepare download: {{download_progression}}%</div>
                 </div>
@@ -750,9 +750,9 @@
 
         </div>
 
-        <div id=popup_pointermove class="popup petit_popup scroll_box"></div>
+        <div id=popup_pointermove class="popup small_popup scroll_box"></div>
 
-        <div id=popup_clic class="popup petit_popup scroll_box"></div>
+        <div id=popup_clic class="popup small_popup scroll_box"></div>
 
         <div id=outil_filtrage_div class='bouton_1 ol-unselectable ol-control'>
             <button class=open_form_button @click="setup_filter_form">Filter</button>
@@ -771,8 +771,8 @@
         </div>
  
         <!-- Bouton qui permet d'activer la localisation -->
-        <div id="affichage_localisation_div" class='ol-unselectable ol-control'>
-            <button @click=affichage_localisation>&#8857;</button>
+        <div id="affichage_location_div" class='ol-unselectable ol-control'>
+            <button @click=show_location>&#8857;</button>
         </div>
 
         <div id="scaleline_div"></div>

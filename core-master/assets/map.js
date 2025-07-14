@@ -2216,7 +2216,7 @@ Vue.createApp({
         },
 
         // Récupérer la localisation et l'afficher
-        affichage_localisation() {
+        show_location() {
 
             if (this.localisation_layer.getVisible()) {
                 this.localisation_layer.setVisible(false);
@@ -2520,7 +2520,7 @@ Vue.createApp({
 
         // Bouton pour activer la localisation
         let localisation_control = new ol.control.Control({
-            element: document.getElementById("affichage_localisation_div"),
+            element: document.getElementById("affichage_location_div"),
         });
         this.map.addControl(localisation_control);
 

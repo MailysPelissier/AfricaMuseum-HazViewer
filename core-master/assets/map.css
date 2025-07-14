@@ -66,7 +66,7 @@ html, body {
     white-space: nowrap;
 }
 
-.petit_popup {
+.small_popup {
     display: none; 
     padding: 5px; 
     border-radius: 5px;
@@ -170,7 +170,7 @@ html, body {
     top: 0.3em;
 }
 
-#affichage_localisation_div {
+#affichage_location_div {
     top: .5em;
     right: .5em;
 }
@@ -208,11 +208,11 @@ ul {
     padding: 10px;
 }
 
-.largeur_min {
+.min_width {
     min-width: 20em;
 }
 
-.largeur_auto {
+.width_100 {
     width: 100%;
 }
 
