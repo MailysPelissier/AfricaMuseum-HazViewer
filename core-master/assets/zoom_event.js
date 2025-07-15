@@ -86,14 +86,14 @@ Vue.createApp({
 
             // Choix de la série temporelle à afficher (par minute / par jour)
             show_time_series_minute: true,
-            show_time_series_jour: false,
+            show_time_series_day: false,
 
             // Données sur la date de publication des paragraphes pour créer les séries temporelles
             publication_time_list: [],
             publication_time_minute_array: [],
             publication_time_minute_sum_array: [],
-            publication_time_jour_array: [],
-            publication_time_jour_sum_array: [],
+            publication_time_day_array: [],
+            publication_time_day_sum_array: [],
 
             // Affichage de la fenêtre de téléchargement
             show_download_form: false,
@@ -115,13 +115,13 @@ Vue.createApp({
 
     methods: {
 
-        // Récupération de l'évènement, mise en place de la page
+        // Récupération et affichage de l'évènement (depuis Geoserver), mise en place de la page
         get_event() {
 
             // Récupération de l'identifiant de l'évènement depuis le php
             this.event_id = document.getElementById('app').dataset.event_id;
 
-            // Requête vers le geoserver, on récupère l'évènement
+            // Requête vers le Geoserver, on récupère l'évènement
             let cql_filter = `event_id = '${this.event_id}'`;
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
                 + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
@@ -174,17 +174,17 @@ Vue.createApp({
                     this.event_main_text += '<li>' + this.event_main_properties_title[i] + ': ' + feature.get(this.event_main_properties[i]) + '</li>';
                 } 
             }
-            // Les propriétés supplémentaires se chargent, mais elles ne s'affichent que si la checkbox Show other information est cochée
+            // Les propriétés supplémentaires se chargent, mais elles ne s'affichent que si le bouton Show other information est coché
             // L'utilisateur peut choisir s'il veut afficher les informations supplémentaires ou non, son choix est conservé
             for (let i = 0; i < this.event_other_properties.length; i++) {
                 this.event_other_text += '<li>' + this.event_other_properties_title[i] + ': ' + feature.get(this.event_other_properties[i]) + '</li>';
             }
-            // Les propriétés sur la localisation se chargent, mais elles ne s'affichent que si la checkbox Show location information est cochée
+            // Les propriétés sur la localisation se chargent, mais elles ne s'affichent que si le bouton Show location information est coché
             // L'utilisateur peut choisir s'il veut afficher les informations sur la localisation ou non, son choix est conservé
             for (let i = 0; i < this.event_location_properties.length; i++) {
                 this.event_location_text += '<li>' + this.event_location_properties_title[i] + ': ' + feature.get(this.event_location_properties[i]) + '</li>';
             }
-            // Les propriétés statistiques se chargent, mais elles ne s'affichent que si la checkbox Show more statistics est cochée
+            // Les propriétés statistiques se chargent, mais elles ne s'affichent que si le bouton Show more statistics est coché
             // L'utilisateur peut choisir s'il veut afficher les informations statistiques ou non, son choix est conservé
             for (let i = 0; i < this.event_number_properties.length; i++) {
                 this.event_number_text += '<li>' + this.event_number_properties_title[i] + ': ' + feature.get(this.event_number_properties[i]) + '</li>';
@@ -194,7 +194,7 @@ Vue.createApp({
             this.event_location_text += '</ul>';
             this.event_number_text += '</ul>';
 
-            // Affichage contours scrollbox
+            // Affichage contours de la zone de texte
             document.getElementById('event_data_zoom_event_scroll_box').style.border = "1px solid #ccc";
 
         },
@@ -227,7 +227,7 @@ Vue.createApp({
             // Ajout à la couche emprise de l'évènement
             this.bbox_events_layer.getSource().addFeature(event_bbox);
 
-            // Zoom sur l'emprise de l'évènement si cette emprise est non nulle
+            // Zoom adapté sur l'emprise de l'évènement si cette emprise est non nulle
             // Zoom par défaut à 10 si l'emprise est nulle
             this.map.getView().fit([min_lon, min_lat, max_lon, max_lat], this.map.getSize());
             if (min_lon === max_lon || min_lat === max_lat) {
@@ -239,13 +239,13 @@ Vue.createApp({
 
         },
 
-        // Affichage des paragraphs correspondant à l'évènement (depuis Geoserver)
+        // Récupération et affichage des paragraphes correspondant à l'évènement (depuis Geoserver)
         get_paragraphs() {
 
-            // Affichage du popup qui indique que les données chargent
+            // Affichage de la fenêtre qui indique que les données chargent
             document.getElementById("loading_popup").style.display = "block";
 
-            // Requête vers le geoserver, on récupère seulement les paragraphes de l'évènement
+            // Requête vers le Geoserver, on récupère seulement les paragraphes de l'évènement
             let cql_filter = `event_id = '${this.event_id}'`;
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
                 + `&outputFormat=application/json`  + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
@@ -271,7 +271,7 @@ Vue.createApp({
                 this.create_time_series_data();
             })
             .then(data => {
-                // Désaffichage du popup qui indique que les données chargent
+                // Désaffichage de la fenêtre qui indique que les données chargent
                 document.getElementById("loading_popup").style.display = "none";
                 return data;
             })
@@ -299,7 +299,7 @@ Vue.createApp({
             }
             this.paragraph_text += '</ul>';
 
-            // Affichage contours scrollbox
+            // Affichage contours de la zone de texte
             document.getElementById('paragraph_data_scroll_box').style.border = "1px solid #ccc";
 
             // Couche du paragraphe sélectionné vidée
@@ -313,7 +313,7 @@ Vue.createApp({
 
         },
 
-        // Affichage emprise et écart-type associés à l'emprise du paragraphe
+        // Affichage de l'emprise et de l'écart-type associés à l'emprise du paragraphe
         show_selected_paragraph_bbox(feature) {
 
             // Couche emprise des paragraphes vidée
@@ -349,89 +349,89 @@ Vue.createApp({
                 std_dev = feature.get('std_dev') * 1000;
 
                 // Calcul des milieux de chaque côté
-                let centerTop = [(min_lon + max_lon) / 2, max_lat];
-                let centerBottom = [(min_lon + max_lon) / 2, min_lat];
-                let centerLeft = [min_lon, (min_lat + max_lat) / 2];
-                let centerRight = [max_lon, (min_lat + max_lat) / 2];
+                let center_top = [(min_lon + max_lon) / 2, max_lat];
+                let center_bottom = [(min_lon + max_lon) / 2, min_lat];
+                let center_left = [min_lon, (min_lat + max_lat) / 2];
+                let center_right = [max_lon, (min_lat + max_lat) / 2];
 
                 // Création des segments (écart-type)
-                let lineTop = new ol.Feature(new ol.geom.LineString([
-                    [centerTop[0], centerTop[1] - std_dev/2],
-                    [centerTop[0], centerTop[1] + std_dev/2]
+                let line_top = new ol.Feature(new ol.geom.LineString([
+                    [center_top[0], center_top[1] - std_dev/2],
+                    [center_top[0], center_top[1] + std_dev/2]
                 ]));
                   
-                let lineBottom = new ol.Feature(new ol.geom.LineString([
-                    [centerBottom[0], centerBottom[1] + std_dev/2],
-                    [centerBottom[0], centerBottom[1] - std_dev/2]
+                let line_bottom = new ol.Feature(new ol.geom.LineString([
+                    [center_bottom[0], center_bottom[1] + std_dev/2],
+                    [center_bottom[0], center_bottom[1] - std_dev/2]
                 ]));
                   
-                let lineLeft = new ol.Feature(new ol.geom.LineString([
-                    [centerLeft[0] + std_dev/2, centerLeft[1]],
-                    [centerLeft[0] - std_dev/2, centerLeft[1]]
+                let line_left = new ol.Feature(new ol.geom.LineString([
+                    [center_left[0] + std_dev/2, center_left[1]],
+                    [center_left[0] - std_dev/2, center_left[1]]
                 ]));
                   
-                let lineRight = new ol.Feature(new ol.geom.LineString([
-                    [centerRight[0] - std_dev/2, centerRight[1]],
-                    [centerRight[0] + std_dev/2, centerRight[1]]
+                let line_right = new ol.Feature(new ol.geom.LineString([
+                    [center_right[0] - std_dev/2, center_right[1]],
+                    [center_right[0] + std_dev/2, center_right[1]]
                 ]));
 
                 // Calcul des bouts des segments
-                let TopBottom = [centerTop[0], centerTop[1] - std_dev/2];
-                let TopTop = [centerTop[0], centerTop[1] + std_dev/2];
-                let BottomTop = [centerBottom[0], centerBottom[1] + std_dev/2];
-                let BottomBottom = [centerBottom[0], centerBottom[1] - std_dev/2];
-                let LeftRight = [centerLeft[0] + std_dev/2, centerLeft[1]];
-                let LeftLeft = [centerLeft[0] - std_dev/2, centerLeft[1]];
-                let RightLeft = [centerRight[0] - std_dev/2, centerRight[1]];
-                let RightRight = [centerRight[0] + std_dev/2, centerRight[1]]
+                let top_bottom = [center_top[0], center_top[1] - std_dev/2];
+                let top_top = [center_top[0], center_top[1] + std_dev/2];
+                let bottom_top = [center_bottom[0], center_bottom[1] + std_dev/2];
+                let bottom_bottom = [center_bottom[0], center_bottom[1] - std_dev/2];
+                let left_right = [center_left[0] + std_dev/2, center_left[1]];
+                let left_left = [center_left[0] - std_dev/2, center_left[1]];
+                let right_left = [center_right[0] - std_dev/2, center_right[1]];
+                let right_right = [center_right[0] + std_dev/2, center_right[1]];
 
                 // Création des sous segments
-                let lineTopBottom = new ol.Feature(new ol.geom.LineString([
-                    [TopBottom[0] - std_dev/10, TopBottom[1]],
-                    [TopBottom[0] + std_dev/10, TopBottom[1]]
+                let line_top_bottom = new ol.Feature(new ol.geom.LineString([
+                    [top_bottom[0] - std_dev/10, top_bottom[1]],
+                    [top_bottom[0] + std_dev/10, top_bottom[1]]
                 ]));
-                let lineTopTop = new ol.Feature(new ol.geom.LineString([
-                    [TopTop[0] - std_dev/10, TopTop[1]],
-                    [TopTop[0] + std_dev/10, TopTop[1]]
+                let line_top_top = new ol.Feature(new ol.geom.LineString([
+                    [top_top[0] - std_dev/10, top_top[1]],
+                    [top_top[0] + std_dev/10, top_top[1]]
                 ]));
-                let lineBottomTop = new ol.Feature(new ol.geom.LineString([
-                    [BottomTop[0] - std_dev/10, BottomTop[1]],
-                    [BottomTop[0] + std_dev/10, BottomTop[1]]
+                let line_bottom_top = new ol.Feature(new ol.geom.LineString([
+                    [bottom_top[0] - std_dev/10, bottom_top[1]],
+                    [bottom_top[0] + std_dev/10, bottom_top[1]]
                 ]));
-                let lineBottomBottom = new ol.Feature(new ol.geom.LineString([
-                    [BottomBottom[0] - std_dev/10, BottomBottom[1]],
-                    [BottomBottom[0] + std_dev/10, BottomBottom[1]]
+                let line_bottom_bottom = new ol.Feature(new ol.geom.LineString([
+                    [bottom_bottom[0] - std_dev/10, bottom_bottom[1]],
+                    [bottom_bottom[0] + std_dev/10, bottom_bottom[1]]
                 ]));
-                let lineLeftRight = new ol.Feature(new ol.geom.LineString([
-                    [LeftRight[0], LeftRight[1] - std_dev/10],
-                    [LeftRight[0], LeftRight[1] + std_dev/10]
+                let line_left_right = new ol.Feature(new ol.geom.LineString([
+                    [left_right[0], left_right[1] - std_dev/10],
+                    [left_right[0], left_right[1] + std_dev/10]
                 ]));
-                let lineLeftLeft = new ol.Feature(new ol.geom.LineString([
-                    [LeftLeft[0], LeftLeft[1] - std_dev/10],
-                    [LeftLeft[0], LeftLeft[1] + std_dev/10]
+                let line_left_left = new ol.Feature(new ol.geom.LineString([
+                    [left_left[0], left_left[1] - std_dev/10],
+                    [left_left[0], left_left[1] + std_dev/10]
                 ]));
-                let lineRightLeft = new ol.Feature(new ol.geom.LineString([
-                    [RightLeft[0], RightLeft[1] - std_dev/10],
-                    [RightLeft[0], RightLeft[1] + std_dev/10]
+                let line_right_left = new ol.Feature(new ol.geom.LineString([
+                    [right_left[0], right_left[1] - std_dev/10],
+                    [right_left[0], right_left[1] + std_dev/10]
                 ]));
-                let lineRightRight = new ol.Feature(new ol.geom.LineString([
-                    [RightRight[0], RightRight[1] - std_dev/10],
-                    [RightRight[0], RightRight[1] + std_dev/10]
+                let line_right_right = new ol.Feature(new ol.geom.LineString([
+                    [right_right[0], right_right[1] - std_dev/10],
+                    [right_right[0], right_right[1] + std_dev/10]
                 ]));
                 
                 // Ajout à la couche emprise des paragraphes
-                this.bbox_paragraphs_layer.getSource().addFeature(lineTop);
-                this.bbox_paragraphs_layer.getSource().addFeature(lineBottom);
-                this.bbox_paragraphs_layer.getSource().addFeature(lineLeft);
-                this.bbox_paragraphs_layer.getSource().addFeature(lineRight);
-                this.bbox_paragraphs_layer.getSource().addFeature(lineTopBottom);
-                this.bbox_paragraphs_layer.getSource().addFeature(lineTopTop);
-                this.bbox_paragraphs_layer.getSource().addFeature(lineBottomTop);
-                this.bbox_paragraphs_layer.getSource().addFeature(lineBottomBottom);
-                this.bbox_paragraphs_layer.getSource().addFeature(lineLeftRight);
-                this.bbox_paragraphs_layer.getSource().addFeature(lineLeftLeft);
-                this.bbox_paragraphs_layer.getSource().addFeature(lineRightLeft);
-                this.bbox_paragraphs_layer.getSource().addFeature(lineRightRight);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_top);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_bottom);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_left);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_right);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_top_bottom);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_top_top);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_bottom_top);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_bottom_bottom);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_left_right);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_left_left);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_right_left);
+                this.bbox_paragraphs_layer.getSource().addFeature(line_right_right);
 
             }
 
@@ -456,8 +456,8 @@ Vue.createApp({
                 value[day]['count'] += 1;        
                 return value;
             }, {});
-            this.publication_time_jour_array = Object.values(day_dictionnary).map(a => a.date);
-            this.publication_time_jour_sum_array = Object.values(day_dictionnary).map(a => a.count);
+            this.publication_time_day_array = Object.values(day_dictionnary).map(a => a.date);
+            this.publication_time_day_sum_array = Object.values(day_dictionnary).map(a => a.count);
 
         },
 
@@ -477,7 +477,7 @@ Vue.createApp({
         setup_time_series_change_menu() {
 
             this.show_time_series_minute = !this.show_time_series_minute;
-            this.show_time_series_jour = !this.show_time_series_jour;
+            this.show_time_series_day = !this.show_time_series_day;
 
             if (this.show_time_series_form) {
                 this.create_time_series_plot();
@@ -502,11 +502,11 @@ Vue.createApp({
                 filename = `graph_by_minute_${this.event_id}`;
             }
 
-            if (this.show_time_series_jour) {
-                x = this.publication_time_jour_array;
-                y = this.publication_time_jour_sum_array;
+            if (this.show_time_series_day) {
+                x = this.publication_time_day_array;
+                y = this.publication_time_day_sum_array;
                 subtitle = 'By day';
-                div_name = 'time_series_jour_plot';
+                div_name = 'time_series_day_plot';
                 filename = `graph_by_day_${this.event_id}`;
             }
 
@@ -563,7 +563,7 @@ Vue.createApp({
 
         },
 
-        // Permet d'avoir une seule checkbox sélectionnée pour le choix du mode de téléchargement
+        // Permet d'avoir un seul bouton sélectionné pour le choix du mode de téléchargement
         checkbox_download(checkbox_name) {
             let checkbox_list = ['download_e', 'download_p', 'download_e_p'];
             for (let checkbox of checkbox_list) {
@@ -573,8 +573,8 @@ Vue.createApp({
             }
         },
 
-        // Téléchargement
-        async download() {
+        // Téléchargement des données (csv)
+        async download_data() {
 
             // Si aucun mode de téléchargement n'est choisi
             if (!(this.download_e || this.download_p || this.download_e_p)) {
@@ -610,7 +610,7 @@ Vue.createApp({
                 paragraph_content_lines = await this.create_paragraph_download_text();
             }
                 
-            // Désaffichage de la progression du download
+            // Désaffichage de la progression du téléchargement
             this.show_fetch_progression = false;
             this.show_download_progression = false;
             this.fetch_progression = 'Fetch data in progress...';
@@ -638,7 +638,7 @@ Vue.createApp({
             let seen_paragraph_id = new Set();
 
             // Requête vers le geoserver, on récupère seulement les paragraphes de l'évènement
-            let cql_filter = `event_id = '${this.event_id}'`
+            let cql_filter = `event_id = '${this.event_id}'`;
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
                 + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
             let result = await fetch(url);
@@ -727,7 +727,7 @@ Vue.createApp({
             map_canvas.height = size[1];
             let map_context = map_canvas.getContext('2d');
 
-            // Dessine tous les canvas de la carte (layers)
+            // Dessine tous les canvas de la carte
             Array.prototype.forEach.call(
                 this.map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer'),
                 function (canvas) {
@@ -1039,7 +1039,7 @@ Vue.createApp({
                                     title: 'Bbox paragraph',
                                     zIndex: 11,
                                 }),                               
-                                // Création de la couche  contenant uniquement le paragraphe selectionné (vide)
+                                // Création de la couche contenant uniquement le paragraphe selectionné (vide)
                                 this.selected_paragraph_layer = new ol.layer.Vector({
                                     source: new ol.source.Vector(),
                                     style: new ol.style.Style({
@@ -1069,14 +1069,14 @@ Vue.createApp({
         // Récupérer l'évènement et le rajouter dans la couche évènement selectionné
         this.get_event()
 
-        // Création du popup vide pour le pointermove
+        // Création de la bulle vide qui affiche le nombre de paragraphes si plusieurs sont superposés
         let overlay_pointermove = new ol.Overlay({
             element: document.getElementById("popup_pointermove"),
             positioning: "bottom-center"
         });
         this.map.addOverlay(overlay_pointermove);
 
-        // Création du popup vide pour le clic
+        // Création de la bulle vide qui permet de sélectionner un paragraphe quand plusieurs sont superposés
         let overlay_clic = new ol.Overlay({
             element: document.getElementById("popup_clic"),
             positioning: "bottom-center"
@@ -1084,61 +1084,61 @@ Vue.createApp({
         this.map.addOverlay(overlay_clic);
 
         // Gestionnaire des couches
-        let layerSwitcher = new LayerSwitcher({
+        let layer_switcher = new LayerSwitcher({
             activationMode: 'click',
             reverse: true,
             groupSelectStyle: 'children'
         });
-        this.map.addControl(layerSwitcher);
+        this.map.addControl(layer_switcher);
 
-        // Bouton time series
+        // Bouton séries temporelles
         let time_series_control = new ol.control.Control({
             element: document.getElementById("time_series_div"),
         });
         this.map.addControl(time_series_control);
 
-        // Bouton download
+        // Bouton de téléchargement
         let download_control = new ol.control.Control({
             element: document.getElementById("download_div"),
         });
         this.map.addControl(download_control);
 
-        // Bouton screenshot
+        // Bouton des captures d'écran
         let screenshot_control = new ol.control.Control({
             element: document.getElementById("screenshot_div"),
         });
         this.map.addControl(screenshot_control);
 
         // Bouton pour activer la localisation
-        let localisation_control = new ol.control.Control({
+        let location_control = new ol.control.Control({
             element: document.getElementById("affichage_location_div"),
         });
-        this.map.addControl(localisation_control);
+        this.map.addControl(location_control);
 
-        // Scale line
+        // Echelle
         let scaleline = new ol.control.ScaleLine({
             element: document.getElementById("scaleline_div"),
         })
         this.map.addControl(scaleline);
 
-        // A chaque déplacement/zoom, suppression du popup clic
+        // A chaque déplacement/zoom, suppression de la bulle qui permet de sélectionner un paragraphe quand plusieurs sont superposés
         this.map.on('moveend', () => {
             document.getElementById("popup_clic").style.display = "none";
         });
 
-        // A chaque déplacement du pointer, si plusieurs paragraphs sont superposées au niveau du pointer, on affiche leur nombre
+        // A chaque déplacement du pointeur, si plusieurs paragraphes sont superposées au niveau du pointeur, on affiche leur nombre
         this.map.on("pointermove", evt => {
 
             let paragraph_features = [];
         
-            // Récupérer les features à partir des différentes couches
+            // Récupérer les objets à partir des différentes couches
             this.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
                 if (layer === this.paragraphs_layer) {
                     paragraph_features.push(feature);
                 }
             });
     
-            // Si il y a plusieurs paragraphs, le popup affiche "n paragraphs"
+            // Si il y a plusieurs paragraphes, la bulle affiche "n paragraphs"
             if (paragraph_features.length > 1) {
                 document.getElementById("popup_pointermove").innerHTML = paragraph_features.length + " paragraphs";
                 overlay_pointermove.setPosition(evt.coordinate);
@@ -1151,26 +1151,26 @@ Vue.createApp({
 
         });
 
-        // Quand on clique sur un ou plusieurs paragraphs :
+        // Quand on clique sur un ou plusieurs paragraphes :
         this.map.on('click', evt => {
 
             let paragraph_features = [];
         
-            // Récupérer les features à partir des différentes couches
+            // Récupérer les objets à partir des différentes couches
             this.map.forEachFeatureAtPixel(evt.pixel, (feature, layer) => {
                 if (layer === this.paragraphs_layer) {
                     paragraph_features.push(feature);
                 }
             });
         
-            // Si la feature est un seul paragraph, le texte contenant les infos sur ce paragraph s'affiche en bas à droite de l'écran
+            // Si l'objet est un seul paragraphe, le texte contenant les infos sur ce paragraphe s'affiche en bas à droite de l'écran
             if (paragraph_features.length == 1) {
                 document.getElementById("popup_clic").style.display = "none";
                 this.show_selected_paragraph_data(paragraph_features[0]);
             }
 
-            // Si plusieurs paragraphs sont sélectionnés, on affiche la liste sous forme de liens cliquables
-            // Cliquer sur un lien affiche le texte contenant les infos sur le paragraph sélectionné en bas à droite de l'écran
+            // Si plusieurs paragraphes sont sélectionnés, on affiche la liste sous forme de liens cliquables
+            // Cliquer sur un lien affiche le texte contenant les infos sur le paragraphe sélectionné en bas à droite de l'écran
             else if (paragraph_features.length > 1) {
                 let html_popup = 'Choose the paragraph:<ul>'
                 paragraph_features.forEach((paragraph_feature, index) => {
@@ -1181,7 +1181,7 @@ Vue.createApp({
                 document.getElementById("popup_clic").innerHTML = html_popup;
                 paragraph_features.forEach((paragraph_feature, index) => {
                     document.getElementById(`paragraph_link_${index}`).addEventListener('click', (e) => {
-                        e.preventDefault(); // empêcher le scroll en haut de page
+                        e.preventDefault();
                         this.show_selected_paragraph_data(paragraph_feature);
                     });
                 });

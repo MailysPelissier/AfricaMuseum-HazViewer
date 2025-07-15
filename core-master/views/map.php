@@ -18,11 +18,11 @@
 
         <div id="map" class="margin">
 
-            <div id="form_changer_style" class="form popup scroll_box" v-if="show_changer_style_form">
+            <div id="form_changer_style" class="form popup scroll_box" v-if="show_change_style_form">
 
                 <div id="top_form" class="flexrow space_between padding">
                     <h5>Change style</h5>
-                    <button class="vertical_center" @click="change_true_false(['show_changer_style_form'])">&#215;</button>
+                    <button class="vertical_center" @click="change_true_false(['show_change_style_form'])">&#215;</button>
                 </div>
 
                 <div id=choix_style_data class="flexrow space_between padding">
@@ -111,12 +111,12 @@
                     <div id="size_casualties" class="flexrow padding" v-if="size_style ==='Casualties'">
                         <label>Size style (casualties):
                             <select class="margin_left" v-model="size_casualties">
-                                <option v-for="casualty in casualties_list" :value="casualty.id">{{casualty.label}}</option>  
+                                <option v-for="casualty in casualties_hazminer_list" :value="casualty.id">{{casualty.label}}</option>  
                             </select>
                         </label>
                     </div>
 
-                    <div v-for="casualty in casualties_list" v-if="size_style ==='Casualties'">
+                    <div v-for="casualty in casualties_hazminer_list" v-if="size_style ==='Casualties'">
                         <div v-if="size_casualties === casualty.id">
                             <div class="flexrow margin" v-for="step in casualty.table">
                                 <div class="vertical_center">{{step.label}}:</div>
@@ -129,12 +129,12 @@
                     <div id="size_popularity" class="flexrow padding" v-if="size_style ==='Popularity'">
                         <label>Size style (popularity):
                             <select class="margin_left" v-model="size_popularity">
-                                <option v-for="pop in popularity_list" :value="pop.id">{{pop.label}}</option>  
+                                <option v-for="pop in popularity_hazminer_list" :value="pop.id">{{pop.label}}</option>  
                             </select>
                         </label>
                     </div>
 
-                    <div v-for="pop in popularity_list" v-if="size_style ==='Popularity'">
+                    <div v-for="pop in popularity_hazminer_list" v-if="size_style ==='Popularity'">
                         <div v-if="size_popularity === pop.id">
                             <div class="flexrow margin" v-for="step in pop.table">
                                 <div class="vertical_center">{{step.label}}:</div>
@@ -236,12 +236,12 @@
                     <div id="taille_impact_humain" class="flexrow padding" v-if="style_taille ==='Impact_humain'">
                         <label>Taille selon :
                             <select class="margin_left" v-model="taille_impact_humain">
-                                <option v-for="impact in liste_impact_humain" :value="impact.id">{{impact.label}}</option>  
+                                <option v-for="impact in human_casualties_co_list" :value="impact.id">{{impact.label}}</option>  
                             </select>
                         </label>
                     </div>
 
-                    <div v-for="impact in liste_impact_humain" v-if="style_taille ==='Impact_humain'">
+                    <div v-for="impact in human_casualties_co_list" v-if="style_taille ==='Impact_humain'">
                         <div v-if="taille_impact_humain === impact.id">
                             <div class="flexrow margin" v-for="step in impact.table">
                                 <div class="vertical_center">{{step.label}}:</div>
@@ -254,12 +254,12 @@
                     <div id="taille_autres_impacts" class="flexrow padding" v-if="style_taille ==='Autres_impacts'">
                         <label>Taille selon :
                             <select class="margin_left" v-model="taille_autres_impacts">
-                                <option v-for="impact in liste_autres_impacts" :value="impact.id">{{impact.label}}</option>  
+                                <option v-for="impact in other_casualties_co_list" :value="impact.id">{{impact.label}}</option>  
                             </select>
                         </label>
                     </div>
 
-                    <div v-for="impact in liste_autres_impacts" v-if="style_taille ==='Autres_impacts'">
+                    <div v-for="impact in other_casualties_co_list" v-if="style_taille ==='Autres_impacts'">
                         <div v-if="taille_autres_impacts === impact.id">
                             <div class="flexrow margin">
                                 <div class="vertical_center">Oui:</div>
@@ -280,7 +280,7 @@
 
                 <div class="flexrow space_evenly padding">
                     <button id="change_style" @click="change_style_all">Apply</button>
-                    <button id="cancel" @click="change_true_false(['show_changer_style_form'])">Close</button>
+                    <button id="cancel" @click="change_true_false(['show_change_style_form'])">Close</button>
                 </div>
 
             </div>
@@ -759,7 +759,7 @@
         </div>
 
         <div id=changer_style_div class='bouton_2 ol-unselectable ol-control'>
-            <button class=open_form_button @click=setup_changer_style_form>Change style</button>
+            <button class=open_form_button @click=setup_change_style_form>Change style</button>
         </div>
 
         <div id=download_div class='bouton_3 ol-unselectable ol-control'>

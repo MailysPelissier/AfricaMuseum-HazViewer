@@ -18,10 +18,13 @@
         <!-- Récupération de l'identifiant de l'évènement depuis la carte principale -->
         <div id="app" data-event_id="<?php echo htmlspecialchars($event_id, ENT_QUOTES, 'UTF-8'); ?>"></div>
 
+        <!-- Carte -->
         <div id="map" class="margin">
 
+            <!-- Fenêtre de chargement -->
             <div id=loading_popup class="popup center_popup">Loading...</div>
 
+            <!-- Fenêtre des séries temporelles -->
             <div id="form_time_series" class="time_series_form popup scroll_box"  v-if="show_time_series_form">
 
                 <div id="top_form" class="flexrow space_between padding">
@@ -32,16 +35,17 @@
                 <div id=choix_time_series class="flexrow space_evenly padding">
                     <button class="btn btn-secondary" type="button" v-if=show_time_series_minute>By minute</button>
                     <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_minute @click="setup_time_series_change_menu">By day</button>
-                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_jour @click="setup_time_series_change_menu">By minute</button>
-                    <button class="btn btn-secondary" type="button" v-if=show_time_series_jour>By day</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_day @click="setup_time_series_change_menu">By minute</button>
+                    <button class="btn btn-secondary" type="button" v-if=show_time_series_day>By day</button>
                 </div>
 
                 <div id="time_series_minute_plot" v-if="show_time_series_minute"></div>
 
-                <div id="time_series_jour_plot" v-if="show_time_series_jour"></div>
+                <div id="time_series_day_plot" v-if="show_time_series_day"></div>
 
             </div>
 
+            <!-- Fenêtre de téléchargement des données -->
             <div id="form_download" class="form popup scroll_box" v-if="show_download_form">
 
                 <div id="top_form" class="flexrow space_between padding">
@@ -73,7 +77,7 @@
                 <br>
 
                 <div class="flexrow space_evenly padding">
-                    <button id="download" @click="download">Download</button>
+                    <button id="download" @click="download_data">Download</button>
                     <button id="cancel" @click="setup_download_form">Close</button>
                 </div>
 
@@ -81,6 +85,7 @@
 
         </div>
 
+        <!-- Texte sur les évènements (en haut à droite) -->
         <div id=event_data_zoom_event_scroll_box class="scroll_box margin padding">
 
             <div id=event_title class=title>Event:</div>
@@ -104,6 +109,7 @@
 
         </div>
 
+        <!-- Texte sur les paragraphes (en bas à droite) -->
         <div id=paragraph_data_scroll_box class="scroll_box margin padding">
 
             <div id=paragraph_title  class=title v-if="selected_paragraph">Paragraph:</div>
@@ -111,27 +117,33 @@
 
         </div>
 
+        <!-- Bulle qui affiche le nombre de paragraphes si plusieurs sont superposés -->
         <div id=popup_pointermove class="popup small_popup scroll_box"></div>
 
+        <!-- Bulle qui permet de sélectionner un paragraphe quand plusieurs sont superposés -->
         <div id=popup_clic class="popup small_popup scroll_box"></div>
 
+        <!-- Bouton séries temporelles -->
         <div id=time_series_div class='bouton_1 ol-unselectable ol-control'>
             <button class=open_form_button @click=setup_time_series_form>Time series</button>
         </div>
 
+        <!-- Bouton téléchargement des données -->
         <div id=download_div class='bouton_2 ol-unselectable ol-control'>
             <button class=open_form_button @click=setup_download_form>Download data</button>
         </div>
 
+        <!-- Bouton capture décran -->
         <div id=screenshot_div class='bouton_3 ol-unselectable ol-control'>
             <button class=open_form_button @click=download_screenshot>Screenshot</button>
         </div>
 
-        <!-- Bouton qui permet d'activer la localisation -->
+        <!-- Bouton de la localisation -->
         <div id="affichage_location_div" class='ol-unselectable ol-control'>
             <button @click=show_location>&#8857;</button>
         </div>
 
+        <!-- Echelle -->
         <div id="scaleline_div"></div>
 
     </div>  
