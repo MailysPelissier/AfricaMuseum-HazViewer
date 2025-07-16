@@ -4,11 +4,51 @@ Idées parties :
 - promesses vs appel global
 - format des données (wfs, wms, raster, vecteur)
 
+
+Parler de :
+pg admin, geoserver
+gestion des bdd
+Adaptation données co
+Adaptation au site du musée (PROCHE)
+edit.africamuseum.be/geoserver
+
+taille event adaptée zoom
+
+
+Data hazminer:
+csv (2017/2023)
+articles en 58 langues
+LLM avec plusieurs filtres: expressions, types d'évènements
+Un article : un ou plusieurs pargraphes
+Events : paragraphs clusterisés par catastrophe, date, localisation extraite de l'article
+Paragraphes répétés pour plusieurs évènements de type différents (flood + landslide)
+Nombreuses données : donner chiffres
+les paragraphs sans lon/lat non utilisés -> pas reliés à un event
+
+Données citizen observer:
+csv : réponses à un questionnaire : beaucoup de traitements (250 colonnes)
+
+Doc récapitulatif données (uml) ?
+
+
+
 Ouverture / prolongement :
 Automatiser processus maj data (QGIS?)
 Ajout nouveau type data
+Autre moyens de stocker les données (elastic search, solr) 
+Couches supplémentaires (nominatim, précipitations, images satellites avant / après)
+Barre de recherche (par ville, pays)
+Faire deux versions (version pro / classique)
+Généraliser time series sur la page principale (par pays / polygone / emprise) (events et paragraphs liés)
+Autres outils analyse
+
 
 
 A faire :
 Maj nex data Bram (valeurs max)
 ICT
+licence, avertissements, logos partenaires, copyright, citations (robots.txt)
+(popup explication ?...)
+(légende dynamique)
+gros rond si plusieurs paragraphs
+
