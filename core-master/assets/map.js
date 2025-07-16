@@ -9,7 +9,7 @@ Vue.createApp({
             landslide_susceptibility_layer: null, // Initialisation de la couche de susceptibilité des tremblements de terre
             rivers_layer: null, // Initialisation de la couche des rivières
             countries_layer: null, // Initialisation de la couche des pays
-            extent_layer: null, // Initialisation de la couche du polygone de l'emprise
+            extent_layer: null, // Initialisation de la couche du polygone du choix manuel de l'emprise
             draw_layer: null, // Initialisation de la couche de dessin
             events_hazminer_layer: null, // Initialisation de la couche des évènements hazminer
             events_co_layer: null, // Initialisation de la couche des évènements citizen observer
@@ -60,10 +60,10 @@ Vue.createApp({
                 "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
                 "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
                 "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found", "continent", "population_density"],
-            event_main_text_hazminer: '', // Texte sur les évènements (haut droite de l'écran)
-            event_other_text_hazminer: '', // Texte sur les évènements, partie optionnelle autres (haut droite de l'écran)
-            event_location_text_hazminer: '', // Texte sur les évènements, partie optionnelle localisations (haut droite de l'écran)
-            event_number_text_hazminer: '', // Texte sur les évènements, partie optionnelle statistiques (haut droite de l'écran)        
+            event_main_text_hazminer: '', // Texte sur les évènements (droite de l'écran)
+            event_other_text_hazminer: '', // Texte sur les évènements, partie optionnelle autres (droite de l'écran)
+            event_location_text_hazminer: '', // Texte sur les évènements, partie optionnelle localisations (droite de l'écran)
+            event_number_text_hazminer: '', // Texte sur les évènements, partie optionnelle statistiques (droite de l'écran)        
             other_information_hazminer: false, // Affichage des informations supplémentaires des évènements ou non (inactif par défaut)
             location_information_hazminer: false, // Affichage des informations de localisation des évènements ou non (inactif par défaut)
             number_information_hazminer: false, // Affichage des informations statistiques des évènements ou non (inactif par défaut)
@@ -265,7 +265,7 @@ Vue.createApp({
                 { label: '≥ 30', min: 31, max: Infinity, size: 15 },
             ],
             size_source_countries: [
-                { label: '1 - 20', min: 1, max: 20, size: 3 },
+                { label: '0 - 20', min: 0, max: 20, size: 3 },
                 { label: '21 - 40', min: 21, max: 40, size: 5 },
                 { label: '41 - 60', min: 41, max: 60, size: 7 },
                 { label: '61 - 80', min: 61, max: 80, size: 9 },
@@ -400,7 +400,7 @@ Vue.createApp({
                 { id: 'n_articles', label: 'Number of articles:', min: 1, max: 25000, min_depart: 1, max_depart: 25000 },
                 { id: 'n_paragraphs', label: 'Number of paragraphs:', min: 1, max: 60000, min_depart: 1, max_depart: 60000 },
                 { id: 'n_languages', label: 'Number of languages:', min: 1, max: 40, min_depart: 1, max_depart: 40 },
-                { id: 'n_source_countries', label: 'Number of source countries:', min: 1, max: 120, min_depart: 1, max_depart: 120 },
+                { id: 'n_source_countries', label: 'Number of source countries:', min: 0, max: 120, min_depart: 0, max_depart: 120 },
                 { id: 'n_domains', label: 'Number of domains:', min: 1, max: 3000, min_depart: 1, max_depart: 3000 },
             ],
 
@@ -792,9 +792,11 @@ Vue.createApp({
 
         // Change la / les variable(s) passée(s) en paramètre (true/false)
         change_true_false(parameters) {
+
             for (let parameter of parameters) {
                 this[parameter] = !this[parameter];
             }
+
         },
 
         // Affiche la fenêtre de changement de style, ferme les autres fenêtres ouvertes
@@ -1239,13 +1241,13 @@ Vue.createApp({
 
                     let polygon = event.feature.getGeometry();
 
-                    // Récupération des events dans l'emprise (bbox) du polygone
+                    // Récupération des évènements dans l'emprise du polygone
                     let features_polygon_extent = [];
                     this.events_hazminer_layer.getSource().forEachFeatureIntersectingExtent(polygon.getExtent(), (feature) => {
                         features_polygon_extent.push(feature);
                     });
 
-                    // Récupération des events intersectant le polygone
+                    // Récupération des évènements intersectant le polygone
                     this.features_polygon = [];
                     for (feature of features_polygon_extent) {
                         let point = feature.getGeometry().getCoordinates();
@@ -1262,15 +1264,17 @@ Vue.createApp({
 
         // Réinitialiser la couche de dessin
         reset_draw() {
+
             this.draw_layer.getSource().clear();
             this.features_polygon = [];
-            this.appliquer_filtres();
+            this.apply_filters();
+
         },
 
-        // Crée le polynome extent
+        // Crée le polynome du choix manuel de l'emprise
         extent_polygon() {
 
-            // Couche extent layer vidée
+            // Couche du polygone du choix manuel de l'emprise vidée
             this.extent_layer.getSource().clear();
 
             // Projection en 3857
@@ -1289,22 +1293,24 @@ Vue.createApp({
                 ol.geom.Polygon.fromExtent([min_lon, min_lat, max_lon, max_lat])
             );
 
-            // Ajout à la couche extent layer 
+            // Ajout à la couche du polygone du choix manuel de l'emprise
             this.extent_layer.getSource().addFeature(extent_polygon);
 
         },
 
-        // Réinitialiser le choix manuel de la bbox
+        // Réinitialise le choix manuel de l'emprise
         reset_extent() {
+
             this.extent_layer.getSource().clear();
             for(let i = 0; i < this.extent_filter.length; i++) {           
                 this.extent_filter[i].min = this.extent_filter[i].min_depart;
                 this.extent_filter[i].max = this.extent_filter[i].max_depart;
             }
-            this.appliquer_filtres();
+            this.apply_filters();
+
         },
 
-        // Reset le formulaire des filtres
+        // Réinitialise le formulaire des filtres
         reset_filter_form() {
 
             // Remet les propriétés à leur état initial
@@ -1355,7 +1361,7 @@ Vue.createApp({
                 this.impact_bool_filter_co[i].checkbox_impact = false;              
             }
 
-            // Chaque event devient visible
+            // Chaque évènement devient visible
             for (let feature of this.events_hazminer_layer.getSource().getFeatures()) {
                 feature.set('visible',true);
             }
@@ -1363,7 +1369,7 @@ Vue.createApp({
                 feature.set('visible',true);
             }
 
-            // Ferme les panneaux ouverts
+            // Ferme les panneaux de filtre ouverts
             this.show_event_type_filter_hazminer = false;
             this.show_date_filter_hazminer = false;
             this.show_casualties_filter_hazminer = false;
@@ -1382,9 +1388,9 @@ Vue.createApp({
             // Evènement visible par défaut
             feature.set('visible',true);
 
-            // Evènement ne doit pas être visible si elle ne respecte pas les critères du filtre
+            // Evènement ne doit pas être visible si il ne respecte pas les critères du filtre
 
-            // Hazard type
+            // Selon le type de catastrophe
             if (!this.flood && feature.get('hazard_type') === 'flood') {
                 feature.set('visible',false);
                 return;
@@ -1398,7 +1404,7 @@ Vue.createApp({
                 return;
             }
 
-            // Date
+            // Selon la date
             if (Date.parse(feature.get('event_time')) < Date.parse(start_date_hazminer_ymd)) {
                 feature.set('visible',false);
                 return;
@@ -1416,7 +1422,7 @@ Vue.createApp({
                 return;
             }
 
-            // Location
+            // Selon la localisation
             if (this.chosen_country_hazminer != 'All' && feature.get('country_found') != this.chosen_country_hazminer) {
                 feature.set('visible',false);
                 return;
@@ -1436,7 +1442,7 @@ Vue.createApp({
                 }
             }
 
-            // Impact
+            // Selon l'impact
             for(let i = 0; i < this.impact_filter_hazminer.length; i++) {
                 if (!this.impact_filter_hazminer[i].checkbox_null && feature.get(this.impact_filter_hazminer[i].id) === null) {
                     feature.set('visible',false);
@@ -1452,7 +1458,7 @@ Vue.createApp({
                 }
             }
 
-            // Popularity
+            // Selon la popularité
             for(let i = 0; i < this.popularity_filter.length; i++) {
                 if (parseFloat(feature.get(this.popularity_filter[i].id)) < parseFloat(this.popularity_filter[i].min)) {
                     feature.set('visible',false);
@@ -1474,7 +1480,7 @@ Vue.createApp({
 
             // Evènement ne doit pas être visible si il ne respecte pas les critères du filtre
 
-            // Type event
+            // Selon le type de catastrophe
             if (!this.inondation && feature.get('type_event') === 'Inondation') {
                 feature.set('visible',false);
                 return;
@@ -1500,7 +1506,7 @@ Vue.createApp({
                 return;
             }
 
-            // Date
+            // Selon la date
             if (Date.parse(feature.get('event_date')) < Date.parse(start_date_co_ymd)) {
                 feature.set('visible',false);
                 return;
@@ -1510,7 +1516,7 @@ Vue.createApp({
                 return;
             }
 
-            // Location
+            // Selon la localisation
             if (this.chosen_province_co != 'All' && feature.get('province') != this.chosen_province_co) {
                 feature.set('visible',false);
                 return;
@@ -1521,7 +1527,7 @@ Vue.createApp({
             }
 
 
-            // Impact
+            // Selon l'impact
             for(let i = 0; i < this.impact_chiffre_filter_co.length; i++) {
                 if (!this.impact_chiffre_filter_co[i].checkbox_null && feature.get(this.impact_chiffre_filter_co[i].id) === null) {
                     feature.set('visible',false);
@@ -1546,7 +1552,7 @@ Vue.createApp({
         },
 
         // Application des filtres : seuls les évènements respectant les critères apparaissent
-        appliquer_filtres() {
+        apply_filters() {
 
             // Dates des filtres en format y-m-d
             let start_date_hazminer_ymd = this.start_date_hazminer.substring(6,10) + '-' + this.start_date_hazminer.substring(3,5) + '-' + this.start_date_hazminer.substring(0,2) + ' 00:00:00';
@@ -1562,12 +1568,12 @@ Vue.createApp({
                 this.set_feature_co_visibility(feature, start_date_co_ymd, end_date_co_ymd);
             }
 
-            // Change le style des évènements : ceux dont la visibilité est fausse sont invisibles, les autres gardent leur style actuel
+            // Change le style des évènements : ceux dont la visibilité est fausse sont invisibles, les autres prennent le style actuel
             this.change_style_all();
 
         },
 
-        // Affiche le form de download, ferme les autres forms ouverts
+        // Affiche la fenêtre du téléchargement, ferme les autres fenêtres ouvertes
         setup_download_form() {
 
             this.show_download_form = !this.show_download_form;
@@ -1578,19 +1584,21 @@ Vue.createApp({
 
         // Permet d'avoir un seul bouton sélectionné pour le choix du mode de téléchargement
         checkbox_download(checkbox_name) {
+
             let checkbox_list = ['download_filter_e_hazminer', 'download_filter_p_hazminer', 'download_filter_e_p_hazminer', 'download_all_e_hazminer',
-                'download_filter_co', 'download_all_co']
+                'download_filter_co', 'download_all_co'];
             for (let checkbox of checkbox_list) {
                 if (checkbox_name != checkbox) {
                     this[checkbox] = false;
                 }
             }
+
         },
 
-        // Download
-        async download() {
+        // Téléchargement des données (csv)
+        async download_data() {
 
-            // Définition des données à télécharger
+            // Définition des données à télécharger (hazminer ou citizen observer)
             let data = null;
             if (this.download_all_e_hazminer || this.download_filter_e_hazminer || this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
                 data = 'hazminer';
@@ -1601,7 +1609,7 @@ Vue.createApp({
                 this.download_co();
             }
 
-            // Si aucun mode de download n'est choisi
+            // Message d'erreur si aucun mode de téléchargement n'est choisi
             if (data === null) {
                 alert("No download mode selected!");
                 return;
@@ -1609,7 +1617,7 @@ Vue.createApp({
 
         },
 
-        // Download des données hazminer
+        // Téléchargement des données hazminer
         async download_hazminer() {
 
             let type = null;
@@ -1620,26 +1628,26 @@ Vue.createApp({
                 type = 'filter';
             }
      
-            // Création des tableaux pour le join final, initialisation des textes (header)
+            // Création des tableaux pour la jointure finale, initialisation du texte (noms des colonnes)
             let event_content_lines = [this.event_download_properties_hazminer.join(',')];
             let paragraph_content_lines = [this.paragraph_download_properties.join(',')];
 
-            // Liste permettent d'éviter les paragraphs en double
+            // Liste permettent d'éviter les paragraphes en double
             let seen_paragraph_id = new Set();
 
-            // Récupérer filtres
+            // Récupérer les paramètres de filtrage
             let { cql_filter, draw_filter } = this.set_cqlfilter_event_hazminer(type);
 
-            // Si la liste des hazard type est vide
+            // Message d'erreur si la liste des types de catastrophe est vide
             if (cql_filter === 'No event') {
                 alert("No event matches the criteria!");
                 return;
             }
 
-            // Si on ne filtre pas selon un polygone
+            // Si on ne filtre pas selon un polygone :
             if (draw_filter == 0) {
 
-                // Requête vers le geoserver, on récupère seulement les events correspondant aux filtres
+                // Requête vers le Geoserver, on récupère seulement les évènements correspondant aux filtres
                 let url;
                 if (type == 'all') {
                     url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
@@ -1653,17 +1661,17 @@ Vue.createApp({
                 let json = await result.json();
                 this.fetch_progression = 'Fetch data completed!';
 
-                // Récupération des events
+                // Récupération des évènements
                 let features = json.features;
                 let n_events = features.length;
 
-                // Si aucun event ne correspond aux critères
+                // Message d'erreur si aucun évènement ne correspond aux critères
                 if (n_events === 0) {
                     alert("No event matches the criteria!");
                     return;
                 }
 
-                // Si on veut télécharger des paragraphs et que trop d'events correspondent aux critères (>10000)
+                // Message d'erreur si on veut télécharger des paragraphes et que trop d'évènements correspondent aux critères (>10000)
                 if (this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
                     if (n_events > 10000) {
                         alert("To many events, use more filters!");
@@ -1671,16 +1679,16 @@ Vue.createApp({
                     }
                 }
 
-                // Affichage de la progression du download
+                // Affichage de la progression du téléchargement
                 this.show_fetch_progression = true;
                 this.show_download_progression = true;
 
-                // Pour chaque event
-                let compteur_features = 0;
+                // Pour chaque évènement :
+                let count_features = 0;
                 for (let f of features) {
 
                     // Création d'une ligne de texte (events.csv)
-                    // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                    // Toutes les valeurs sont entourées de guillemets
                     if(this.download_all_e_hazminer || this.download_filter_e_hazminer || this.download_filter_e_p_hazminer) {
                         let row = this.event_download_properties_hazminer.map(prop => {
                             let value = f.properties[prop];
@@ -1691,23 +1699,23 @@ Vue.createApp({
                         event_content_lines.push(row);
                     }
 
-                    // Création du texte de paragraphs.csv
+                    // Mise à jour du texte concernant les paragraphes (paragraphs.csv)
                     if(this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
-                        ({ paragraph_content_lines, seen_paragraph_id } = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'geoserver'));
+                        ({ paragraph_content_lines, seen_paragraph_id } = await this.create_paragraph_download_text(f,paragraph_content_lines,seen_paragraph_id,'geoserver'));
                     }
 
-                    // Calcul de la progression
-                    compteur_features += 1;
-                    this.download_progression = parseInt(compteur_features*100/features.length);
+                    // Calcul de la progression du téléchargement
+                    count_features += 1;
+                    this.download_progression = parseInt(count_features*100/features.length);
 
                     // Forcer une pause très courte pour mettre à jour le DOM
-                    if (compteur_features % 100 === 0) {
+                    if (count_features % 100 === 0) {
                         await new Promise(resolve => setTimeout(resolve, 0));
                     }
 
                 };
 
-                // Désaffichage de la progression du download
+                // Désaffichage de la progression du téléchargement
                 this.show_fetch_progression = false;
                 this.show_download_progression = false;
                 this.fetch_progression = 0;
@@ -1715,40 +1723,40 @@ Vue.createApp({
 
             }
             
-            // Si on filtre selon un polygone
+            // Si on filtre selon un polygone :
             if (draw_filter == 1) {
 
-                // Récupérer le nombre d'events
+                // Récupérer le nombre d'évènements
                 let event_features = this.events_hazminer_layer.getSource().getFeatures();
-                let n_events_visibles = event_features.filter(f => f.get('visible') === true).length;
+                let nb_visible_events = event_features.filter(f => f.get('visible') === true).length;
                 let nb_total_events = event_features.length;
 
-                // Si aucun event ne correspond aux critères
-                if (n_events_visibles === 0) {
+                // Message d'erreur si aucun évènement ne correspond aux critères
+                if (nb_visible_events === 0) {
                     alert("No event matches the criteria!");
                     return;
                 }
 
-                // Si on veut télécharger des paragraphs et que trop d'events correspondent aux critères (>10000)
+                // Message d'erreur si on veut télécharger des paragraphes et que trop d'évènements correspondent aux critères (>10000)
                 if (this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
-                    if (n_events_visibles > 10000) {
+                    if (nb_visible_events > 10000) {
                         alert("To many events, use more filters!");
                         return;
                     }
                 }
 
-                // Affichage de la progression du download
+                // Affichage de la progression du téléchargement
                 this.show_download_progression = true;
 
-                let compteur_events = 0;
-                // On récupère les events de la couche events 1 par 1
+                let count_events = 0;
+                // On récupère les évènements de la couche 1 par 1
                 for (let f of this.events_hazminer_layer.getSource().getFeatures()) {
 
-                    // Pour chaque event correspondant aux critères
+                    // Pour chaque évènement correspondant aux critères :
                     if (f.get('visible')) {
 
                         // Création d'une ligne de texte (events.csv)
-                        // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                        // Toutes les valeurs sont entourées de guillemets
                         if(this.download_all_e_hazminer || this.download_filter_e_hazminer || this.download_filter_e_p_hazminer) {
                             let row = this.event_download_properties_hazminer.map(prop => {
                                 let value = f.get(prop);
@@ -1759,43 +1767,43 @@ Vue.createApp({
                             event_content_lines.push(row);
                         }
 
-                        // Création du texte de paragraphs.csv
+                        // Mise à jour du texte concernant les paragraphes (paragraphs.csv)
                         if(this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
-                            ({ paragraph_content_lines, seen_paragraph_id } = await this.paragraph_download_text_filter(f,paragraph_content_lines,seen_paragraph_id,'event layer'));
+                            ({ paragraph_content_lines, seen_paragraph_id } = await this.create_paragraph_download_text(f,paragraph_content_lines,seen_paragraph_id,'event layer'));
                         }
 
                     }
 
-                    // Calcul de la progression du download
-                    compteur_events += 1;
-                    this.download_progression = parseInt(compteur_events*100/nb_total_events);
+                    // Calcul de la progression du téléchargement
+                    count_events += 1;
+                    this.download_progression = parseInt(count_events*100/nb_total_events);
 
                     // Forcer une pause très courte pour mettre à jour le DOM
-                    if (compteur_events % 100 === 0) {
+                    if (count_events % 100 === 0) {
                         await new Promise(resolve => setTimeout(resolve, 0));
                     }
                     
                 }
 
-                // Désaffichage de la progression du download
+                // Désaffichage de la progression du téléchargement
                 this.show_download_progression = false;
                 this.download_progression = 0;
 
             }
 
-            // Téléchargement des events
+            // Téléchargement des évènements
             if(this.download_all_e_hazminer || this.download_filter_e_hazminer || this.download_filter_e_p_hazminer) {
-                this.creation_csv(event_content_lines, "hazminer_events.csv");
+                this.create_csv(event_content_lines, "hazminer_events.csv");
             }
 
-            // Téléchargement des paragraphs
+            // Téléchargement des paragraphes
             if(this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
-                this.creation_csv(paragraph_content_lines, "hazminer_paragraphs.csv");
+                this.create_csv(paragraph_content_lines, "hazminer_paragraphs.csv");
             }
 
         },
 
-        // Download des données co
+        // Download des données citizen observer
         async download_co() {
 
             let type = null;
@@ -1806,19 +1814,19 @@ Vue.createApp({
                 type = 'filter';
             }
 
-            // Création du tableau pour le join final, initialisation du texte (header)
+            // Création du tableau pour la jointure finale, initialisation du texte (noms des colonnes)
             let event_content_lines = [this.event_download_properties_co.join(',')];
 
-            // Récupérer filtres
+            // Récupérer les paramètres de filtrage
             let cql_filter = this.set_cqlfilter_event_co(type);
 
-            // Si la liste des hazard type est vide
+            // Message d'erreur si la liste des types de catastrophe est vide
             if (cql_filter === 'No event') {
                 alert("No event matches the criteria!");
                 return;
             }
 
-            // Requête vers le geoserver, on récupère seulement les events correspondant aux filtres
+            // Requête vers le Geoserver, on récupère seulement les évènements correspondant aux filtres
             let url;
             if (type == 'all') {
                 url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer`
@@ -1832,26 +1840,26 @@ Vue.createApp({
             let json = await result.json();
             this.fetch_progression = 'Fetch data completed!';
 
-            // Récupération des events
+            // Récupération des évènements
             let features = json.features;
             let n_events = features.length;
 
-            // Si aucun event ne correspond aux critères
+            // Message d'erreur si aucun évènement ne correspond aux critères
             if (n_events === 0) {
                 alert("No event matches the criteria!");
                 return;
             }
 
-            // Affichage de la progression du download
+            // Affichage de la progression du téléchargement
             this.show_fetch_progression = true;
             this.show_download_progression = true;
 
-            // Pour chaque event
-            let compteur_features = 0;
+            // Pour chaque évènement :
+            let count_features = 0;
             for (let f of features) {
 
                 // Création d'une ligne de texte (events.csv)
-                // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                // Toutes les valeurs sont entourées de guillemets
                 let row = this.event_download_properties_co.map(prop => {
                     let value = f.properties[prop];
                     if (value == null) return ''; // gérer les null
@@ -1860,25 +1868,25 @@ Vue.createApp({
                 }).join(',');
                 event_content_lines.push(row);
 
-                // Calcul de la progression
-                compteur_features += 1;
-                this.download_progression = parseInt(compteur_features*100/features.length);
+                // Calcul de la progression du téléchargement
+                count_features += 1;
+                this.download_progression = parseInt(count_features*100/features.length);
 
                 // Forcer une pause très courte pour mettre à jour le DOM
-                if (compteur_features % 100 === 0) {
+                if (count_features % 100 === 0) {
                     await new Promise(resolve => setTimeout(resolve, 0));
                 }
 
             };
 
-            // Désaffichage de la progression du download
+            // Désaffichage de la progression du téléchargement
             this.show_fetch_progression = false;
             this.show_download_progression = false;
             this.fetch_progression = 0;
             this.download_progression = 0;        
 
             // Téléchargement des évènements
-            this.creation_csv(event_content_lines, "co_events.csv");
+            this.create_csv(event_content_lines, "co_events.csv");
 
         },
 
@@ -1893,7 +1901,7 @@ Vue.createApp({
                 return { cql_filter, draw_filter }
             }
 
-            // Cas où on filtre selon un polygone: utilisation de la visibilité des évènements de la couche events
+            // Cas où on filtre selon un polygone : utilisation de la visibilité des évènements
             if (type == 'filter' && this.draw_layer.getSource().getFeatures().length === 1) {
                 draw_filter = 1;
                 return { cql_filter, draw_filter }
@@ -1902,7 +1910,7 @@ Vue.createApp({
             // Cas où on filtre dans la requête Geoserver
             if (type == 'filter' && this.draw_layer.getSource().getFeatures().length === 0) {
 
-                // Hazard type
+                // Type de catastrophe
                 let hazard_type_liste = [];
                 if(this.flood) {
                     hazard_type_liste.push('flood');
@@ -1914,7 +1922,7 @@ Vue.createApp({
                     hazard_type_liste.push('landslide');
                 }
                 if (hazard_type_liste.length === 0) {  
-                    cql_filter = 'No event'                 
+                    cql_filter = 'No event';                
                     return { cql_filter, draw_filter }
                 }
                 else {
@@ -1928,6 +1936,14 @@ Vue.createApp({
                 cql_filter += " AND event_time <= '" + end_date_hazminer_ymd + "'";
                 cql_filter += " AND " + this.duration_filter[0].id + " BETWEEN " + this.duration_filter[0].min + " AND " + this.duration_filter[0].max;
 
+                // Localisation
+                if (this.chosen_country_hazminer != 'All') {
+                    cql_filter += " AND country_found = '" + this.chosen_country_hazminer + "'";
+                }
+                for(let i = 0; i < this.extent_filter.length; i++) {
+                    cql_filter += " AND " + this.extent_filter[i].id + " BETWEEN " + this.extent_filter[i].min + " AND " + this.extent_filter[i].max;
+                }
+
                 // Impact
                 for(let i = 0; i < this.impact_filter_hazminer.length; i++) {
                     if (this.impact_filter_hazminer[i].checkbox_null) {
@@ -1939,17 +1955,9 @@ Vue.createApp({
                     }
                 }
 
-                // Popularity
+                // Popularité
                 for(let i = 0; i < this.popularity_filter.length; i++) {
                     cql_filter += " AND " + this.popularity_filter[i].id + " BETWEEN " + this.popularity_filter[i].min + " AND " + this.popularity_filter[i].max;
-                }
-
-                // Location
-                if (this.chosen_country_hazminer != 'All') {
-                    cql_filter += " AND country_found = '" + this.chosen_country_hazminer + "'";
-                }
-                for(let i = 0; i < this.extent_filter.length; i++) {
-                    cql_filter += " AND " + this.extent_filter[i].id + " BETWEEN " + this.extent_filter[i].min + " AND " + this.extent_filter[i].max;
                 }
 
                 return { cql_filter, draw_filter }
@@ -1958,20 +1966,20 @@ Vue.createApp({
 
         },
 
-        // Crée le filtre cql pour la requête des events vers le Geoserver (citizen observer)
+        // Crée le filtre cql pour la requête des évènements vers le Geoserver (citizen observer)
         set_cqlfilter_event_co(type) {
 
             let cql_filter = '';
 
-            // Cas où on télécharge tous les events
+            // Cas où on télécharge tous les évènements
             if (type == 'all') {
-                return cql_filter
+                return cql_filter;
             }
 
             // Cas où on filtre dans la requête Geoserver
             if (type == 'filter') {
 
-                // Type d'évènement
+                // Type de catastrophe
                 let hazard_type_liste = [];
                 if(this.inondation) {
                     hazard_type_liste.push('Inondation');
@@ -1992,8 +2000,8 @@ Vue.createApp({
                     hazard_type_liste.push('Foudre');
                 }
                 if (hazard_type_liste.length === 0) {  
-                    cql_filter = 'No event'                 
-                    return cql_filter
+                    cql_filter = 'No event';
+                    return cql_filter;
                 }
                 else {
                     cql_filter += "type_event IN (" + hazard_type_liste.map(id => `'${id}'`).join(",") + ")";
@@ -2005,7 +2013,7 @@ Vue.createApp({
                 cql_filter += " AND event_date >= '" + start_date_co_ymd + "'";
                 cql_filter += " AND event_date <= '" + end_date_co_ymd + "'";
 
-                // Location
+                // Localisation
                 if (this.chosen_province_co != 'All') {
                     cql_filter += " AND province = '" + this.chosen_province_co + "'";
                 }
@@ -2029,16 +2037,16 @@ Vue.createApp({
                     }
                 }
 
-                return cql_filter
+                return cql_filter;
 
             }
 
         },
 
-        // Création du texte de download des paragraphs liés à un event (hazminer)
-        async paragraph_download_text_filter(feature,paragraph_content_lines,seen_paragraph_id,source) {
+        // Création du texte de téléchargement des paragraphes liés à un évènement (hazminer)
+        async create_paragraph_download_text(feature, paragraph_content_lines, seen_paragraph_id, source) {
 
-            // Récupérer les valeurs d'event_id
+            // Récupérer l'identifiant de l'évènement
             let event_id;
             if (source === 'event layer') {
                 event_id = feature.get('event_id');
@@ -2047,17 +2055,17 @@ Vue.createApp({
                 event_id = feature.properties.event_id;
             }
 
-            // Requête vers le geoserver, on récupère seulement les paragraphs de l'event
+            // Requête vers le Geoserver, on récupère seulement les paragraphes liés à l'évènement
             let cql_filter = `event_id = '${event_id}'`
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
                 + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
             let result = await fetch(url);
             let json = await result.json();
                 
-            // Récupération des groupes de paragraphs
+            // Récupération des paragraphes
             let features = json.features;
 
-            // Pour chaque paragraph
+            // Pour chaque paragraphe :
             for (let f of features) {
 
                 let paragraph_id = f.properties.paragraph_id;
@@ -2070,7 +2078,7 @@ Vue.createApp({
                 seen_paragraph_id.add(paragraph_id);
 
                 // Création d'une ligne de texte (paragraphs.csv)
-                // Si la valeur contient une virgule ou si la propriété nécessite des guillemets, on l'entoure de guillemets
+                // Toutes les valeurs sont entourées de guillemets
                 let row = this.paragraph_download_properties.map(prop => {
                     let value = f.properties[prop];
                     if (value == null) return ''; // gérer les null
@@ -2086,11 +2094,11 @@ Vue.createApp({
         },
 
         // Crée le csv à partir du texte
-        creation_csv(contentLines, filename) {
+        create_csv(content_lines, filename) {
 
             try {
 
-                let content = contentLines.join('\n');
+                let content = content_lines.join('\n');
 
                 // Essayer de créer le blob et de le télécharger
                 let blob;
@@ -2120,110 +2128,107 @@ Vue.createApp({
         // Download d'un screenshot de la map
         download_screenshot() {
 
-            let mapCanvas = document.createElement('canvas');
+            let map_canvas = document.createElement('canvas');
             let size = this.map.getSize();
-            mapCanvas.width = size[0];
-            mapCanvas.height = size[1];
-            let mapContext = mapCanvas.getContext('2d');
+            map_canvas.width = size[0];
+            map_canvas.height = size[1];
+            let map_context = map_canvas.getContext('2d');
 
-            // Dessine tous les canvas de la carte (layers)
+            // Dessine tous les canvas de la carte
             Array.prototype.forEach.call(
                 this.map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer'),
                 function (canvas) {
                     if (canvas.width > 0) {
                         let opacity = canvas.parentNode.style.opacity || canvas.style.opacity;
-                        mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+                        map_context.globalAlpha = opacity === '' ? 1 : Number(opacity);
                         let matrix;
                         let transform = canvas.style.transform;
                         if (transform) {
-                            // Get the transform parameters from the style's transform matrix
                             matrix = transform.match(/^matrix\(([^\(]*)\)$/)[1].split(',').map(Number);
                         } else {
                             matrix = [parseFloat(canvas.style.width) / canvas.width, 0, 0, parseFloat(canvas.style.height) / canvas.height, 0, 0];
                         }
-                        // Apply the transform to the export map context
-                        CanvasRenderingContext2D.prototype.setTransform.apply(mapContext, matrix);
+                        CanvasRenderingContext2D.prototype.setTransform.apply(map_context, matrix);
                         let backgroundColor = canvas.parentNode.style.backgroundColor;
                         if (backgroundColor) {
-                            mapContext.fillStyle = backgroundColor;
-                            mapContext.fillRect(0, 0, canvas.width, canvas.height);
+                            map_context.fillStyle = backgroundColor;
+                            map_context.fillRect(0, 0, canvas.width, canvas.height);
                         }
-                        mapContext.drawImage(canvas, 0, 0);
+                        map_context.drawImage(canvas, 0, 0);
                     }
                 },
             );
 
-            // Reset le contexte
-            mapContext.globalAlpha = 1;
-            mapContext.setTransform(1, 0, 0, 1, 0, 0);
+            map_context.globalAlpha = 1;
+            map_context.setTransform(1, 0, 0, 1, 0, 0);
 
             // Flèche nord (en haut à droite)
             let arrow_width = 25;
             let arrow_height = 40;
-            mapContext.strokeStyle = 'black';
-            mapContext.lineWidth = 1;                
+            map_context.strokeStyle = 'black';
+            map_context.lineWidth = 1;                
             // Triangle vers le haut
             // Partie gauche
-            mapContext.save();  
-            mapContext.translate(size[0] - arrow_width - 10, 25 + arrow_height);
-            mapContext.beginPath();
-            mapContext.moveTo(arrow_width / 2, -arrow_height);
-            mapContext.lineTo(0, 0);
-            mapContext.lineTo(arrow_width / 2 , -arrow_height / 3);
-            mapContext.closePath();
-            mapContext.fillStyle = 'rgba(255, 255, 255, 0.7)';          
-            mapContext.fill();
-            mapContext.stroke();
-            mapContext.restore();
+            map_context.save();  
+            map_context.translate(size[0] - arrow_width - 10, 25 + arrow_height);
+            map_context.beginPath();
+            map_context.moveTo(arrow_width / 2, -arrow_height);
+            map_context.lineTo(0, 0);
+            map_context.lineTo(arrow_width / 2 , -arrow_height / 3);
+            map_context.closePath();
+            map_context.fillStyle = 'rgba(255, 255, 255, 0.7)';          
+            map_context.fill();
+            map_context.stroke();
+            map_context.restore();
             // Partie droite
-            mapContext.save();
-            mapContext.translate(size[0] - 10, 25 + arrow_height);
-            mapContext.beginPath();
-            mapContext.moveTo(-arrow_width / 2, -arrow_height);
-            mapContext.lineTo(0, 0);
-            mapContext.lineTo(-arrow_width / 2 , -arrow_height / 3);
-            mapContext.closePath();
-            mapContext.fillStyle = 'rgba(0, 0, 0, 1)';
-            mapContext.fill();
-            mapContext.stroke();
-            mapContext.restore();
+            map_context.save();
+            map_context.translate(size[0] - 10, 25 + arrow_height);
+            map_context.beginPath();
+            map_context.moveTo(-arrow_width / 2, -arrow_height);
+            map_context.lineTo(0, 0);
+            map_context.lineTo(-arrow_width / 2 , -arrow_height / 3);
+            map_context.closePath();
+            map_context.fillStyle = 'rgba(0, 0, 0, 1)';
+            map_context.fill();
+            map_context.stroke();
+            map_context.restore();
             // "N"
-            mapContext.save();
-            mapContext.translate(size[0] - arrow_width / 2 - 15, 20);
-            mapContext.fillStyle = 'black';
-            mapContext.font = 'bold 16px sans-serif';
-            mapContext.fillText('N', 0, 0);
-            mapContext.restore();
+            map_context.save();
+            map_context.translate(size[0] - arrow_width / 2 - 15, 20);
+            map_context.fillStyle = 'black';
+            map_context.font = 'bold 16px sans-serif';
+            map_context.fillText('N', 0, 0);
+            map_context.restore();
             
-            // Scale line (en bas à gauche)
-            let scaleLineEl = document.querySelector('.ol-scale-line-inner');
-            mapContext.save();
-            let scaleText = scaleLineEl.innerText;
-            let scaleWidth = scaleLineEl.offsetWidth;
+            // Echelle (en bas à gauche)
+            let scaleline = document.querySelector('.ol-scale-line-inner');
+            map_context.save();
+            let scaleText = scaleline.innerText;
+            let scaleWidth = scaleline.offsetWidth;
             let barHeight = 8;
             let x = 10;
             let y = size[1] - barHeight - 30;
             // Barre
-            mapContext.fillStyle = 'white';
-            mapContext.strokeStyle = 'black';
-            mapContext.lineWidth = 1;
-            mapContext.fillRect(x, y, scaleWidth, barHeight);
-            mapContext.strokeRect(x, y, scaleWidth, barHeight);
+            map_context.fillStyle = 'white';
+            map_context.strokeStyle = 'black';
+            map_context.lineWidth = 1;
+            map_context.fillRect(x, y, scaleWidth, barHeight);
+            map_context.strokeRect(x, y, scaleWidth, barHeight);
             // Texte
-            mapContext.fillStyle = 'black';
-            mapContext.font = '12px sans-serif';
-            mapContext.fillText(scaleText, x, y + barHeight + 14);
-            mapContext.restore();
+            map_context.fillStyle = 'black';
+            map_context.font = '12px sans-serif';
+            map_context.fillText(scaleText, x, y + barHeight + 14);
+            map_context.restore();
 
             // Téléchargement
             let link = document.createElement("a");
-            link.href = mapCanvas.toDataURL();
+            link.href = map_canvas.toDataURL();
             link.download = `map.png`;
             link.click();
 
         },
 
-        // Récupérer la localisation et l'afficher
+        // Récupérer la localisation et l'afficher / la désafficher
         show_location() {
 
             if (this.location_layer.getVisible()) {
@@ -2248,13 +2253,13 @@ Vue.createApp({
                     let center = ol.proj.fromLonLat([longitude_pos, latitude_pos]);
 
                     // Point central
-                    let pointFeature = new ol.Feature(new ol.geom.Point(center));
+                    let point_feature = new ol.Feature(new ol.geom.Point(center));
 
                     // Cercle de précision (en mètres, donc dans la projection EPSG:3857)
-                    let circleFeature = new ol.Feature(new ol.geom.Circle(center, precision_pos));
+                    let circle_feature = new ol.Feature(new ol.geom.Circle(center, precision_pos));
 
                     // Ajouter les deux objets à la couche
-                    this.location_layer.getSource().addFeatures([circleFeature, pointFeature]);
+                    this.location_layer.getSource().addFeatures([circle_feature, point_feature]);
 
                     // Appliquer les styles
                     this.location_layer.setStyle((feature) => {
@@ -2316,7 +2321,7 @@ Vue.createApp({
                 new ol.layer.Group({
                     title: 'Raster layers',
                     layers: [
-                        // Couche landslide susceptibility
+                        // Couche de susceptibilité des tremblements de terre
                         this.landslide_susceptibility_layer = new ol.layer.Tile({
                             source: new ol.source.TileWMS({
                                 url: 'http://localhost:8080/geoserver/webGIS/wms',
@@ -2375,7 +2380,7 @@ Vue.createApp({
                 new ol.layer.Group({
                     title: 'Location filters',
                     layers: [
-                        // Couche du polygone de l'extent
+                        // Couche du polygone du choix manuel de l'emprise
                         this.extent_layer = new ol.layer.Vector({
                             source: new ol.source.Vector({}),
                             style: new ol.style.Style({
@@ -2401,7 +2406,7 @@ Vue.createApp({
                 new ol.layer.Group({
                     title: 'Events',
                     layers: [
-                        // Création de la couche events hazminer (se remplit selon la bbox)
+                        // Création de la couche évènements hazminer (Geoserver, se remplit selon la bbox)
                         this.events_hazminer_layer = new ol.layer.Vector({
                             source: new ol.source.Vector({
                                 format: new ol.format.GeoJSON(),
@@ -2414,7 +2419,7 @@ Vue.createApp({
                             title: 'Hazminer events',
                             zIndex: 10,
                         }),
-                        // Création de la couche events citizen observer (se remplit selon la bbox)
+                        // Création de la couche évènements citizen observer (Geoserver, se remplit selon la bbox)
                         this.events_co_layer = new ol.layer.Vector({
                             source: new ol.source.Vector({
                                 format: new ol.format.GeoJSON(),
@@ -2427,7 +2432,7 @@ Vue.createApp({
                             title: 'Citizen observer events',
                             zIndex: 11,
                         }),
-                        // Création de la couche event selectionné (vide)
+                        // Création de la couche contenant uniquement l'évènement sélectionné
                         this.selected_event_layer = new ol.layer.Vector({
                             source: new ol.source.Vector(),
                             title: 'Selected event',
@@ -2435,7 +2440,7 @@ Vue.createApp({
                         }),
                     ],
                 }),
-                // Création de la couche géolocalisation vide
+                // Création de la couche de géolocalisation
                 this.location_layer = new ol.layer.Vector({
                     source: new ol.source.Vector(),
                     zIndex: 13,
@@ -2459,22 +2464,22 @@ Vue.createApp({
         this.events_hazminer_layer.getSource().on('featuresloadend', event => {
             let features = event.features;
             features.forEach((feature) => {
-                this.set_new_feature_hazminer_visibility(feature)
+                this.set_new_feature_hazminer_visibility(feature);
             })
         });
 
-        // À chaque ajout de nouvelles évènements citizen observer, création de la variable visibilité selon les filtres actifs
+        // À chaque ajout de nouveaux évènements citizen observer, création de la variable visibilité selon les filtres actifs
         this.events_co_layer.getSource().on('featuresloadend', event => {
             let features = event.features;
             features.forEach((feature) => {
-                this.set_new_feature_co_visibility(feature)
+                this.set_new_feature_co_visibility(feature);
             })
         });
 
         // Style au départ
         this.change_style_events();
 
-        // Changer le style de la couche selected event à chaque évènement ajouté
+        // Changer le style de la couche contenant uniquement l'évènement sélectionné à chaque évènement ajouté
         // (le style dépend de la couche d'origine de l'évènement et des filtres)
         this.selected_event_layer.getSource().on('addfeature', event => {
             this.change_style_selected_event();
@@ -2488,51 +2493,51 @@ Vue.createApp({
         this.map.addOverlay(overlay_pointermove);
 
         // Création de la bulle vide qui permet de sélectionner un évènement / paragraphe quand plusieurs sont superposés
-        let overlay_clic = new ol.Overlay({
-            element: document.getElementById("popup_clic"),
+        let overlay_click = new ol.Overlay({
+            element: document.getElementById("popup_click"),
             positioning: "bottom-center"
         });
-        this.map.addOverlay(overlay_clic);
+        this.map.addOverlay(overlay_click);
 
         // Gestionnaire des couches
-        let layerSwitcher = new LayerSwitcher({
+        let layer_switcher = new LayerSwitcher({
             activationMode: 'click',
             reverse: true,
             groupSelectStyle: 'children'
         });
-        this.map.addControl(layerSwitcher);
+        this.map.addControl(layer_switcher);
 
         // Bouton pour accéder à l'outil filtrage
-        let filtrage_control = new ol.control.Control({
-            element: document.getElementById("outil_filtrage_div"),
+        let filter_control = new ol.control.Control({
+            element: document.getElementById("filter_div"),
         });
-        this.map.addControl(filtrage_control);
+        this.map.addControl(filter_control);
 
         // Bouton pour changer le style
         let change_style_control = new ol.control.Control({
-            element: document.getElementById("changer_style_div"),
+            element: document.getElementById("change_style_div"),
         });
         this.map.addControl(change_style_control);
 
-        // Bouton download
+        // Bouton de téléchargement
         let download_control = new ol.control.Control({
             element: document.getElementById("download_div"),
         });
         this.map.addControl(download_control);
 
-        // Bouton screenshot
+        // Bouton des captures d'écran
         let screenshot_control = new ol.control.Control({
             element: document.getElementById("screenshot_div"),
         });
         this.map.addControl(screenshot_control);
 
-        // Bouton pour activer la localisation
-        let localisation_control = new ol.control.Control({
-            element: document.getElementById("affichage_location_div"),
+        // Bouton pour activer / désactiver la localisation
+        let location_control = new ol.control.Control({
+            element: document.getElementById("location_div"),
         });
-        this.map.addControl(localisation_control);
+        this.map.addControl(location_control);
 
-        // Scale line
+        // Echelle
         let scaleline = new ol.control.ScaleLine({
             element: document.getElementById("scaleline_div"),
         });
@@ -2542,9 +2547,9 @@ Vue.createApp({
         this.map.on('moveend', () => {
 
             // Suppression de la bulle qui permet de sélectionner un évènement / paragraphe quand plusieurs sont superposés
-            document.getElementById("popup_clic").style.display = "none";
+            document.getElementById("popup_click").style.display = "none";
 
-            // Changement de la taille des events selon le niveau de zoom
+            // Changement de la taille des évènements selon le niveau de zoom
             let zoom = this.map.getView().getZoom();
             let new_factor_zoom = this.zoom_table.find(interval => {
                 return zoom >= interval.min_zoom && zoom <= interval.max_zoom;
@@ -2556,7 +2561,7 @@ Vue.createApp({
 
         });
 
-        // A chaque déplacement du pointeur, si plusieurs events sont superposées au niveau du pointeur, on affiche leur nombre
+        // A chaque déplacement du pointeur, si plusieurs évènements sont superposées au niveau du pointeur, on affiche leur nombre
         this.map.on("pointermove", evt => {
 
             let event_features = [];
@@ -2581,7 +2586,7 @@ Vue.createApp({
 
         });
 
-        // Quand on clique sur une ou plusieurs évènements :
+        // Quand on clique sur un ou plusieurs évènements :
         this.map.on('click', evt => {
 
             let event_features = [];
@@ -2595,38 +2600,38 @@ Vue.createApp({
     
             // Si l'objet est un seul évènement, le texte contenant les infos sur cet évènement s'affiche à droite de l'écran
             if (event_features.length == 1) {
-                document.getElementById("popup_clic").style.display = "none";
+                document.getElementById("popup_click").style.display = "none";
                 this.show_selected_event_data(event_features[0]);
             }
 
-            // Si plusieurs events sont sélectionnés, on affiche la liste sous forme de liens cliquables
-            // Cliquer sur un lien affiche le texte contenant les infos sur l'event sélectionné à droite de l'écran
+            // Si plusieurs évènements sont sélectionnés, on affiche la liste sous forme de liens cliquables
+            // Cliquer sur un lien affiche le texte contenant les infos sur l'évènement sélectionné à droite de l'écran
             else if (event_features.length > 1) {
                 let html_popup = 'Choose the event:<ul>'
                 event_features.forEach((event_feature, index) => {
-                    let ligne;
+                    let line;
                     if (event_feature.get('hazard_type')) {
-                        ligne = event_feature.get('hazard_type') + ' - ' + event_feature.get('event_time').substring(0,10);
+                        line = event_feature.get('hazard_type') + ' - ' + event_feature.get('event_time').substring(0,10);
                     }
                     if (event_feature.get('type_event')) {
-                        ligne = event_feature.get('type_event') + ' - ' + event_feature.get('event_date').substring(0,10);
+                        line = event_feature.get('type_event') + ' - ' + event_feature.get('event_date').substring(0,10);
                     }
-                    html_popup += `<li><a href="#" id="event_link_${index}">${ligne}</a></li>`;
+                    html_popup += `<li><a href="#" id="event_link_${index}">${line}</a></li>`;
                 });
                 html_popup += '</ul>';
-                document.getElementById("popup_clic").innerHTML = html_popup;
+                document.getElementById("popup_click").innerHTML = html_popup;
                 event_features.forEach((event_feature, index) => {
                     document.getElementById(`event_link_${index}`).addEventListener('click', (e) => {
                         e.preventDefault();
                         this.show_selected_event_data(event_feature);
                     });
                 });
-                overlay_clic.setPosition(evt.coordinate);
-                document.getElementById("popup_clic").style.display = "block";
+                overlay_click.setPosition(evt.coordinate);
+                document.getElementById("popup_click").style.display = "block";
             }
 
             else {
-                document.getElementById("popup_clic").style.display = "none";
+                document.getElementById("popup_click").style.display = "none";
             }
 
         });

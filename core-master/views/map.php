@@ -16,275 +16,10 @@
 
     <div id="vue_map">
 
+        <!-- Carte -->
         <div id="map" class="margin">
 
-            <div id="form_changer_style" class="form popup scroll_box" v-if="show_change_style_form">
-
-                <div id="top_form" class="flexrow space_between padding">
-                    <h5>Change style</h5>
-                    <button class="vertical_center" @click="change_true_false(['show_change_style_form'])">&#215;</button>
-                </div>
-
-                <div id=choix_style_data class="flexrow space_between padding">
-                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_style_hazminer>Hazminer</button>
-                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_style_hazminer @click="change_true_false(['show_general_menu_style_hazminer','show_general_menu_style_co'])">Citizen observer</button>
-                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_style_co @click="change_true_false(['show_general_menu_style_hazminer','show_general_menu_style_co'])">Hazminer</button>
-                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_style_co>Citizen observer</button>
-                </div>
-
-                <br>
-
-                <div id=hazminer_style v-if=show_general_menu_style_hazminer>
-
-                    <div id="choix_couleur" class="padding">
-                        <label>Color style:
-                            <select class="margin_left" v-model="color_style">
-                                <option value="Event_type">Hazard type</option>
-                                <option value="Year">Year</option>
-                                <option value="Month">Month</option>
-                            </select>
-                        </label>
-                    </div>
-
-                    <div id="color_eventtype" class="padding" v-if="color_style ==='Event_type'">
-                        <div class="flexrow">
-                            <div class="vertical_center">Flood:</div>
-                            <input type="color" class="color_input margin_left" v-model="color_flood">
-                        </div>
-                        <div class="flexrow">
-                            <div class="vertical_center">Flash flood:</div>
-                            <input type="color" class="color_input margin_left" v-model="color_flashflood">
-                        </div>
-                        <div class="flexrow">
-                            <div class="vertical_center">Landslide:</div>
-                            <input type="color" class="color_input margin_left" v-model="color_landslide">
-                        </div>
-                    </div>
-
-                    <div id="color_year" class="flexrow padding" v-if="color_style ==='Year'">
-                        <div>
-                            <div class="flexrow" v-for="step in color_year">
-                                <div class="vertical_center">{{step.label}}:</div>
-                                <input type="color" class="color_input margin_left" v-model="step.color">
-                            </div>
-                        </div>
-                    </div> 
-
-                    <div id="color_month" class="flexrow padding" v-if="color_style ==='Month'">
-                        <div>
-                            <div class="flexrow" v-for="step in color_month">
-                                <div class="vertical_center">{{step.label}}:</div>
-                                <input type="color" class="color_input margin_left" v-model="step.color">
-                            </div>
-                        </div>
-                    </div> 
-
-                    <hr />
-
-                    <div id="choix_taille" class="padding">
-                        <label>Size style:
-                            <select class="margin_left" v-model="size_style">
-                                <option value="Standard">Standard</option>
-                                <option value="Duration">Duration</option>
-                                <option value="Casualties">Casualties</option> 
-                                <option value="Popularity">Popularity</option>                         
-                            </select>
-                        </label>
-                    </div>
-
-                    <div id="size_standard" class="flexrow padding" v-if="size_style ==='Standard'">
-                        <div class="vertical_center">All events:</div>
-                        <input type="range" min="0" max="15" class="slider margin_left" v-model="size_standard">
-                        <span class="margin_left">{{size_standard}}</span>
-                    </div>
-
-                    <div id="size_duration" class="flexrow padding" v-if="size_style ==='Duration'">
-                        <div>
-                            <div class="flexrow margin" v-for="step in size_duration">
-                                <div class="vertical_center">{{step.label}}:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
-                                <span class="margin_left">{{step.size}}</span>
-                            </div>
-                        </div>
-                    </div>        
-
-                    <div id="size_casualties" class="flexrow padding" v-if="size_style ==='Casualties'">
-                        <label>Size style (casualties):
-                            <select class="margin_left" v-model="size_casualties">
-                                <option v-for="casualty in casualties_hazminer_list" :value="casualty.id">{{casualty.label}}</option>  
-                            </select>
-                        </label>
-                    </div>
-
-                    <div v-for="casualty in casualties_hazminer_list" v-if="size_style ==='Casualties'">
-                        <div v-if="size_casualties === casualty.id">
-                            <div class="flexrow margin" v-for="step in casualty.table">
-                                <div class="vertical_center">{{step.label}}:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
-                                <span class="margin_left">{{step.size}}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="size_popularity" class="flexrow padding" v-if="size_style ==='Popularity'">
-                        <label>Size style (popularity):
-                            <select class="margin_left" v-model="size_popularity">
-                                <option v-for="pop in popularity_hazminer_list" :value="pop.id">{{pop.label}}</option>  
-                            </select>
-                        </label>
-                    </div>
-
-                    <div v-for="pop in popularity_hazminer_list" v-if="size_style ==='Popularity'">
-                        <div v-if="size_popularity === pop.id">
-                            <div class="flexrow margin" v-for="step in pop.table">
-                                <div class="vertical_center">{{step.label}}:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
-                                <span class="margin_left">{{step.size}}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div id=co_style v-if=show_general_menu_style_co>
-
-                    <div id="choix_couleur" class="padding">
-                        <label>Couleur:
-                            <select class="margin_left" v-model="style_couleur">
-                                <option value="Type_event">Type d'évènement</option>
-                                <option value="Annee">Année</option>
-                                <option value="Mois">Mois</option>
-                                <option value="Georeferencees">Données géoréférencées ou non</option>
-                            </select>
-                        </label>
-                    </div>
-
-                    <div id="couleur_typeevent" class="padding" v-if="style_couleur ==='Type_event'">
-                        <div class="flexrow">
-                            <div class="vertical_center">Inondation:</div>
-                            <input type="color" class="color_input margin_left" v-model="couleur_inondation">
-                        </div>
-                        <div class="flexrow">
-                            <div class="vertical_center">Glissement de terrain:</div>
-                            <input type="color" class="color_input margin_left" v-model="couleur_landslide">
-                        </div>
-                        <div class="flexrow">
-                            <div class="vertical_center">Tremblement de terre:</div>
-                            <input type="color" class="color_input margin_left" v-model="couleur_tdt">
-                        </div>
-                        <div class="flexrow">
-                            <div class="vertical_center">Vents violents:</div>
-                            <input type="color" class="color_input margin_left" v-model="couleur_vents_violents">
-                        </div>
-                        <div class="flexrow">
-                            <div class="vertical_center">Grêle:</div>
-                            <input type="color" class="color_input margin_left" v-model="couleur_grele">
-                        </div>
-                        <div class="flexrow">
-                            <div class="vertical_center">Foudre:</div>
-                            <input type="color" class="color_input margin_left" v-model="couleur_foudre">
-                        </div>
-                    </div>
-
-                    <div id="couleur_annee" class="flexrow padding" v-if="style_couleur ==='Annee'">
-                        <div>
-                            <div class="flexrow" v-for="step in couleur_annee">
-                                <div class="vertical_center">{{step.label}}:</div>
-                                <input type="color" class="color_input margin_left" v-model="step.color">
-                            </div>
-                        </div>
-                    </div> 
-
-                    <div id="couleur_mois" class="flexrow padding" v-if="style_couleur ==='Mois'">
-                        <div>
-                            <div class="flexrow" v-for="step in couleur_mois">
-                                <div class="vertical_center">{{step.label}}:</div>
-                                <input type="color" class="color_input margin_left" v-model="step.color">
-                            </div>
-                        </div>
-                    </div> 
-
-                    <div id="couleur_georef" class="padding" v-if="style_couleur ==='Georeferencees'">
-                        <div class="flexrow">
-                            <div class="vertical_center">Données géoréférencées:</div>
-                            <input type="color" class="color_input margin_left" v-model="couleur_georef_true">
-                        </div>
-                        <div class="flexrow">
-                            <div class="vertical_center">Données non géoréférencées:</div>
-                            <input type="color" class="color_input margin_left" v-model="couleur_georef_false">
-                        </div>
-                    </div>
-
-                    <hr />
-
-                    <div id="choix_taille" class="padding">
-                        <label>Taille:
-                            <select class="margin_left" v-model="style_taille">
-                                <option value="Standard">Standard</option>
-                                <option value="Impact_humain">Impact humain</option>
-                                <option value="Autres_impacts">Autres impacts</option>                       
-                            </select>
-                        </label>
-                    </div>
-
-                    <div id="taille_standard" class="flexrow padding" v-if="style_taille ==='Standard'">
-                        <div class="vertical_center">Tous les évènements:</div>
-                        <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_standard">
-                        <span class="margin_left">{{taille_standard}}</span>
-                    </div>
-
-                    <div id="taille_impact_humain" class="flexrow padding" v-if="style_taille ==='Impact_humain'">
-                        <label>Taille selon :
-                            <select class="margin_left" v-model="taille_impact_humain">
-                                <option v-for="impact in human_casualties_co_list" :value="impact.id">{{impact.label}}</option>  
-                            </select>
-                        </label>
-                    </div>
-
-                    <div v-for="impact in human_casualties_co_list" v-if="style_taille ==='Impact_humain'">
-                        <div v-if="taille_impact_humain === impact.id">
-                            <div class="flexrow margin" v-for="step in impact.table">
-                                <div class="vertical_center">{{step.label}}:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
-                                <span class="margin_left">{{step.size}}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="taille_autres_impacts" class="flexrow padding" v-if="style_taille ==='Autres_impacts'">
-                        <label>Taille selon :
-                            <select class="margin_left" v-model="taille_autres_impacts">
-                                <option v-for="impact in other_casualties_co_list" :value="impact.id">{{impact.label}}</option>  
-                            </select>
-                        </label>
-                    </div>
-
-                    <div v-for="impact in other_casualties_co_list" v-if="style_taille ==='Autres_impacts'">
-                        <div v-if="taille_autres_impacts === impact.id">
-                            <div class="flexrow margin">
-                                <div class="vertical_center">Oui:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_oui">
-                                <span class="margin_left">{{taille_oui}}</span>
-                            </div>
-                            <div class="flexrow margin">
-                                <div class="vertical_center">Non:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_non">
-                                <span class="margin_left">{{taille_non}}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <br>
-
-                <div class="flexrow space_evenly padding">
-                    <button id="change_style" @click="change_style_all">Apply</button>
-                    <button id="cancel" @click="change_true_false(['show_change_style_form'])">Close</button>
-                </div>
-
-            </div>
-
+            <!-- Fenêtre du filtre -->
             <div id="form_filter" class="form popup scroll_box" v-if="show_filter_form">
 
                 <div id="top_form" class="flexrow space_between padding">
@@ -292,7 +27,7 @@
                     <button class="vertical_center" @click="change_true_false(['show_filter_form'])">&#215;</button>
                 </div> 
 
-                <div id=choix_filtre_data class="flexrow space_between padding">
+                <div id=filtre_data_choice class="flexrow space_between padding">
                     <button class="btn btn-secondary" type="button" v-if=show_general_menu_filter_hazminer>Hazminer</button>
                     <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_filter_hazminer @click="setup_filter_change_menu">Citizen observer</button>
                     <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_filter_co @click="setup_filter_change_menu">Hazminer</button>
@@ -611,12 +346,281 @@
 
                 <div class="flexrow space_evenly padding">
                     <button id="reset" @click="reset_filter_form">Reset</button>
-                    <button id="apply" @click="appliquer_filtres">Apply</button>
+                    <button id="apply" @click="apply_filters">Apply</button>
                     <button id="cancel" @click="change_true_false(['show_filter_form'])">Close</button>
                 </div>
 
             </div>
 
+            <!-- Fenêtre pour changer le style -->
+            <div id="form_changer_style" class="form popup scroll_box" v-if="show_change_style_form">
+
+                <div id="top_form" class="flexrow space_between padding">
+                    <h5>Change style</h5>
+                    <button class="vertical_center" @click="change_true_false(['show_change_style_form'])">&#215;</button>
+                </div>
+
+                <div id=style_data_choice class="flexrow space_between padding">
+                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_style_hazminer>Hazminer</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_style_hazminer @click="change_true_false(['show_general_menu_style_hazminer','show_general_menu_style_co'])">Citizen observer</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_general_menu_style_co @click="change_true_false(['show_general_menu_style_hazminer','show_general_menu_style_co'])">Hazminer</button>
+                    <button class="btn btn-secondary" type="button" v-if=show_general_menu_style_co>Citizen observer</button>
+                </div>
+
+                <br>
+
+                <div id=hazminer_style v-if=show_general_menu_style_hazminer>
+
+                    <div id="color_choice" class="padding">
+                        <label>Color style:
+                            <select class="margin_left" v-model="color_style">
+                                <option value="Event_type">Hazard type</option>
+                                <option value="Year">Year</option>
+                                <option value="Month">Month</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div id="color_eventtype" class="padding" v-if="color_style ==='Event_type'">
+                        <div class="flexrow">
+                            <div class="vertical_center">Flood:</div>
+                            <input type="color" class="color_input margin_left" v-model="color_flood">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Flash flood:</div>
+                            <input type="color" class="color_input margin_left" v-model="color_flashflood">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Landslide:</div>
+                            <input type="color" class="color_input margin_left" v-model="color_landslide">
+                        </div>
+                    </div>
+
+                    <div id="color_year" class="flexrow padding" v-if="color_style ==='Year'">
+                        <div>
+                            <div class="flexrow" v-for="step in color_year">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="color" class="color_input margin_left" v-model="step.color">
+                            </div>
+                        </div>
+                    </div> 
+
+                    <div id="color_month" class="flexrow padding" v-if="color_style ==='Month'">
+                        <div>
+                            <div class="flexrow" v-for="step in color_month">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="color" class="color_input margin_left" v-model="step.color">
+                            </div>
+                        </div>
+                    </div> 
+
+                    <hr />
+
+                    <div id="size_choice" class="padding">
+                        <label>Size style:
+                            <select class="margin_left" v-model="size_style">
+                                <option value="Standard">Standard</option>
+                                <option value="Duration">Duration</option>
+                                <option value="Casualties">Casualties</option> 
+                                <option value="Popularity">Popularity</option>                         
+                            </select>
+                        </label>
+                    </div>
+
+                    <div id="size_standard" class="flexrow padding" v-if="size_style ==='Standard'">
+                        <div class="vertical_center">All events:</div>
+                        <input type="range" min="0" max="15" class="slider margin_left" v-model="size_standard">
+                        <span class="margin_left">{{size_standard}}</span>
+                    </div>
+
+                    <div id="size_duration" class="flexrow padding" v-if="size_style ==='Duration'">
+                        <div>
+                            <div class="flexrow margin" v-for="step in size_duration">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <span class="margin_left">{{step.size}}</span>
+                            </div>
+                        </div>
+                    </div>        
+
+                    <div id="size_casualties" class="flexrow padding" v-if="size_style ==='Casualties'">
+                        <label>Size style (casualties):
+                            <select class="margin_left" v-model="size_casualties">
+                                <option v-for="casualty in casualties_hazminer_list" :value="casualty.id">{{casualty.label}}</option>  
+                            </select>
+                        </label>
+                    </div>
+
+                    <div v-for="casualty in casualties_hazminer_list" v-if="size_style ==='Casualties'">
+                        <div v-if="size_casualties === casualty.id">
+                            <div class="flexrow margin" v-for="step in casualty.table">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <span class="margin_left">{{step.size}}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="size_popularity" class="flexrow padding" v-if="size_style ==='Popularity'">
+                        <label>Size style (popularity):
+                            <select class="margin_left" v-model="size_popularity">
+                                <option v-for="pop in popularity_hazminer_list" :value="pop.id">{{pop.label}}</option>  
+                            </select>
+                        </label>
+                    </div>
+
+                    <div v-for="pop in popularity_hazminer_list" v-if="size_style ==='Popularity'">
+                        <div v-if="size_popularity === pop.id">
+                            <div class="flexrow margin" v-for="step in pop.table">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <span class="margin_left">{{step.size}}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id=co_style v-if=show_general_menu_style_co>
+
+                    <div id="choix_couleur" class="padding">
+                        <label>Couleur:
+                            <select class="margin_left" v-model="style_couleur">
+                                <option value="Type_event">Type d'évènement</option>
+                                <option value="Annee">Année</option>
+                                <option value="Mois">Mois</option>
+                                <option value="Georeferencees">Données géoréférencées ou non</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    <div id="couleur_typeevent" class="padding" v-if="style_couleur ==='Type_event'">
+                        <div class="flexrow">
+                            <div class="vertical_center">Inondation:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_inondation">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Glissement de terrain:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_landslide">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Tremblement de terre:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_tdt">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Vents violents:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_vents_violents">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Grêle:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_grele">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Foudre:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_foudre">
+                        </div>
+                    </div>
+
+                    <div id="couleur_annee" class="flexrow padding" v-if="style_couleur ==='Annee'">
+                        <div>
+                            <div class="flexrow" v-for="step in couleur_annee">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="color" class="color_input margin_left" v-model="step.color">
+                            </div>
+                        </div>
+                    </div> 
+
+                    <div id="couleur_mois" class="flexrow padding" v-if="style_couleur ==='Mois'">
+                        <div>
+                            <div class="flexrow" v-for="step in couleur_mois">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="color" class="color_input margin_left" v-model="step.color">
+                            </div>
+                        </div>
+                    </div> 
+
+                    <div id="couleur_georef" class="padding" v-if="style_couleur ==='Georeferencees'">
+                        <div class="flexrow">
+                            <div class="vertical_center">Données géoréférencées:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_georef_true">
+                        </div>
+                        <div class="flexrow">
+                            <div class="vertical_center">Données non géoréférencées:</div>
+                            <input type="color" class="color_input margin_left" v-model="couleur_georef_false">
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div id="choix_taille" class="padding">
+                        <label>Taille:
+                            <select class="margin_left" v-model="style_taille">
+                                <option value="Standard">Standard</option>
+                                <option value="Impact_humain">Impact humain</option>
+                                <option value="Autres_impacts">Autres impacts</option>                       
+                            </select>
+                        </label>
+                    </div>
+
+                    <div id="taille_standard" class="flexrow padding" v-if="style_taille ==='Standard'">
+                        <div class="vertical_center">Tous les évènements:</div>
+                        <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_standard">
+                        <span class="margin_left">{{taille_standard}}</span>
+                    </div>
+
+                    <div id="taille_impact_humain" class="flexrow padding" v-if="style_taille ==='Impact_humain'">
+                        <label>Taille selon :
+                            <select class="margin_left" v-model="taille_impact_humain">
+                                <option v-for="impact in human_casualties_co_list" :value="impact.id">{{impact.label}}</option>  
+                            </select>
+                        </label>
+                    </div>
+
+                    <div v-for="impact in human_casualties_co_list" v-if="style_taille ==='Impact_humain'">
+                        <div v-if="taille_impact_humain === impact.id">
+                            <div class="flexrow margin" v-for="step in impact.table">
+                                <div class="vertical_center">{{step.label}}:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <span class="margin_left">{{step.size}}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="taille_autres_impacts" class="flexrow padding" v-if="style_taille ==='Autres_impacts'">
+                        <label>Taille selon :
+                            <select class="margin_left" v-model="taille_autres_impacts">
+                                <option v-for="impact in other_casualties_co_list" :value="impact.id">{{impact.label}}</option>  
+                            </select>
+                        </label>
+                    </div>
+
+                    <div v-for="impact in other_casualties_co_list" v-if="style_taille ==='Autres_impacts'">
+                        <div v-if="taille_autres_impacts === impact.id">
+                            <div class="flexrow margin">
+                                <div class="vertical_center">Oui:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_oui">
+                                <span class="margin_left">{{taille_oui}}</span>
+                            </div>
+                            <div class="flexrow margin">
+                                <div class="vertical_center">Non:</div>
+                                <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_non">
+                                <span class="margin_left">{{taille_non}}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <br>
+
+                <div class="flexrow space_evenly padding">
+                    <button id="change_style" @click="change_style_all">Apply</button>
+                    <button id="cancel" @click="change_true_false(['show_change_style_form'])">Close</button>
+                </div>
+
+            </div>
+
+            <!-- Fenêtre de téléchargement des données -->
             <div id="form_download" class="form popup scroll_box" v-if="show_download_form">
 
                 <div id="top_form" class="flexrow space_between padding">
@@ -686,7 +690,7 @@
                 <br>
 
                 <div class="flexrow space_evenly padding">
-                    <button id="download" @click="download">Download</button>
+                    <button id="download" @click="download_data">Download</button>
                     <button id="cancel" @click="change_true_false(['show_download_form'])">Close</button>
                 </div>
 
@@ -694,6 +698,7 @@
 
         </div>
 
+        <!-- Texte sur les évènements (à droite) -->
         <div id=event_data_map_scroll_box class="scroll_box margin padding">
 
             <div id=no_event_selected v-if="!selected_event">Select an event to get more information!</div>
@@ -750,31 +755,38 @@
 
         </div>
 
+        <!-- Bulle qui affiche le nombre d'évènements si plusieurs sont superposés -->
         <div id=popup_pointermove class="popup small_popup scroll_box"></div>
 
-        <div id=popup_clic class="popup small_popup scroll_box"></div>
+        <!-- Bulle qui permet de sélectionner un évènement quand plusieurs sont superposés -->
+        <div id=popup_click class="popup small_popup scroll_box"></div>
 
-        <div id=outil_filtrage_div class='bouton_1 ol-unselectable ol-control'>
+        <!-- Bouton du filtre -->
+        <div id=filter_div class='bouton_1 ol-unselectable ol-control'>
             <button class=open_form_button @click="setup_filter_form">Filter</button>
         </div>
 
-        <div id=changer_style_div class='bouton_2 ol-unselectable ol-control'>
+        <!-- Bouton pour changer le style -->
+        <div id=change_style_div class='bouton_2 ol-unselectable ol-control'>
             <button class=open_form_button @click=setup_change_style_form>Change style</button>
         </div>
 
+        <!-- Bouton téléchargement des données -->
         <div id=download_div class='bouton_3 ol-unselectable ol-control'>
             <button class=open_form_button @click=setup_download_form>Download data</button>
         </div>
 
+        <!-- Bouton capture d'écran -->
         <div id=screenshot_div class='bouton_4 ol-unselectable ol-control'>
             <button class=open_form_button @click=download_screenshot>Screenshot</button>
         </div>
  
-        <!-- Bouton qui permet d'activer la localisation -->
-        <div id="affichage_location_div" class='ol-unselectable ol-control'>
+        <!-- Bouton de la localisation -->
+        <div id="location_div" class='ol-unselectable ol-control'>
             <button @click=show_location>&#8857;</button>
         </div>
 
+        <!-- Echelle -->
         <div id="scaleline_div"></div>
 
     </div>  

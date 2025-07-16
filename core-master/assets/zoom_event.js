@@ -565,24 +565,26 @@ Vue.createApp({
 
         // Permet d'avoir un seul bouton sélectionné pour le choix du mode de téléchargement
         checkbox_download(checkbox_name) {
+
             let checkbox_list = ['download_e', 'download_p', 'download_e_p'];
             for (let checkbox of checkbox_list) {
                 if (checkbox_name != checkbox) {
                     this[checkbox] = false;
                 }
             }
+
         },
 
         // Téléchargement des données (csv)
         async download_data() {
 
-            // Si aucun mode de téléchargement n'est choisi
+            // Message d'erreur si aucun mode de téléchargement n'est choisi
             if (!(this.download_e || this.download_p || this.download_e_p)) {
                 alert("No download mode selected!");
                 return;
             }
 
-            // Création du tableau pour la jointure finale, initialisation du texte (header)
+            // Création du tableau pour la jointure finale, initialisation du texte (noms des colonnes)
             let event_content_lines = [this.event_download_properties.join(',')];
 
             // Affichage de la progression du téléchargement
@@ -631,13 +633,13 @@ Vue.createApp({
         // Création du texte de téléchargement des paragraphes liés à un évènement
         async create_paragraph_download_text() {
 
-            // Création du tableau pour la jointure finale, initialisation du texte (header)
+            // Création du tableau pour la jointure finale, initialisation du texte (noms des colonnes)
             let paragraph_content_lines = [this.paragraph_download_properties.join(',')];
 
             // Liste permettant d'éviter les paragraphes en double
             let seen_paragraph_id = new Set();
 
-            // Requête vers le geoserver, on récupère seulement les paragraphes de l'évènement
+            // Requête vers le Geoserver, on récupère seulement les paragraphes liés à l'évènement
             let cql_filter = `event_id = '${this.event_id}'`;
             let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
                 + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
@@ -648,7 +650,7 @@ Vue.createApp({
             // Récupération des paragraphes
             let features = json.features;
 
-            // Pour chaque paragraphe
+            // Pour chaque paragraphe :
             let count_features = 0;
             for (let f of features) {
 
@@ -991,7 +993,7 @@ Vue.createApp({
                                     title: 'Bbox event',
                                     zIndex: 10,
                                 }),
-                                // Création de la couche contenant uniquement l'évènement sélectionné (vide)
+                                // Création de la couche contenant uniquement l'évènement sélectionné
                                 this.selected_event_layer = new ol.layer.Vector({
                                     source: new ol.source.Vector(),
                                     style: new ol.style.Style({
@@ -1007,7 +1009,7 @@ Vue.createApp({
                                 }),
                             ],
                         }),
-                        // Création de la couche des paragraphes (vide)
+                        // Création de la couche des paragraphes
                         this.paragraphs_layer = new ol.layer.Vector({
                             source: new ol.source.Vector(),
                             style: new ol.style.Style({
@@ -1024,7 +1026,7 @@ Vue.createApp({
                         new ol.layer.Group({
                             title: 'Selected paragraph',
                             layers: [
-                                // Création de la couche de l'emprise des paragraphes (vide)
+                                // Création de la couche de l'emprise des paragraphes
                                 this.bbox_paragraphs_layer = new ol.layer.Vector({
                                     source: new ol.source.Vector(),
                                     style: new ol.style.Style({
@@ -1039,7 +1041,7 @@ Vue.createApp({
                                     title: 'Bbox paragraph',
                                     zIndex: 11,
                                 }),                               
-                                // Création de la couche contenant uniquement le paragraphe selectionné (vide)
+                                // Création de la couche contenant uniquement le paragraphe selectionné
                                 this.selected_paragraph_layer = new ol.layer.Vector({
                                     source: new ol.source.Vector(),
                                     style: new ol.style.Style({
@@ -1057,7 +1059,7 @@ Vue.createApp({
                         }),
                     ],
                 }),
-                // Création de la couche de géolocalisation vide
+                // Création de la couche de géolocalisation
                 this.location_layer = new ol.layer.Vector({
                     source: new ol.source.Vector(),
                     zIndex: 15,
@@ -1077,11 +1079,11 @@ Vue.createApp({
         this.map.addOverlay(overlay_pointermove);
 
         // Création de la bulle vide qui permet de sélectionner un paragraphe quand plusieurs sont superposés
-        let overlay_clic = new ol.Overlay({
-            element: document.getElementById("popup_clic"),
+        let overlay_click = new ol.Overlay({
+            element: document.getElementById("popup_click"),
             positioning: "bottom-center"
         });
-        this.map.addOverlay(overlay_clic);
+        this.map.addOverlay(overlay_click);
 
         // Gestionnaire des couches
         let layer_switcher = new LayerSwitcher({
@@ -1109,9 +1111,9 @@ Vue.createApp({
         });
         this.map.addControl(screenshot_control);
 
-        // Bouton pour activer la localisation
+        // Bouton pour activer / désactiver la localisation
         let location_control = new ol.control.Control({
-            element: document.getElementById("affichage_location_div"),
+            element: document.getElementById("location_div"),
         });
         this.map.addControl(location_control);
 
@@ -1123,7 +1125,7 @@ Vue.createApp({
 
         // A chaque déplacement/zoom, suppression de la bulle qui permet de sélectionner un paragraphe quand plusieurs sont superposés
         this.map.on('moveend', () => {
-            document.getElementById("popup_clic").style.display = "none";
+            document.getElementById("popup_click").style.display = "none";
         });
 
         // A chaque déplacement du pointeur, si plusieurs paragraphes sont superposées au niveau du pointeur, on affiche leur nombre
@@ -1165,7 +1167,7 @@ Vue.createApp({
         
             // Si l'objet est un seul paragraphe, le texte contenant les infos sur ce paragraphe s'affiche en bas à droite de l'écran
             if (paragraph_features.length == 1) {
-                document.getElementById("popup_clic").style.display = "none";
+                document.getElementById("popup_click").style.display = "none";
                 this.show_selected_paragraph_data(paragraph_features[0]);
             }
 
@@ -1174,23 +1176,23 @@ Vue.createApp({
             else if (paragraph_features.length > 1) {
                 let html_popup = 'Choose the paragraph:<ul>'
                 paragraph_features.forEach((paragraph_feature, index) => {
-                    let ligne = paragraph_feature.get('article_id');
-                    html_popup += `<li><a href="#" id="paragraph_link_${index}">${ligne}</a></li>`;
+                    let line = paragraph_feature.get('article_id');
+                    html_popup += `<li><a href="#" id="paragraph_link_${index}">${line}</a></li>`;
                 });
                 html_popup += '</ul>'
-                document.getElementById("popup_clic").innerHTML = html_popup;
+                document.getElementById("popup_click").innerHTML = html_popup;
                 paragraph_features.forEach((paragraph_feature, index) => {
                     document.getElementById(`paragraph_link_${index}`).addEventListener('click', (e) => {
                         e.preventDefault();
                         this.show_selected_paragraph_data(paragraph_feature);
                     });
                 });
-                overlay_clic.setPosition(evt.coordinate);
-                document.getElementById("popup_clic").style.display = "block";
+                overlay_click.setPosition(evt.coordinate);
+                document.getElementById("popup_click").style.display = "block";
             }
 
             else {
-                document.getElementById("popup_clic").style.display = "none";
+                document.getElementById("popup_click").style.display = "none";
             }
 
         });

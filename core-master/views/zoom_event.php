@@ -32,7 +32,7 @@
                     <button class="vertical_center" @click="setup_time_series_form">&#215;</button>
                 </div> 
 
-                <div id=choix_time_series class="flexrow space_evenly padding">
+                <div id=time_series_choice class="flexrow space_evenly padding">
                     <button class="btn btn-secondary" type="button" v-if=show_time_series_minute>By minute</button>
                     <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_minute @click="setup_time_series_change_menu">By day</button>
                     <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_day @click="setup_time_series_change_menu">By minute</button>
@@ -121,7 +121,7 @@
         <div id=popup_pointermove class="popup small_popup scroll_box"></div>
 
         <!-- Bulle qui permet de sélectionner un paragraphe quand plusieurs sont superposés -->
-        <div id=popup_clic class="popup small_popup scroll_box"></div>
+        <div id=popup_click class="popup small_popup scroll_box"></div>
 
         <!-- Bouton séries temporelles -->
         <div id=time_series_div class='bouton_1 ol-unselectable ol-control'>
@@ -133,13 +133,13 @@
             <button class=open_form_button @click=setup_download_form>Download data</button>
         </div>
 
-        <!-- Bouton capture décran -->
+        <!-- Bouton capture d'écran -->
         <div id=screenshot_div class='bouton_3 ol-unselectable ol-control'>
             <button class=open_form_button @click=download_screenshot>Screenshot</button>
         </div>
 
         <!-- Bouton de la localisation -->
-        <div id="affichage_location_div" class='ol-unselectable ol-control'>
+        <div id="location_div" class='ol-unselectable ol-control'>
             <button @click=show_location>&#8857;</button>
         </div>
 
