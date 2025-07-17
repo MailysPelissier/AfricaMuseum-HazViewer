@@ -12,7 +12,6 @@ Adaptation données co
 Adaptation au site du musée (PROCHE)
 edit.africamuseum.be/geoserver
 
-taille event adaptée zoom
 
 
 Data hazminer:
@@ -30,6 +29,16 @@ csv : réponses à un questionnaire : beaucoup de traitements (250 colonnes)
 
 Doc récapitulatif données (uml) ?
 
+Utilisation de :
+Flight
+vue.js
+openlayers
+bootstrap
+flatpickr (calendriers)
+layerswitcher
+dayjs (dates ne dépendent pas du navigateur)
+plotly (graphes séries temporelles)
+
 
 
 Ouverture / prolongement :
@@ -45,7 +54,7 @@ Autres outils analyse
 
 
 A faire :
-Maj nex data Bram (valeurs max)
+Maj nex data Bram (valeurs max, tri colonnes)
 ICT
 licence, avertissements, logos partenaires, copyright, citations (robots.txt)
 (popup explication ?...)
