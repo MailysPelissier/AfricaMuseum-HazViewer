@@ -84,11 +84,22 @@ Vue.createApp({
             // Affichage de la fenêtre des séries temporelles
             show_time_series_form: false,
 
-            // Choix de la série temporelle à afficher (par minute / par jour)
-            show_time_series_minute: true,
-            show_time_series_day: false,
+            // Choix du type de série temporelle à afficher (date de l'évènement, date de publication)
+            show_time_series_event_time: true,
+            show_time_series_publication_time: false,
 
-            // Données sur la date de publication des paragraphes pour créer les séries temporelles
+            // Choix de la série temporelle à afficher, en fonction du type de série temporelle (par minute / par jour)
+            show_time_series_event_time_minute: true,
+            show_time_series_event_time_day: false,
+            show_time_series_publication_time_minute: false,
+            show_time_series_publication_time_day: false,
+
+            // Données sur la date de l'évènement et sur la date de publication des paragraphes pour créer les séries temporelles
+            event_time_list: [],
+            event_time_minute_array: [],
+            event_time_minute_sum_array: [],
+            event_time_day_array: [],
+            event_time_day_sum_array: [],
             publication_time_list: [],
             publication_time_minute_array: [],
             publication_time_minute_sum_array: [],
@@ -259,15 +270,16 @@ Vue.createApp({
                     featureProjection: 'EPSG:3857',       // Projection de la carte (Web Mercator)
                 });
 
-                // Chaque paragraphe récupéré est ajouté à la couche paragraphes, sa date de publication est ajoutée à la liste
+                // Chaque paragraphe récupéré est ajouté à la couche paragraphes, la date de l'évènement et sa date de publication sont ajoutées à leur liste
                 features.forEach(feature => {
                     this.paragraphs_layer.getSource().addFeature(feature);
-                    this.publication_time_list.push({date: feature.get('publication_time')});
+                    this.event_time_list.push({date: dayjs(feature.get('paragraph_time')).format("YYYY-MM-DD HH:mm:ss")});
+                    this.publication_time_list.push({date: dayjs(feature.get('publication_time')).format("YYYY-MM-DD HH:mm:ss")});
                 });
 
             })
             .then(data => {
-                // Création des données sur la date de publication des paragraphes pour créer les séries temporelles
+                // Création des données sur la date de l'évènement et sur la date de publication des paragraphes pour créer les séries temporelles
                 this.create_time_series_data();
             })
             .then(data => {
@@ -437,27 +449,46 @@ Vue.createApp({
 
         },
 
-        // Création des données sur la date de publication des paragraphes pour créer les séries temporelles
+        // Création des données sur la date de l'évènement et sur la date de publication des paragraphes pour créer les séries temporelles
         create_time_series_data() {
 
-            // Données par minute
-            let minute_dictionnary = this.publication_time_list.reduce((value, {date}) => {
+            // Date de l'évènement : données par minute
+            let event_time_minute_dictionnary = this.event_time_list.reduce((value, {date}) => {
                 value[date] = value[date] || {date: date, count: 0};
                 value[date]['count'] += 1;        
                 return value;
             }, {});
-            this.publication_time_minute_array = Object.values(minute_dictionnary).map(a => a.date);
-            this.publication_time_minute_sum_array = Object.values(minute_dictionnary).map(a => a.count);
+            this.event_time_minute_array = Object.values(event_time_minute_dictionnary).map(a => a.date);
+            this.event_time_minute_sum_array = Object.values(event_time_minute_dictionnary).map(a => a.count);
 
-            // Données par jour
-            let day_dictionnary = this.publication_time_list.reduce((value, {date}) => {
+            // Date de l'évènement : : données par jour
+            let event_time_day_dictionnary = this.event_time_list.reduce((value, {date}) => {
                 let day = date.substring(0,10);
                 value[day] = value[day] || {date: day, count: 0};
                 value[day]['count'] += 1;        
                 return value;
             }, {});
-            this.publication_time_day_array = Object.values(day_dictionnary).map(a => a.date);
-            this.publication_time_day_sum_array = Object.values(day_dictionnary).map(a => a.count);
+            this.event_time_day_array = Object.values(event_time_day_dictionnary).map(a => a.date);
+            this.event_time_day_sum_array = Object.values(event_time_day_dictionnary).map(a => a.count);
+
+            // Date de publication : données par minute
+            let publication_time_minute_dictionnary = this.publication_time_list.reduce((value, {date}) => {
+                value[date] = value[date] || {date: date, count: 0};
+                value[date]['count'] += 1;        
+                return value;
+            }, {});
+            this.publication_time_minute_array = Object.values(publication_time_minute_dictionnary).map(a => a.date);
+            this.publication_time_minute_sum_array = Object.values(publication_time_minute_dictionnary).map(a => a.count);
+
+            // Date de publication : données par jour
+            let publication_time_day_dictionnary = this.publication_time_list.reduce((value, {date}) => {
+                let day = date.substring(0,10);
+                value[day] = value[day] || {date: day, count: 0};
+                value[day]['count'] += 1;        
+                return value;
+            }, {});
+            this.publication_time_day_array = Object.values(publication_time_day_dictionnary).map(a => a.date);
+            this.publication_time_day_sum_array = Object.values(publication_time_day_dictionnary).map(a => a.count);
 
         },
 
@@ -473,15 +504,47 @@ Vue.createApp({
 
         },
 
-        // Affiche le bon menu de la fenêtre des séries temporelles (par minute / par jour) selon le bouton sélectionné
-        setup_time_series_change_menu() {
+        // Permet de sélectionner le bon type de série temporelle (selon la date de l'évènement donnée dans le paragraphe ou sa date de publication)
+        setup_time_series_type_change_menu() {
 
-            this.show_time_series_minute = !this.show_time_series_minute;
-            this.show_time_series_day = !this.show_time_series_day;
-
-            if (this.show_time_series_form) {
-                this.create_time_series_plot();
+            this.show_time_series_event_time = !this.show_time_series_event_time;
+            this.show_time_series_publication_time = !this.show_time_series_publication_time;
+        
+            if (this.show_time_series_event_time) {
+                this.show_time_series_event_time_minute = true;
+                this.show_time_series_event_time_day = false;
+                this.show_time_series_publication_time_minute = false;
+                this.show_time_series_publication_time_day = false;
             }
+
+            if (this.show_time_series_publication_time) {
+                this.show_time_series_event_time_minute = false;
+                this.show_time_series_event_time_day = false;
+                this.show_time_series_publication_time_minute = true;
+                this.show_time_series_publication_time_day = false;
+            }
+
+            this.create_time_series_plot();
+            
+        },
+
+        // Affiche le bon menu de la fenêtre des séries temporelles pour la date de l'évènement (par minute / par jour) selon le bouton sélectionné
+        setup_time_series_event_time_change_menu() {
+
+            this.show_time_series_event_time_minute = !this.show_time_series_event_time_minute;
+            this.show_time_series_event_time_day = !this.show_time_series_event_time_day;
+
+            this.create_time_series_plot();
+
+        },
+
+        // Affiche le bon menu de la fenêtre des séries temporelles pour la date de publication (par minute / par jour) selon le bouton sélectionné
+        setup_time_series_publication_time_change_menu() {
+
+            this.show_time_series_publication_time_minute = !this.show_time_series_publication_time_minute;
+            this.show_time_series_publication_time_day = !this.show_time_series_publication_time_day;
+
+            this.create_time_series_plot();
 
         },
         
@@ -490,24 +553,53 @@ Vue.createApp({
 
             let x;
             let y;
+            let title;
             let subtitle;
             let div_name;
             let filename;
 
-            if (this.show_time_series_minute) {
-                x = this.publication_time_minute_array;
-                y = this.publication_time_minute_sum_array;
-                subtitle = 'By minute';
-                div_name = 'time_series_minute_plot';   
-                filename = `graph_by_minute_${this.event_id}`;
+            if (this.show_time_series_event_time) {
+                title = 'Event time';
             }
 
-            if (this.show_time_series_day) {
+            if (this.show_time_series_publication_time) {
+                title = 'Publication time';
+            }
+
+            if (this.show_time_series_event_time_minute || this.show_time_series_publication_time_minute) {
+                subtitle = 'By time';
+            }
+
+            if (this.show_time_series_event_time_day || this.show_time_series_publication_time_day) {
+                subtitle = 'By day';
+            }
+
+            if (this.show_time_series_event_time_minute) {
+                x = this.event_time_minute_array;
+                y = this.event_time_minute_sum_array;
+                div_name = 'time_series_event_time_minute_plot';   
+                filename = `graph_event_time_by_time_${this.event_id}`;
+            }
+
+            if (this.show_time_series_event_time_day) {
+                x = this.event_time_day_array;
+                y = this.event_time_day_sum_array;
+                div_name = 'time_series_event_time_day_plot';
+                filename = `graph_event_time_by_day_${this.event_id}`;
+            }
+
+            if (this.show_time_series_publication_time_minute) {
+                x = this.publication_time_minute_array;
+                y = this.publication_time_minute_sum_array;
+                div_name = 'time_series_publication_time_minute_plot';   
+                filename = `graph_publication_time_by_time_${this.event_id}`;
+            }
+
+            if (this.show_time_series_publication_time_day) {
                 x = this.publication_time_day_array;
                 y = this.publication_time_day_sum_array;
-                subtitle = 'By day';
-                div_name = 'time_series_day_plot';
-                filename = `graph_by_day_${this.event_id}`;
+                div_name = 'time_series_publication_time_day_plot';
+                filename = `graph_publication_time_by_day_${this.event_id}`;
             }
 
             this.$nextTick(() => {
@@ -522,7 +614,7 @@ Vue.createApp({
 
                 let layout = {
                     title: {
-                        text: 'Publication time',
+                        text: title,
                         subtitle: {
                             text: subtitle,
                         }
@@ -534,7 +626,7 @@ Vue.createApp({
                     },
                     yaxis: {
                         title: {
-                            text: 'Number of paragraphs published',
+                            text: 'Number of paragraphs',
                         }
                     },
                 };

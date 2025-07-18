@@ -6,7 +6,6 @@
     <title>Event</title>
     <link rel="stylesheet" href="https://unpkg.com/ol/ol.css">
     <link rel="stylesheet" href="assets/map.css">
-    <script src="https://unpkg.com/ol/dist/ol.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol-layerswitcher@4.1.2/dist/ol-layerswitcher.css" />
 </head>
@@ -32,16 +31,34 @@
                     <button class="vertical_center" @click="setup_time_series_form">&#215;</button>
                 </div> 
 
-                <div id=time_series_choice class="flexrow space_evenly padding">
-                    <button class="btn btn-secondary" type="button" v-if=show_time_series_minute>By minute</button>
-                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_minute @click="setup_time_series_change_menu">By day</button>
-                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_day @click="setup_time_series_change_menu">By minute</button>
-                    <button class="btn btn-secondary" type="button" v-if=show_time_series_day>By day</button>
+                <div id=time_series_type_choice class="flexrow space_evenly padding">
+                    <button class="btn btn-secondary" type="button" v-if=show_time_series_event_time>Event time</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_event_time @click="setup_time_series_type_change_menu">Publication time</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_publication_time @click="setup_time_series_type_change_menu">Event time</button>
+                    <button class="btn btn-secondary" type="button" v-if=show_time_series_publication_time>Publication time</button>
                 </div>
 
-                <div id="time_series_minute_plot" v-if="show_time_series_minute"></div>
+                <div id=time_series_event_time_choice class="flexrow space_evenly padding" v-if=show_time_series_event_time>
+                    <button class="btn btn-secondary" type="button" v-if=show_time_series_event_time_minute>By time</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_event_time_minute @click="setup_time_series_event_time_change_menu">By day</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_event_time_day @click="setup_time_series_event_time_change_menu">By time</button>
+                    <button class="btn btn-secondary" type="button" v-if=show_time_series_event_time_day>By day</button>
+                </div>
 
-                <div id="time_series_day_plot" v-if="show_time_series_day"></div>
+                <div id=time_series_publication_time_choice class="flexrow space_evenly padding" v-if=show_time_series_publication_time>
+                    <button class="btn btn-secondary" type="button" v-if=show_time_series_publication_time_minute>By time</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_publication_time_minute @click="setup_time_series_publication_time_change_menu">By day</button>
+                    <button class="btn btn-outline-secondary" type="button" v-if=show_time_series_publication_time_day @click="setup_time_series_publication_time_change_menu">By time</button>
+                    <button class="btn btn-secondary" type="button" v-if=show_time_series_publication_time_day>By day</button>
+                </div>
+
+                <div id="time_series_event_time_minute_plot" v-if="show_time_series_event_time_minute"></div>
+
+                <div id="time_series_event_time_day_plot" v-if="show_time_series_event_time_day"></div>
+
+                <div id="time_series_publication_time_minute_plot" v-if="show_time_series_publication_time_minute"></div>
+
+                <div id="time_series_publication_time_day_plot" v-if="show_time_series_publication_time_day"></div>
 
             </div>
 
@@ -149,6 +166,7 @@
     </div>  
 
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://unpkg.com/ol/dist/ol.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/ol-layerswitcher@4.1.2/dist/ol-layerswitcher.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-3.0.1.min.js" charset="utf-8"></script>
