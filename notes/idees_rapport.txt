@@ -55,9 +55,14 @@ Autres outils analyse
 
 A faire :
 Maj nex data Bram (valeurs max, tri colonnes)
+trier données paragraphes (extracted location, url, url domain)
+données paragraphes à télécharger
+Refaire changements taille
 ICT
 licence, avertissements, logos partenaires, copyright, citations (robots.txt)
 (popup explication ?...)
 (légende dynamique)
 gros rond si plusieurs paragraphs
+layout propriétés
+
 
