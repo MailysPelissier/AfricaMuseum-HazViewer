@@ -35,7 +35,7 @@ Vue.createApp({
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des évènements
             event_other_properties_hazminer: ["country_found", "n_languages", "n_source_countries", "n_domains", "duration", "hazard_score"],
-            event_other_properties_hazminer_title: ["Country", "Number of languages", "Number of source countries", "Number of domains", "Duration", "Hazard score"],
+            event_other_properties_hazminer_title: ["Country", "Number of languages", "Number of source countries", "Number of domains", "Duration (days)", "Hazard score"],
             // Propriétés de localisation des évènements
             event_location_properties_hazminer: ["latitude", "longitude", "min_lat", "max_lat", "min_lon", "max_lon"],
             event_location_properties_hazminer_title: ["Latitude", "Longitude", "Minimum latitude", "Maximum latitude", "Minimum longitude", "Maximum longitude"],
