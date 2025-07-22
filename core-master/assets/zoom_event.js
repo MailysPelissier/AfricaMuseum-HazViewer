@@ -16,6 +16,10 @@ Vue.createApp({
             selected_paragraph_layer: null, // Initialisation de la couche contenant uniquement le paragraphe sélectionné
             location_layer: null, // Initialisation de la couche de géolocalisation
 
+            // Légende de la couche de susceptibilité des tremblements de terre
+            landslide_susceptibility_visibility: false, // Visibilité de la couche de susceptibilité des tremblements de terre
+            landslide_susceptibility_legend: false, // Légende de la couche de susceptibilité des tremblements de terre
+
             // Evènement et paragraphe sélectionnés
             event_id: '', // Permet de récupérer l'évènement par son identifiant
             selected_event: null, // Permet de conserver l'évènement sélectionné
@@ -976,6 +980,24 @@ Vue.createApp({
 
         },
 
+        // Afficher la légende de la couche de susceptibilité des tremblements de terre
+        show_legend() {
+
+            this.landslide_susceptibility_legend = !this.landslide_susceptibility_legend;
+
+            if (this.landslide_susceptibility_legend) {
+
+                this.$nextTick(() => { 
+                    let resolution = this.map.getView().getResolution();
+                    let legend_url = this.landslide_susceptibility_layer.getSource().getLegendUrl(resolution);
+                    let image = document.getElementById('legend');
+                    image.src = legend_url;
+                })
+
+            }
+            
+        }
+
     },
 
     mounted() {
@@ -1163,6 +1185,22 @@ Vue.createApp({
         // Récupérer l'évènement et le rajouter dans la couche évènement selectionné
         this.get_event()
 
+        // Écouter le changement de visibilité de la couche de susceptibilité des tremblements de terre
+        this.landslide_susceptibility_layer.on('change:visible', () => {
+            this.landslide_susceptibility_visibility = this.landslide_susceptibility_layer.getVisible();
+            // Si la couche de susceptibilité des tremblements de terre est visible
+            if (this.landslide_susceptibility_visibility) {
+                // Affichage du bouton
+                document.getElementById("legend_div").style.display = "block";
+            }
+            // Si la couche de susceptibilité des tremblements de terre n'est pas visible
+            else {
+                // Désaffichage du bouton, de la légende si elle est affichée
+                document.getElementById("legend_div").style.display = "none";
+                this.landslide_susceptibility_legend = false;
+            }
+        });
+
         // Création de la bulle vide qui affiche le nombre de paragraphes si plusieurs sont superposés
         let overlay_pointermove = new ol.Overlay({
             element: document.getElementById("popup_pointermove"),
@@ -1184,6 +1222,12 @@ Vue.createApp({
             groupSelectStyle: 'children'
         });
         this.map.addControl(layer_switcher);
+
+        // Bouton pour afficher la légende de la couche de susceptibilité des tremblements de terre
+        let legend_control = new ol.control.Control({
+            element: document.getElementById("legend_div"),
+        });
+        this.map.addControl(legend_control);
 
         // Bouton séries temporelles
         let time_series_control = new ol.control.Control({

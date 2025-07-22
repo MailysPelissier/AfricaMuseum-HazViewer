@@ -19,6 +19,10 @@ Vue.createApp({
             // Liste des pays
             countries_list: [],
 
+            // Légende de la couche de susceptibilité des tremblements de terre
+            landslide_susceptibility_visibility: false, // Visibilité de la couche de susceptibilité des tremblements de terre
+            landslide_susceptibility_legend: false, // Légende de la couche de susceptibilité des tremblements de terre
+
             // Evènement sélectionné
             selected_event: null, // Permet de conserver l'évènement sélectionné
             selected_event_type: null, // Type de l'évènement sélectionné (hazminer ou citizen observer)
@@ -1672,7 +1676,7 @@ Vue.createApp({
                 // Message d'erreur si on veut télécharger des paragraphes et que trop d'évènements correspondent aux critères (>10000)
                 if (this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
                     if (n_events > 10000) {
-                        alert("To many events, use more filters!");
+                        alert("To many events, use more filters!\nThe number of events is limited to 10000 to avoid the paragraphs.csv file being too large.");
                         return;
                     }
                 }
@@ -2287,6 +2291,24 @@ Vue.createApp({
 
         },
 
+        // Afficher la légende de la couche de susceptibilité des tremblements de terre
+        show_legend() {
+
+            this.landslide_susceptibility_legend = !this.landslide_susceptibility_legend;
+
+            if (this.landslide_susceptibility_legend) {
+
+                this.$nextTick(() => { 
+                    let resolution = this.map.getView().getResolution();
+                    let legend_url = this.landslide_susceptibility_layer.getSource().getLegendUrl(resolution);
+                    let image = document.getElementById('legend');
+                    image.src = legend_url;
+                })
+
+            }
+            
+        }
+
     },
 
     mounted() {
@@ -2483,6 +2505,22 @@ Vue.createApp({
             this.change_style_selected_event();
         });
 
+        // Écouter le changement de visibilité de la couche de susceptibilité des tremblements de terre
+        this.landslide_susceptibility_layer.on('change:visible', () => {
+            this.landslide_susceptibility_visibility = this.landslide_susceptibility_layer.getVisible();
+            // Si la couche de susceptibilité des tremblements de terre est visible
+            if (this.landslide_susceptibility_visibility) {
+                // Affichage du bouton
+                document.getElementById("legend_div").style.display = "block";
+            }
+            // Si la couche de susceptibilité des tremblements de terre n'est pas visible
+            else {
+                // Désaffichage du bouton, de la légende si elle est affichée
+                document.getElementById("legend_div").style.display = "none";
+                this.landslide_susceptibility_legend = false;
+            }
+        });
+
         // Création de la bulle vide qui affiche le nombre d'évènements / de paragraphes si plusieurs sont superposés
         let overlay_pointermove = new ol.Overlay({
             element: document.getElementById("popup_pointermove"),
@@ -2504,6 +2542,12 @@ Vue.createApp({
             groupSelectStyle: 'children'
         });
         this.map.addControl(layer_switcher);
+
+        // Bouton pour afficher la légende de la couche de susceptibilité des tremblements de terre
+        let legend_control = new ol.control.Control({
+            element: document.getElementById("legend_div"),
+        });
+        this.map.addControl(legend_control);
 
         // Bouton pour accéder à l'outil filtrage
         let filter_control = new ol.control.Control({
