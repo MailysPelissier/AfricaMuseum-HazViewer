@@ -713,10 +713,15 @@
 
         </div>
 
+        <!-- Logo hazviewer -->
+        <div id=hazviewer_title class="flexrow space_evenly">
+            <img id="hazviewer_logo" src="assets/logo_hazminer.png">
+        </div>
+
         <!-- Texte sur les évènements (à droite) -->
         <div id=event_data_map_scroll_box class="scroll_box margin padding">
 
-            <div id=no_event_selected v-if="!selected_event">Select an event to get more information!</div>
+            <div id=no_event_selected class="text_center" v-if="!selected_event">Select an event to get more information!</div>
 
             <div id=event_hazminer v-if="selected_event && selected_event_type === 'hazminer'">
 
@@ -768,6 +773,11 @@
 
             </div>
 
+        </div>
+
+        <!-- Lien vers la page infos hazviewer -->
+        <div id=hazviewer_info class="vertical_center">
+            <div><a href="/hazviewer_info" target="_blank">Hazviewer information</a></div>
         </div>
 
         <!-- Bulle qui affiche le nombre d'évènements si plusieurs sont superposés -->

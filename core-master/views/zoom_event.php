@@ -118,6 +118,11 @@
 
         </div>
 
+        <!-- Logo hazviewer -->
+        <div id=hazviewer_title class="flexrow space_evenly">
+            <img id="hazviewer_logo" src="assets/logo_hazminer.png">
+        </div>
+
         <!-- Texte sur les évènements (en haut à droite) -->
         <div id=event_data_zoom_event_scroll_box class="scroll_box margin padding">
 
@@ -148,6 +153,11 @@
             <div id=paragraph_title  class=title v-if="selected_paragraph">Paragraph:</div>
             <div id=paragraph_data v-html="paragraph_text" v-if="selected_paragraph"></div>
 
+        </div>
+
+        <!-- Lien vers la page infos hazviewer -->
+        <div id=hazviewer_info class="vertical_center">
+            <div><a href="/hazviewer_info" target="_blank">Hazviewer information</a></div>
         </div>
 
         <!-- Bulle qui affiche le nombre de paragraphes si plusieurs sont superposés -->

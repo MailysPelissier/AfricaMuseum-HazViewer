@@ -17,6 +17,11 @@ Flight::route('GET /event', function () {
     Flight::render('zoom_event', ['event_id' => $event_id]);
 });
 
+// Page des informations de l'interface
+Flight::route('GET /hazviewer_info', function () {
+    Flight::render('hazviewer_info');
+});
+
 Flight::start();
 
 ?>
