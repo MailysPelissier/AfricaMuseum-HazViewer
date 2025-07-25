@@ -453,6 +453,15 @@ Vue.createApp({
 
         },
 
+        // Change la / les variable(s) passée(s) en paramètre (true/false)
+        change_true_false(parameters) {
+
+            for (let parameter of parameters) {
+                this[parameter] = !this[parameter];
+            }
+
+        },
+
         // Création des données sur la date de l'évènement et sur la date de publication des paragraphes pour créer les séries temporelles
         create_time_series_data() {
 
@@ -980,24 +989,6 @@ Vue.createApp({
 
         },
 
-        // Afficher la légende de la couche de susceptibilité des tremblements de terre
-        show_legend() {
-
-            this.landslide_susceptibility_legend = !this.landslide_susceptibility_legend;
-
-            if (this.landslide_susceptibility_legend) {
-
-                this.$nextTick(() => { 
-                    let resolution = this.map.getView().getResolution();
-                    let legend_url = this.landslide_susceptibility_layer.getSource().getLegendUrl(resolution);
-                    let image = document.getElementById('legend');
-                    image.src = legend_url;
-                })
-
-            }
-            
-        }
-
     },
 
     mounted() {
@@ -1013,6 +1004,84 @@ Vue.createApp({
                 new ol.layer.Group({
                     title: 'Base maps',
                     layers: [
+                        // Couche satellite
+                        new ol.layer.Tile({
+                            source: new ol.source.XYZ({
+                                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                                crossOrigin: 'anonymous',
+                                maxZoom: 19,
+                            }),
+                            title: 'World Imagery (© ESRI)',
+                            type: 'base',
+                            zIndex: 1,
+                        }),
+                        // Couche topographique
+                        new ol.layer.Tile({
+                            source: new ol.source.XYZ({
+                                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+                                crossOrigin: 'anonymous',
+                                maxZoom: 19,
+                            }),
+                            title: 'Topographic (© ESRI)',
+                            type: 'base',
+                            zIndex: 1,
+                        }),
+                        // Couche relief ombré
+                        new ol.layer.Tile({
+                            source: new ol.source.XYZ({
+                                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',
+                                crossOrigin: 'anonymous',
+                                maxZoom: 19,
+                            }),
+                            title: 'Shaded Relief (© ESRI)',
+                            type: 'base',
+                            zIndex: 1,
+                        }),
+                        // Couche couleur gris clair
+                        new ol.layer.Tile({
+                            source: new ol.source.XYZ({
+                                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+                                crossOrigin: 'anonymous',
+                                maxZoom: 19,
+                            }),
+                            title: 'Light Gray (© ESRI)',
+                            type: 'base',
+                            zIndex: 1,
+                        }),
+                        // Couche couleur gris sombre
+                        new ol.layer.Tile({
+                            source: new ol.source.XYZ({
+                                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+                                crossOrigin: 'anonymous',
+                                maxZoom: 19,
+                            }),
+                            title: 'Dark Gray (© ESRI)',
+                            type: 'base',
+                            zIndex: 1,
+                        }),
+                        // Couche des rues
+                        new ol.layer.Tile({
+                            source: new ol.source.XYZ({
+                                url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+                                crossOrigin: 'anonymous',
+                                maxZoom: 19,
+                            }),
+                            title: 'Streets (© ESRI)',
+                            type: 'base',
+                            zIndex: 1,
+                        }),
+                        // Couche OpenTopoMap
+                        new ol.layer.Tile({
+                            source: new ol.source.XYZ({
+                                url: 'https://tile.opentopomap.org/{z}/{x}/{y}.png',
+                                crossOrigin: 'anonymous',
+                                maxZoom: 19,
+                                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                            }),
+                            title: 'OpenTopoMap (© OSM / SRTM)',
+                            type: 'base',
+                            zIndex: 1,
+                        }),
                         // Couche OSM
                         new ol.layer.Tile({
                             source: new ol.source.XYZ({
@@ -1021,7 +1090,7 @@ Vue.createApp({
                                 maxZoom: 19,
                                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                             }),
-                            title: 'OpenStreetMap',
+                            title: 'OpenStreetMap (© OSM)',
                             type: 'base',
                             zIndex: 1,
                         }),

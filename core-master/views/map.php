@@ -699,14 +699,14 @@
             <div id="landslide_susceptibility_legend" class="popup landslide_susceptibility_legend" v-if="landslide_susceptibility_legend">
                 <p>Landslide susceptibility</p>
                 <div class=flexrow>
-                    <img id="legend"/>
-                    <div class="flexcolumn space_evenly margin_left">
-                        <div>Null</div>
-                        <div>Very low</div>
-                        <div>Low</div>
-                        <div>Moderate</div>
-                        <div>High</div>
+                    <img id="legend" src="assets/legend_landslide_susceptibility.png" />
+                    <div class="flexcolumn space_evenly margin_left">    
                         <div>Very high</div>
+                        <div>High</div>
+                        <div>Moderate</div>
+                        <div>Low</div>
+                        <div>Very low</div>
+                        <div>Null</div>
                     </div>
                 </div>            
             </div>
@@ -813,7 +813,7 @@
 
         <!-- Bouton pour afficher la légende de la couche de susceptibilité des tremblements de terre -->
         <div id="legend_div" class='ol-unselectable ol-control'>
-            <button @click="show_legend">&#x4c;</button>
+            <button class=open_form_button @click="change_true_false(['landslide_susceptibility_legend'])">Legend</button>
         </div>
 
         <!-- Echelle -->
