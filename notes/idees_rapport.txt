@@ -57,12 +57,19 @@ Autres outils analyse
 
 A faire :
 logo hazviewer
+texte en dessous bram
+texte en bas benoit
+
 Maj new data Bram (valeurs max, tri colonnes)
 trier données paragraphes (extracted location, url, url domain)
 données paragraphes à télécharger
 Refaire changements taille
-Rajouter couches : esri, topographic, copernicus
+
+guide utilisateur : partie couches, reprendre à changer style 
+
+Page hazminer information
 licence, avertissements, logos partenaires, copyright, citations (robots.txt)
 metadata : date maj data, infos générales, guides
+
 GitHub georiska
 ICT
