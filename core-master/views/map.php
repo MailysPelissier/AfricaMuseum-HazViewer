@@ -657,7 +657,7 @@
 
                 </div>
 
-                <hr style='margin:10px;' />
+                <!-- <hr style='margin:10px;' />
 
                 <div id="co_download">
 
@@ -677,7 +677,7 @@
                         </div>   
                     </div>
 
-                </div>
+                </div> -->
 
                 <hr style='margin:10px;' v-if="show_download_progression" />
 

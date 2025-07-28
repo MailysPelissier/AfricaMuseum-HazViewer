@@ -1737,91 +1737,92 @@ Vue.createApp({
         },
 
         // Download des données citizen observer
-        async download_co() {
+        // Pas utilisée
+        // async download_co() {
 
-            let type = null;
-            if (this.download_all_co) {
-                type = 'all';
-            }
-            if (this.download_filter_co) {
-                type = 'filter';
-            }
+        //     let type = null;
+        //     if (this.download_all_co) {
+        //         type = 'all';
+        //     }
+        //     if (this.download_filter_co) {
+        //         type = 'filter';
+        //     }
 
-            // Création du tableau pour la jointure finale, initialisation du texte (noms des colonnes)
-            let event_content_lines = [this.event_download_properties_co.join(',')];
+        //     // Création du tableau pour la jointure finale, initialisation du texte (noms des colonnes)
+        //     let event_content_lines = [this.event_download_properties_co.join(',')];
 
-            // Récupérer les paramètres de filtrage
-            let cql_filter = this.set_cqlfilter_event_co(type);
+        //     // Récupérer les paramètres de filtrage
+        //     let cql_filter = this.set_cqlfilter_event_co(type);
 
-            // Message d'erreur si la liste des types de catastrophe est vide
-            if (cql_filter === 'No event') {
-                alert("No event matches the criteria!");
-                return;
-            }
+        //     // Message d'erreur si la liste des types de catastrophe est vide
+        //     if (cql_filter === 'No event') {
+        //         alert("No event matches the criteria!");
+        //         return;
+        //     }
 
-            // Requête vers le Geoserver, on récupère seulement les évènements correspondant aux filtres
-            let url;
-            if (type == 'all') {
-                url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer`
-                    + `&outputFormat=application/json`;
-            }
-            if (type == 'filter' && cql_filter !== 'No event') {
-                url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer`
-                    + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
-            }  
-            let result = await fetch(url);
-            let json = await result.json();
-            this.fetch_progression = 'Fetch data completed!';
+        //     // Requête vers le Geoserver, on récupère seulement les évènements correspondant aux filtres
+        //     let url;
+        //     if (type == 'all') {
+        //         url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer`
+        //             + `&outputFormat=application/json`;
+        //     }
+        //     if (type == 'filter' && cql_filter !== 'No event') {
+        //         url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer`
+        //             + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
+        //     }  
+        //     let result = await fetch(url);
+        //     let json = await result.json();
+        //     this.fetch_progression = 'Fetch data completed!';
 
-            // Récupération des évènements
-            let features = json.features;
-            let n_events = features.length;
+        //     // Récupération des évènements
+        //     let features = json.features;
+        //     let n_events = features.length;
 
-            // Message d'erreur si aucun évènement ne correspond aux critères
-            if (n_events === 0) {
-                alert("No event matches the criteria!");
-                return;
-            }
+        //     // Message d'erreur si aucun évènement ne correspond aux critères
+        //     if (n_events === 0) {
+        //         alert("No event matches the criteria!");
+        //         return;
+        //     }
 
-            // Affichage de la progression du téléchargement
-            this.show_fetch_progression = true;
-            this.show_download_progression = true;
+        //     // Affichage de la progression du téléchargement
+        //     this.show_fetch_progression = true;
+        //     this.show_download_progression = true;
 
-            // Pour chaque évènement :
-            let count_features = 0;
-            for (let f of features) {
+        //     // Pour chaque évènement :
+        //     let count_features = 0;
+        //     for (let f of features) {
 
-                // Création d'une ligne de texte (events.csv)
-                // Toutes les valeurs sont entourées de guillemets
-                let row = this.event_download_properties_co.map(prop => {
-                    let value = f.properties[prop];
-                    if (value == null) return ''; // gérer les null
-                    value = String(value).replace(/"/g, '""');
-                    return `"${value}"`;
-                }).join(',');
-                event_content_lines.push(row);
+        //         // Création d'une ligne de texte (events.csv)
+        //         // Toutes les valeurs sont entourées de guillemets
+        //         let row = this.event_download_properties_co.map(prop => {
+        //             let value = f.properties[prop];
+        //             if (value == null) return ''; // gérer les null
+        //             value = String(value).replace(/"/g, '""');
+        //             return `"${value}"`;
+        //         }).join(',');
+        //         event_content_lines.push(row);
 
-                // Calcul de la progression du téléchargement
-                count_features += 1;
-                this.download_progression = parseInt(count_features*100/features.length);
+        //         // Calcul de la progression du téléchargement
+        //         count_features += 1;
+        //         this.download_progression = parseInt(count_features*100/features.length);
 
-                // Forcer une pause très courte pour mettre à jour le DOM
-                if (count_features % 100 === 0) {
-                    await new Promise(resolve => setTimeout(resolve, 0));
-                }
+        //         // Forcer une pause très courte pour mettre à jour le DOM
+        //         if (count_features % 100 === 0) {
+        //             await new Promise(resolve => setTimeout(resolve, 0));
+        //         }
 
-            };
+        //     };
 
-            // Désaffichage de la progression du téléchargement
-            this.show_fetch_progression = false;
-            this.show_download_progression = false;
-            this.fetch_progression = 0;
-            this.download_progression = 0;        
+        //     // Désaffichage de la progression du téléchargement
+        //     this.show_fetch_progression = false;
+        //     this.show_download_progression = false;
+        //     this.fetch_progression = 0;
+        //     this.download_progression = 0;        
 
-            // Téléchargement des évènements
-            this.create_csv(event_content_lines, "co_events.csv");
+        //     // Téléchargement des évènements
+        //     this.create_csv(event_content_lines, "co_events.csv");
 
-        },
+        // },
 
         // Crée le filtre cql pour la requête des évènements vers le Geoserver (hazminer)
         set_cqlfilter_event_hazminer(type) {
@@ -1900,81 +1901,82 @@ Vue.createApp({
         },
 
         // Crée le filtre cql pour la requête des évènements vers le Geoserver (citizen observer)
-        set_cqlfilter_event_co(type) {
+        // Pas utilisée
+        // set_cqlfilter_event_co(type) {
 
-            let cql_filter = '';
+        //     let cql_filter = '';
 
-            // Cas où on télécharge tous les évènements
-            if (type == 'all') {
-                return cql_filter;
-            }
+        //     // Cas où on télécharge tous les évènements
+        //     if (type == 'all') {
+        //         return cql_filter;
+        //     }
 
-            // Cas où on filtre dans la requête Geoserver
-            if (type == 'filter') {
+        //     // Cas où on filtre dans la requête Geoserver
+        //     if (type == 'filter') {
 
-                // Type de catastrophe
-                let hazard_type_liste = [];
-                if(this.inondation) {
-                    hazard_type_liste.push('Inondation');
-                }
-                if(this.glissement_terrain) {
-                    hazard_type_liste.push('Glissement de terrain');
-                }
-                if(this.tdt) {
-                    hazard_type_liste.push('Tremblement de terre');
-                }
-                if(this.vents_violents) {
-                    hazard_type_liste.push('Tempête de vents violents');
-                }
-                if(this.grele) {
-                    hazard_type_liste.push('Tempête de grêle');
-                }
-                if(this.foudre) {
-                    hazard_type_liste.push('Foudre');
-                }
-                if (hazard_type_liste.length === 0) {  
-                    cql_filter = 'No event';
-                    return cql_filter;
-                }
-                else {
-                    cql_filter += "type_event IN (" + hazard_type_liste.map(id => `'${id}'`).join(",") + ")";
-                }
+        //         // Type de catastrophe
+        //         let hazard_type_liste = [];
+        //         if(this.inondation) {
+        //             hazard_type_liste.push('Inondation');
+        //         }
+        //         if(this.glissement_terrain) {
+        //             hazard_type_liste.push('Glissement de terrain');
+        //         }
+        //         if(this.tdt) {
+        //             hazard_type_liste.push('Tremblement de terre');
+        //         }
+        //         if(this.vents_violents) {
+        //             hazard_type_liste.push('Tempête de vents violents');
+        //         }
+        //         if(this.grele) {
+        //             hazard_type_liste.push('Tempête de grêle');
+        //         }
+        //         if(this.foudre) {
+        //             hazard_type_liste.push('Foudre');
+        //         }
+        //         if (hazard_type_liste.length === 0) {  
+        //             cql_filter = 'No event';
+        //             return cql_filter;
+        //         }
+        //         else {
+        //             cql_filter += "type_event IN (" + hazard_type_liste.map(id => `'${id}'`).join(",") + ")";
+        //         }
 
-                // Date
-                let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2) + ' 00:00:00';
-                let end_date_co_ymd = this.end_date_co.substring(6,10) + '-' + this.end_date_co.substring(3,5) + '-' + this.end_date_co.substring(0,2) + ' 00:00:00';
-                cql_filter += " AND event_date >= '" + start_date_co_ymd + "'";
-                cql_filter += " AND event_date <= '" + end_date_co_ymd + "'";
+        //         // Date
+        //         let start_date_co_ymd = this.start_date_co.substring(6,10) + '-' + this.start_date_co.substring(3,5) + '-' + this.start_date_co.substring(0,2) + ' 00:00:00';
+        //         let end_date_co_ymd = this.end_date_co.substring(6,10) + '-' + this.end_date_co.substring(3,5) + '-' + this.end_date_co.substring(0,2) + ' 00:00:00';
+        //         cql_filter += " AND event_date >= '" + start_date_co_ymd + "'";
+        //         cql_filter += " AND event_date <= '" + end_date_co_ymd + "'";
 
-                // Localisation
-                if (this.chosen_province_co != 'All') {
-                    cql_filter += " AND province = '" + this.chosen_province_co + "'";
-                }
-                if (this.chosen_territoire_co != 'All') {
-                    cql_filter += " AND territoire = '" + this.chosen_territoire_co + "'";
-                }
+        //         // Localisation
+        //         if (this.chosen_province_co != 'All') {
+        //             cql_filter += " AND province = '" + this.chosen_province_co + "'";
+        //         }
+        //         if (this.chosen_territoire_co != 'All') {
+        //             cql_filter += " AND territoire = '" + this.chosen_territoire_co + "'";
+        //         }
 
-                // Impact
-                for(let i = 0; i < this.impact_chiffre_filter_co.length; i++) {
-                    if (this.impact_chiffre_filter_co[i].checkbox_null) {
-                        cql_filter += " AND (" + this.impact_chiffre_filter_co[i].id + " BETWEEN " + this.impact_chiffre_filter_co[i].min + " AND " + this.impact_chiffre_filter_co[i].max
-                        + " OR " + this.impact_chiffre_filter_co[i].id + " IS NULL)";
-                    }
-                    else {
-                        cql_filter += " AND " + this.impact_chiffre_filter_co[i].id + " BETWEEN " + this.impact_chiffre_filter_co[i].min + " AND " + this.impact_chiffre_filter_co[i].max;
-                    }
-                }
-                for(let i = 0; i < this.impact_bool_filter_co.length; i++) {
-                    if (this.impact_bool_filter_co[i].checkbox_impact) {
-                        cql_filter += " AND " + this.impact_bool_filter_co[i].id + " <> 'non'";
-                    }
-                }
+        //         // Impact
+        //         for(let i = 0; i < this.impact_chiffre_filter_co.length; i++) {
+        //             if (this.impact_chiffre_filter_co[i].checkbox_null) {
+        //                 cql_filter += " AND (" + this.impact_chiffre_filter_co[i].id + " BETWEEN " + this.impact_chiffre_filter_co[i].min + " AND " + this.impact_chiffre_filter_co[i].max
+        //                 + " OR " + this.impact_chiffre_filter_co[i].id + " IS NULL)";
+        //             }
+        //             else {
+        //                 cql_filter += " AND " + this.impact_chiffre_filter_co[i].id + " BETWEEN " + this.impact_chiffre_filter_co[i].min + " AND " + this.impact_chiffre_filter_co[i].max;
+        //             }
+        //         }
+        //         for(let i = 0; i < this.impact_bool_filter_co.length; i++) {
+        //             if (this.impact_bool_filter_co[i].checkbox_impact) {
+        //                 cql_filter += " AND " + this.impact_bool_filter_co[i].id + " <> 'non'";
+        //             }
+        //         }
 
-                return cql_filter;
+        //         return cql_filter;
 
-            }
+        //     }
 
-        },
+        // },
 
         // Création du texte de téléchargement des paragraphes liés à un évènement (hazminer)
         async create_paragraph_download_text(feature, paragraph_content_lines, seen_paragraph_id, source) {
