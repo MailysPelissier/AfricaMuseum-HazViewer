@@ -23,6 +23,7 @@ Events : paragraphs clusterisés par catastrophe, date, localisation extraite de
 Paragraphes répétés pour plusieurs évènements de type différents (flood + landslide)
 Nombreuses données : donner chiffres
 les paragraphs sans lon/lat non utilisés -> pas reliés à un event
+un paragraph est maintenant relié à un seul évènement: plus besoin de table de jointure, de vue
 
 Données citizen observer:
 csv : réponses à un questionnaire : beaucoup de traitements (250 colonnes)
@@ -60,10 +61,9 @@ logo hazviewer
 texte en dessous bram
 texte en bas benoit
 
-Maj new data Bram (valeurs max, tri colonnes)
-trier données paragraphes (extracted location, url, url domain)
-données paragraphes à télécharger
+Maj new data Bram (valeurs max)
 Refaire changements taille
+mapper pour ne plus dépendre de l'ordre pg admin
 
 guide utilisateur : partie couches, reprendre à changer style 
 

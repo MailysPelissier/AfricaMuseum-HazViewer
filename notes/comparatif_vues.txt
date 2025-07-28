@@ -1,5 +1,8 @@
 dans pg admin, j'ai des bases de données sql : une table events (21964 lignes), qui représente des évènements, une table paragraphs (1529769 lignes), qui représente des paragraphs liés à ces évènements, et une table de jointure event_paragraphs (2210199 lignes) (many to many), qui contient event_id et paragraph_id. Un event peut être lié à plusieurs paragraphs et un paragraph peut être lié à plusieurs events. dans une page web j'affiche ces données en passant par geoserver. j'ai besoin de pouvoir accéder rapidement à tous les paragraphs liés à un event à l'aide de son identifiant event_id. Ces paragraphs peuvent être nombreux (50000 pour un event). Quelle est la meilleure façon de procéder ? je ne sais pas quoi choisir entre une vue sur pgadmin, une vue matérialisée sur pg admin, une vue virtuelle dans geoserver ou encore autre chose
 
+avant : paragraph_list -> table de jointure -> vue
+pas de doublons dans paragraph list, doublons dans paragraphs.csv
+
 Notes vue virtuelle geoserver :
 GeoServer permet de créer des couches virtuelles (virtual tables) avec des paramètres dynamiques (si PostGIS en back-end).
 %event_id% est un paramètre dans la couche virtuelle. Cela permet des appels comme :
@@ -10,6 +13,22 @@ Cela retourne uniquement les paragraphs liés à l’event_id 1, sans surcharge 
 Utiliser des virtual tables (vues SQL) dans GeoServer
 GeoServer permet de créer une couche basée sur une vue SQL avec jointure dans le fichier virtual table. Tu définis toi-même une jointure SQL entre tables.
 Ensuite tu publies cette requête comme une nouvelle couche dans GeoServer (via featuretype -> SQL view), et tu peux interroger cette couche directement comme une couche GeoServer classique.
+
+Créer une virtual table pour accéder aux paragraphs à partir de l'event_id auxquels ils sont liés (vue_paragraphs_geo):
+Dans New layer, choisir le store webGIS
+Cliquer sur Configure new SQL view
+SQL statement : 
+SELECT (p.paragraph_id || '_' || ep.event_id) AS composite_id, p.*
+FROM paragraphs p
+JOIN event_paragraphs ep ON p.paragraph_id = ep.paragraph_id
+WHERE ep.event_id = '%event_id%'
+SQL view parameters :
+Cliquer sur Guess parameters from SQL
+Paramètre: Name: event_id Default value:19530131E0CT20250417122827 Validation: ^[\w\d\s]+$
+Attributes : 
+Cliquer sur Refresh
+Sélectionner composite_id pour être l'identifier (clé primaire)
+geom: Type: Point SRID: 4326
 
 Pour accéder rapidement à tous les paragraphes liés à un événement à l'aide de son identifiant event_id, surtout lorsque le nombre de paragraphes peut être très élevé (jusqu'à 50 000 pour un événement), il est important de choisir une solution qui optimise les performances de requête. Voici quelques options à considérer, avec leurs avantages et inconvénients :
 

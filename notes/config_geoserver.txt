@@ -20,28 +20,12 @@ Créer d’abord un nouveau Workspace (webGIS)
 
 Store PostGIS
 Créer un Store, lié à votre base PostGIS (PostGIS)
-Créer les layers (la géométrie est utilisée automatiquement) (events, vue_paragaphs_geo, vue_paragraphs_pg, citizen_observer)
+Créer les layers (la géométrie est utilisée automatiquement) (events, paragraphs, citizen_observer)
 Layer : 
 Declared SRS: EPSG:4326
 Bounding Boxes : cliquer sur Compute from SRS bounds puis sur Compute from native bounds
 Vérifier que la clé primaire n'apparait pas dans les propriétés
 Vérifier que ça fonctionne avec le layer preview
-
-Créer une virtual table pour accéder aux paragraphs à partir de l'event_id auxquels ils sont liés (vue_paragraphs_geo):
-Dans New layer, choisir le store webGIS
-Cliquer sur Configure new SQL view
-SQL statement : 
-SELECT (p.paragraph_id || '_' || ep.event_id) AS composite_id, p.*
-FROM paragraphs p
-JOIN event_paragraphs ep ON p.paragraph_id = ep.paragraph_id
-WHERE ep.event_id = '%event_id%'
-SQL view parameters :
-Cliquer sur Guess parameters from SQL
-Paramètre: Name: event_id Default value:19530131E0CT20250417122827 Validation: ^[\w\d\s]+$
-Attributes : 
-Cliquer sur Refresh
-Sélectionner composite_id pour être l'identifier (clé primaire)
-geom: Type: Point SRID: 4326
 
 
 Store rivers

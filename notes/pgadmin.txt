@@ -11,27 +11,22 @@ dans l'invite de commande :
 cd C:\Program Files\PostgreSQL\17\bin
 shp2pgsql -s 4326 -c -D -i -I C:\Mailys\data\countries\ne_10m_admin_0_countries.shp countries | psql -h localhost -U postgres -d webGIS
 
+
+
 Tables :
-- Events v3
-- Paragraphs v3
-- Table de jointure
-- Table events --> Enlever colonnes inutiles : final_cluster, wkt, paragraphs_list, articles_list
-- Table paragraphs --> Enlever colonnes inutiles : wkt
+- Table events
+- Table paragraphs
 - Table citizen_observer coord territoires
 - Table citizen_observer
 
-Vue matérialisée :
-- Vue paragraphs pg
 
 
+-- Table: public.events
 
--- Table: public.events2017_23
+DROP TABLE IF EXISTS public.events;
 
-DROP TABLE IF EXISTS public.events2017_23;
-
-CREATE TABLE IF NOT EXISTS public.events2017_23
+CREATE TABLE IF NOT EXISTS public.events
 (
-    final_cluster real,
     event_id character varying COLLATE pg_catalog."default",
     paragraphs_list character varying COLLATE pg_catalog."default",
     articles_list character varying COLLATE pg_catalog."default",
@@ -52,271 +47,20 @@ CREATE TABLE IF NOT EXISTS public.events2017_23
     n_languages integer,
     n_source_countries integer,
     n_domains integer,
-    mostfreq_death real,
-    n_mostfreq_death real,
-    time_mostfreq_death real,
     median_death real,
-    mostfreq_homeless real,
-    n_mostfreq_homeless real,
-    time_mostfreq_homeless real,
-    median_homeless real,
-    mostfreq_injured real,
-    n_mostfreq_injured real,
-    time_mostfreq_injured real,
     median_injured real,
-    mostfreq_affected real,
-    n_mostfreq_affected real,
-    time_mostfreq_affected real,
     median_affected real,
-    mostfreq_missing real,
-    n_mostfreq_missing real,
-    time_mostfreq_missing real,
-    median_missing real,
-    mostfreq_evacuated real,
-    n_mostfreq_evacuated real,
-    time_mostfreq_evacuated real,
-    median_evacuated real,
     wkt character varying COLLATE pg_catalog."default",
     geom geometry(Point,4326),
     primary_key integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
     country_found character varying COLLATE pg_catalog."default",
-    CONSTRAINT events2017_23_pkey PRIMARY KEY (primary_key)
+    CONSTRAINT events_pkey PRIMARY KEY (primary_key)
 )
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.events2017_23
+ALTER TABLE IF EXISTS public.events
     OWNER to postgres;
-
--- Index: events2017_23_geom_idx
-
-DROP INDEX IF EXISTS public.events2017_23_geom_idx;
-
-CREATE INDEX IF NOT EXISTS events2017_23_geom_idx
-    ON public.events2017_23 USING gist
-    (geom)
-    WITH (buffering=auto)
-    TABLESPACE pg_default;
-
-COPY events2017_23(final_cluster, event_id, paragraphs_list, articles_list, n_paragraphs, n_articles, hazard_type, hazard_score, latitude, longitude, min_lat, max_lat, min_lon, max_lon, event_time, start_time, end_time, duration, n_languages, n_source_countries, n_domains, mostfreq_death, n_mostfreq_death, time_mostfreq_death, median_death, mostfreq_homeless, n_mostfreq_homeless, time_mostfreq_homeless, median_homeless, mostfreq_injured, n_mostfreq_injured, time_mostfreq_injured, median_injured, mostfreq_affected, n_mostfreq_affected, time_mostfreq_affected, median_affected, mostfreq_missing, n_mostfreq_missing, time_mostfreq_missing, median_missing, mostfreq_evacuated, n_mostfreq_evacuated, time_mostfreq_evacuated, median_evacuated)
-FROM 'C:/Mailys/data/hazminer/S20170101000000_E20240101000000_GDELT_Events_v3_OPTICS.csv'
-DELIMITER ',' 
-CSV HEADER
-QUOTE '"';
-
-UPDATE events2017_23 SET wkt=concat('POINT (',longitude,' ',latitude,')');
-UPDATE events2017_23 SET geom=ST_GeomFromText(wkt);
-UPDATE events2017_23 SET country_found = c.admin FROM countries c WHERE ST_Contains(c.geom, events2017_23.geom);
-
-UPDATE events2017_23
-SET paragraphs_list = (
-  SELECT ARRAY(
-    SELECT DISTINCT elem
-    FROM UNNEST(string_to_array(regexp_replace(paragraphs_list,'''|\(|\)|\s','','g'),',')::varchar[]) AS elem
-  )
-);
-UPDATE events2017_23
-SET articles_list = (
-  SELECT ARRAY(
-    SELECT DISTINCT elem
-    FROM UNNEST(string_to_array(regexp_replace(articles_list,'''|\(|\)|\s','','g'),',')::varchar[]) AS elem
-  )
-);
-
-UPDATE events2017_23 SET n_paragraphs =  array_length(string_to_array(paragraphs_list, ','), 1);
-UPDATE events2017_23 SET n_articles =  array_length(string_to_array(articles_list, ','), 1);
-
-
-
--- Table: public.paragraphs2017_23
-
-DROP TABLE IF EXISTS public.paragraphs2017_23;
-
-CREATE TABLE IF NOT EXISTS public.paragraphs2017_23
-(
-    article_id character varying COLLATE pg_catalog."default",
-    title character varying COLLATE pg_catalog."default",
-    extracted_text character varying COLLATE pg_catalog."default",
-    paragraph_time timestamp without time zone,
-    article_language character varying COLLATE pg_catalog."default",
-    source_country character varying COLLATE pg_catalog."default",
-    domain_url character varying COLLATE pg_catalog."default",
-    paragraph_id character varying COLLATE pg_catalog."default",
-    original_text character varying COLLATE pg_catalog."default",
-    disaster_label real,
-    disaster_score real,
-    hazard_type character varying COLLATE pg_catalog."default",
-    hazard_type_score real,
-    nb_death real,
-    score_death real,
-    answer_death character varying COLLATE pg_catalog."default",
-    nb_homeless real,
-    score_homeless real,
-    answer_homeless character varying COLLATE pg_catalog."default",
-    nb_injured real,
-    score_injured real,
-    answer_injured character varying COLLATE pg_catalog."default",
-    nb_affected real,
-    score_affected real,
-    answer_affected character varying COLLATE pg_catalog."default",
-    nb_missing real,
-    score_missing real,
-    answer_missing character varying COLLATE pg_catalog."default",
-    nb_evacuated real,
-    score_evacuated real,
-    answer_evacuated character varying COLLATE pg_catalog."default",
-    publication_time timestamp without time zone,
-    extracted_location character varying COLLATE pg_catalog."default",
-    ner_score character varying COLLATE pg_catalog."default",
-    latitude real,
-    longitude real,
-    std_dev real,
-    min_lat real,
-    max_lat real,
-    min_lon real,
-    max_lon real,
-    n_locations real,
-    nb_death_min real,
-    nb_death_max real,
-    nb_homeless_min real,
-    nb_homeless_max real,
-    nb_injured_min real,
-    nb_injured_max real,
-    nb_affected_min real,
-    nb_affected_max real,
-    nb_missing_min real,
-    nb_missing_max real,
-    nb_evacuated_min real,
-    nb_evacuated_max real,
-    continent character varying COLLATE pg_catalog."default",
-    country character varying COLLATE pg_catalog."default",
-    population_density real,
-    wkt character varying COLLATE pg_catalog."default",
-    geom geometry(Point,4326),
-    primary_key integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
-    country_found character varying COLLATE pg_catalog."default",
-    CONSTRAINT paragraphs2017_23_pkey PRIMARY KEY (primary_key)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.paragraphs2017_23
-    OWNER to postgres;
-	
--- Index: paragraphs2017_23_geom_idx
-
-DROP INDEX IF EXISTS public.paragraphs2017_23_geom_idx;
-
-CREATE INDEX IF NOT EXISTS paragraphs2017_23_geom_idx
-    ON public.paragraphs2017_23 USING gist
-    (geom)
-    WITH (buffering=auto)
-    TABLESPACE pg_default;
-	
--- Index: paragraphs2017_23_paragraph_id_idx
-
-DROP INDEX IF EXISTS public.paragraphs2017_23_paragraph_id_idx;
-
-CREATE INDEX IF NOT EXISTS paragraphs2017_23_paragraph_id_idx
-    ON public.paragraphs2017_23 USING btree
-    (paragraph_id ASC NULLS LAST)
-    TABLESPACE pg_default;
-
-COPY paragraphs2017_23(article_id, title, extracted_text, paragraph_time, article_language, source_country, domain_url, paragraph_id, original_text, disaster_label, disaster_score, hazard_type, hazard_type_score, nb_death, score_death, answer_death, nb_homeless, score_homeless, answer_homeless, nb_injured, score_injured, answer_injured, nb_affected, score_affected, answer_affected, nb_missing, score_missing, answer_missing, nb_evacuated, score_evacuated, answer_evacuated, publication_time, extracted_location, ner_score, latitude, longitude, std_dev, min_lat, max_lat, min_lon, max_lon, n_locations, nb_death_min, nb_death_max, nb_homeless_min, nb_homeless_max, nb_injured_min, nb_injured_max, nb_affected_min, nb_affected_max, nb_missing_min, nb_missing_max, nb_evacuated_min, nb_evacuated_max, continent, country, population_density)
-FROM 'C:/Mailys/data/hazminer/S20170101000000_E20240101000000_GDELT_Paragraphs_v3.csv'
-DELIMITER ',' 
-CSV HEADER
-QUOTE '"';
-
-DELETE FROM paragraphs2017_23 WHERE longitude IS NULL;
-UPDATE paragraphs2017_23 SET wkt=concat('POINT (',longitude,' ',latitude,')');
-UPDATE paragraphs2017_23 SET geom=ST_GeomFromText(wkt);
-UPDATE paragraphs2017_23 SET country_found = c.admin FROM countries c WHERE ST_Contains(c.geom, paragraphs2017_23.geom);
-
-DROP TABLE IF EXISTS public.paragraphs2017_23_clean;
-
-CREATE TABLE IF NOT EXISTS paragraphs2017_23_clean AS
-SELECT DISTINCT ON (paragraph_id) *
-FROM paragraphs2017_23
-ORDER BY paragraph_id, primary_key;
-
-DROP TABLE IF EXISTS paragraphs2017_23;
-
-ALTER TABLE paragraphs2017_23_clean
-RENAME TO paragraphs2017_23;
-
--- Index: paragraphs2017_23_geom_idx
-
-DROP INDEX IF EXISTS public.paragraphs2017_23_geom_idx;
-
-CREATE INDEX IF NOT EXISTS paragraphs2017_23_geom_idx
-    ON public.paragraphs2017_23 USING gist
-    (geom)
-    WITH (buffering=auto)
-    TABLESPACE pg_default;
-	
--- Index: paragraphs2017_23_paragraph_id_idx
-
-DROP INDEX IF EXISTS public.paragraphs2017_23_paragraph_id_idx;
-
-CREATE INDEX IF NOT EXISTS paragraphs2017_23_paragraph_id_idx
-    ON public.paragraphs2017_23 USING btree
-    (paragraph_id ASC NULLS LAST)
-    TABLESPACE pg_default;
-
-
-
--- Table: public.event_paragraphs
-
-DROP MATERIALIZED VIEW IF EXISTS vue_paragraphs_pg;
-
-DROP TABLE IF EXISTS public.event_paragraphs;
-
-CREATE TABLE IF NOT EXISTS public.event_paragraphs
-(
-    event_id character varying(50) COLLATE pg_catalog."default" NOT NULL,
-    paragraph_id character varying(50) COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT event_paragraphs_pkey PRIMARY KEY (event_id, paragraph_id)
-)
-
-TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.event_paragraphs
-    OWNER to postgres;
-
--- Index: event_paragraphs_event_id_idx
-
-DROP INDEX IF EXISTS public.event_paragraphs_event_id_idx;
-
-CREATE INDEX IF NOT EXISTS event_paragraphs_event_id_idx
-    ON public.event_paragraphs USING btree
-    (event_id COLLATE pg_catalog."default" ASC NULLS LAST)
-    WITH (deduplicate_items=True)
-    TABLESPACE pg_default;
-
--- Index: event_paragraphs_paragraph_id_idx
-
-DROP INDEX IF EXISTS public.event_paragraphs_paragraph_id_idx;
-
-CREATE INDEX IF NOT EXISTS event_paragraphs_paragraph_id_idx
-    ON public.event_paragraphs USING btree
-    (paragraph_id COLLATE pg_catalog."default" ASC NULLS LAST)
-    WITH (deduplicate_items=True)
-    TABLESPACE pg_default;
-
-INSERT INTO event_paragraphs (event_id, paragraph_id)
-SELECT event_id, UNNEST(string_to_array(trim(both '{}' from paragraphs_list), ','))
-FROM public.events2017_23;
-
-
-
--- Table: public.events
-
-DROP TABLE IF EXISTS public.events;
-
-SELECT event_id, n_paragraphs, n_articles, hazard_type, hazard_score, latitude, longitude, min_lat, max_lat, min_lon, max_lon, event_time, start_time, end_time, duration, n_languages, n_source_countries, n_domains, mostfreq_death, n_mostfreq_death, time_mostfreq_death, median_death, mostfreq_homeless, n_mostfreq_homeless, time_mostfreq_homeless, median_homeless, mostfreq_injured, n_mostfreq_injured, time_mostfreq_injured, median_injured, mostfreq_affected, n_mostfreq_affected, time_mostfreq_affected, median_affected, mostfreq_missing, n_mostfreq_missing, time_mostfreq_missing, median_missing, mostfreq_evacuated, n_mostfreq_evacuated, time_mostfreq_evacuated, median_evacuated, geom, primary_key, country_found
-INTO events
-FROM public.events2017_23;
 
 -- Index: events_geom_idx
 
@@ -328,7 +72,37 @@ CREATE INDEX IF NOT EXISTS events_geom_idx
     WITH (buffering=auto)
     TABLESPACE pg_default;
 
-ALTER TABLE events ADD PRIMARY KEY (primary_key);
+COPY events(event_id, paragraphs_list, articles_list, n_paragraphs, n_articles, hazard_type, hazard_score, latitude, longitude, min_lat, max_lat, min_lon, max_lon, event_time, start_time, end_time, duration, n_languages, n_source_countries, n_domains, median_death, median_injured, median_affected)
+FROM 'C:/Mailys/data/hazminer/S20170101000000_E20240101000000_GDELT_Events_v3_HazViewer.csv'
+DELIMITER ',' 
+CSV HEADER
+QUOTE '"';
+
+UPDATE events SET wkt=concat('POINT (',longitude,' ',latitude,')');
+UPDATE events SET geom=ST_GeomFromText(wkt);
+UPDATE events SET country_found = c.admin FROM countries c WHERE ST_Contains(c.geom, events.geom);
+
+UPDATE events
+SET paragraphs_list = (
+  SELECT ARRAY(
+    SELECT DISTINCT elem
+    FROM UNNEST(string_to_array(regexp_replace(paragraphs_list,'''|\(|\)|\s','','g'),',')::varchar[]) AS elem
+  )
+);
+UPDATE events
+SET articles_list = (
+  SELECT ARRAY(
+    SELECT DISTINCT elem
+    FROM UNNEST(string_to_array(regexp_replace(articles_list,'''|\(|\)|\s','','g'),',')::varchar[]) AS elem
+  )
+);
+
+UPDATE events SET n_paragraphs =  array_length(string_to_array(paragraphs_list, ','), 1);
+UPDATE events SET n_articles =  array_length(string_to_array(articles_list, ','), 1);
+
+ALTER TABLE events DROP COLUMN paragraphs_list;
+ALTER TABLE events DROP COLUMN articles_list;
+ALTER TABLE events DROP COLUMN wkt;
 
 
 
@@ -336,10 +110,40 @@ ALTER TABLE events ADD PRIMARY KEY (primary_key);
 
 DROP TABLE IF EXISTS public.paragraphs;
 
-SELECT article_id, title, extracted_text, paragraph_time, article_language, source_country, domain_url, paragraph_id, original_text, disaster_label, disaster_score, hazard_type, hazard_type_score, nb_death, score_death, answer_death, nb_homeless, score_homeless, answer_homeless, nb_injured, score_injured, answer_injured, nb_affected, score_affected, answer_affected, nb_missing, score_missing, answer_missing, nb_evacuated, score_evacuated, answer_evacuated, publication_time, extracted_location, ner_score, latitude, longitude, std_dev, min_lat, max_lat, min_lon, max_lon, n_locations, nb_death_min, nb_death_max, nb_homeless_min, nb_homeless_max, nb_injured_min, nb_injured_max, nb_affected_min ,nb_affected_max, nb_missing_min, nb_missing_max, nb_evacuated_min, nb_evacuated_max, continent, country, population_density, geom, primary_key, country_found
-INTO paragraphs
-FROM public.paragraphs2017_23;
+CREATE TABLE IF NOT EXISTS public.paragraphs
+(
+    title character varying COLLATE pg_catalog."default",
+    paragraph_time timestamp without time zone,
+    article_language character varying COLLATE pg_catalog."default",
+    paragraph_id character varying COLLATE pg_catalog."default",
+    hazard_type character varying COLLATE pg_catalog."default",
+    nb_death real,
+    nb_injured real,
+    nb_affected real,
+    publication_time timestamp without time zone,
+    latitude real,
+    longitude real,
+    std_dev real,
+    min_lat real,
+    max_lat real,
+    min_lon real,
+    max_lon real,
+    source_country character varying COLLATE pg_catalog."default",
+    domain_url character varying COLLATE pg_catalog."default",
+    places_names character varying COLLATE pg_catalog."default",
+    event_id character varying COLLATE pg_catalog."default",
+    wkt character varying COLLATE pg_catalog."default",
+    geom geometry(Point,4326),
+    primary_key integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    country_found character varying COLLATE pg_catalog."default",
+    CONSTRAINT paragraphs_pkey PRIMARY KEY (primary_key)
+)
 
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public.paragraphs
+    OWNER to postgres;
+	
 -- Index: paragraphs_geom_idx
 
 DROP INDEX IF EXISTS public.paragraphs_geom_idx;
@@ -348,6 +152,15 @@ CREATE INDEX IF NOT EXISTS paragraphs_geom_idx
     ON public.paragraphs USING gist
     (geom)
     WITH (buffering=auto)
+    TABLESPACE pg_default;
+	
+-- Index: paragraphs_event_id_idx
+
+DROP INDEX IF EXISTS public.paragraphs_event_id_idx;
+
+CREATE INDEX IF NOT EXISTS paragraphs_event_id_idx
+    ON public.paragraphs USING btree
+    (event_id ASC NULLS LAST)
     TABLESPACE pg_default;
 
 -- Index: paragraphs_paragraph_id_idx
@@ -359,49 +172,59 @@ CREATE INDEX IF NOT EXISTS paragraphs_paragraph_id_idx
     (paragraph_id ASC NULLS LAST)
     TABLESPACE pg_default;
 
-ALTER TABLE paragraphs ADD PRIMARY KEY (primary_key);
+COPY paragraphs(title, paragraph_time, article_language, paragraph_id, hazard_type, nb_death, nb_injured, nb_affected, publication_time, latitude, longitude, std_dev, min_lat, max_lat, min_lon, max_lon, source_country, domain_url, places_names, event_id)
+FROM 'C:/Mailys/data/hazminer/S20170101000000_E20240101000000_GDELT_Paragraphs_v3_HazViewer.csv'
+DELIMITER ',' 
+CSV HEADER
+QUOTE '"';
 
+DELETE FROM paragraphs WHERE event_id IS NULL;
+UPDATE paragraphs SET wkt=concat('POINT (',longitude,' ',latitude,')');
+UPDATE paragraphs SET geom=ST_GeomFromText(wkt);
+UPDATE paragraphs SET country_found = c.admin FROM countries c WHERE ST_Contains(c.geom, paragraphs.geom);
 
+DROP TABLE IF EXISTS public.paragraphs_clean;
 
--- Materialized view : public.vue_paragraphs_pg
+CREATE TABLE IF NOT EXISTS paragraphs_clean AS
+SELECT DISTINCT ON (paragraph_id) *
+FROM paragraphs
+ORDER BY paragraph_id, primary_key;
 
-DROP MATERIALIZED VIEW IF EXISTS vue_paragraphs_pg;
+DROP TABLE IF EXISTS paragraphs;
 
-CREATE MATERIALIZED VIEW IF NOT EXISTS vue_paragraphs_pg AS
-SELECT 
-    (p.paragraph_id || '_' || ep.event_id) AS composite_id, ep.event_id, p.*
-FROM 
-    paragraphs p
-JOIN 
-    event_paragraphs ep ON p.paragraph_id = ep.paragraph_id;
+ALTER TABLE paragraphs_clean
+RENAME TO paragraphs;
 
--- Index: vue_paragraphs_pg_composite_id_idx
+-- Index: paragraphs_geom_idx
 
-DROP INDEX IF EXISTS public.vue_paragraphs_pg_composite_id_idx;
+DROP INDEX IF EXISTS public.paragraphs_geom_idx;
 
-CREATE UNIQUE INDEX IF NOT EXISTS vue_paragraphs_pg_composite_id_idx
-    ON public.vue_paragraphs_pg USING btree
-    (composite_id ASC NULLS LAST)
-    TABLESPACE pg_default;
-
--- Index: vue_paragraphs_pg_geom_idx
-
-DROP INDEX IF EXISTS public.vue_paragraphs_pg_geom_idx;
-
-CREATE INDEX IF NOT EXISTS vue_paragraphs_pg_geom_idx
-    ON public.vue_paragraphs_pg USING gist
+CREATE INDEX IF NOT EXISTS paragraphs_geom_idx
+    ON public.paragraphs USING gist
     (geom)
     WITH (buffering=auto)
     TABLESPACE pg_default;
+	
+-- Index: paragraphs_event_id_idx
 
--- Index: vue_paragraphs_pg_event_id_idx
+DROP INDEX IF EXISTS public.paragraphs_event_id_idx;
 
-DROP INDEX IF EXISTS public.vue_paragraphs_pg_event_id_idx;
-
-CREATE INDEX IF NOT EXISTS vue_paragraphs_pg_event_id_idx
-    ON public.vue_paragraphs_pg USING btree
+CREATE INDEX IF NOT EXISTS paragraphs_event_id_idx
+    ON public.paragraphs USING btree
     (event_id ASC NULLS LAST)
     TABLESPACE pg_default;
+
+-- Index: paragraphs_paragraph_id_idx
+
+DROP INDEX IF EXISTS public.paragraphs_paragraph_id_idx;
+
+CREATE INDEX IF NOT EXISTS paragraphs_paragraph_id_idx
+    ON public.paragraphs USING btree
+    (paragraph_id ASC NULLS LAST)
+    TABLESPACE pg_default;
+
+ALTER TABLE paragraphs DROP COLUMN wkt;
+ALTER TABLE paragraphs ADD PRIMARY KEY (primary_key);
 
 
 
@@ -766,3 +589,7 @@ ALTER TABLE citizen_observer DROP COLUMN landslide_react_signes_1;
 
 UPDATE citizen_observer SET landslide_cause_habitants = REPLACE(landslide_cause_habitants,'une autre cause',landslide_cause_habitants_1) WHERE landslide_cause_habitants_1 IS NOT NULL;
 ALTER TABLE citizen_observer DROP COLUMN landslide_cause_habitants_1;
+
+ALTER TABLE citizen_observer DROP COLUMN wkt;
+ALTER TABLE citizen_observer DROP COLUMN today;
+ALTER TABLE citizen_observer DROP COLUMN validation_status;
