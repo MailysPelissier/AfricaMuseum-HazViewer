@@ -37,53 +37,31 @@ Vue.createApp({
             // Propriétés localisations des évènements
             event_location_properties: ["latitude", "longitude", "min_lat", "max_lat", "min_lon", "max_lon"],
             event_location_properties_title: ["Latitude", "Longitude", "Minimum latitude", "Maximum latitude", "Minimum longitude", "Maximum longitude"],
-            // Propriétés statistiques des évènements (souvent null)
-            event_number_properties: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", 
-                "time_mostfreq_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "median_injured", "mostfreq_affected", 
-                "n_mostfreq_affected", "time_mostfreq_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "median_missing", 
-                "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "median_evacuated"],
-            event_number_properties_title: ["Most frequent death", "Number of most frequent death", "Time of most frequent death", "Median death", 
-                "Most frequent homeless", "Number of most frequent homeless", "Time of most frequent homeless", "Median homeless", "Most frequent injured", 
-                "Number of most frequent injured", "Time of most frequent injured", "Median injured", "Most frequent affected", "Number of most frequent affected", 
-                "Time of most frequent affected", "Median affected", "Most frequent missing", "Number of most frequent missing",  "Time of most frequent missing", 
-                "Median missing", "Most frequent evacuated", "Number of most frequent evacuated", "Time of most frequent evacuated", "Median evacuated"],
             // Propriétés des évènements à télécharger
             event_download_properties: ["event_id", "n_paragraphs", "n_articles", "hazard_type", "hazard_score", "latitude", "longitude", "min_lat", "max_lat", 
-                "min_lon", "max_lon", "event_time", "start_time", "end_time", "duration", "n_languages", "n_source_countries", "n_domains", "mostfreq_death", 
-                "n_mostfreq_death", "time_mostfreq_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "median_homeless",
-                "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", 
-                "time_mostfreq_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "median_missing", "mostfreq_evacuated", 
-                "n_mostfreq_evacuated", "time_mostfreq_evacuated", "median_evacuated", "country_found"],
+                "min_lon", "max_lon", "event_time", "start_time", "end_time", "duration", "n_languages", "n_source_countries", "n_domains", "median_death", "median_injured", 
+                "median_affected", "country_found"],
             // Propriétés principales des paragraphes
-            paragraph_main_properties: ["title", "hazard_type", "publication_time", "paragraph_time", "nb_death", "nb_injured", "nb_affected", "article_language"],
+            paragraph_main_properties: ["title", "hazard_type", "publication_time", "paragraph_time", "nb_death", "nb_injured", "nb_affected", "article_language", 
+                "source_country", "domain_url"],
             paragraph_main_properties_title: ["Title", "Hazard type", "Publication time", "Paragraph time", "Number of death", "Number of injured", 
-                "Number of affected", "Article language"],
-            // Autres propriétés des paragraphes
-            paragraph_other_properties: ["extracted_text", "original_text", "country", "country_found", "continent", "population_density", "source_country", 
-                "domain_url", "extracted_location", "ner_score", "n_locations", "disaster_label", "disaster_score", "hazard_type_score"],
+                "Number of affected", "Article language", "Article source country", "Domain url"],
             // Propriétés localisations des paragraphes
-            paragraph_location_properties: ["latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon"],
-            // Propriétés statistiques des paragraphes (souvent null)
-            paragraph_number_properties: ["nb_death", "score_death", "answer_death", "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", 
-                "score_injured", "answer_injured", "nb_affected", "score_affected", "answer_affected", "nb_missing","score_missing", "answer_missing", 
-                "nb_evacuated", "score_evacuated", "answer_evacuated", "nb_death_min","nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", 
-                "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min", "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max"],
+            paragraph_location_properties: ["latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "country_found", "places_names"],
+            paragraph_location_properties_title: ["Latitude", "Longitude", "Standard deviation", "Minimum latitude", "Maximum latitude", "Minimum longitude", 
+                "Maximum longitude", "Country", "Places names"],
             // Propriétés des paragraphes à télécharger
-            paragraph_download_properties: ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
-                "paragraph_id", "original_text", "disaster_label", "disaster_score", "hazard_type", "hazard_type_score", "nb_death", "score_death", "answer_death",
-                "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
-                "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
-                "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
-                "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
-                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found", "continent", "population_density"],
+            paragraph_download_properties: ["title", "paragraph_time", "article_language", "paragraph_id", "hazard_type", "nb_death", "nb_injured", "nb_affected", 
+                "publication_time", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "source_country", "domain_url", "places_names", 
+                "event_id", "country_found"],
             event_main_text: '', // Texte sur les évènements (haut droite de l'écran)
             event_other_text: '', // Texte sur les évènements, partie optionnelle autres (haut droite de l'écran)
             event_location_text: '', // Texte sur les évènements, partie optionnelle localisations (haut droite de l'écran)
-            event_number_text: '', // Texte sur les évènements, partie optionnelle statistiques (haut droite de l'écran)
-            paragraph_text: '', // Texte sur les paragraphes (bas droite de l'écran)
-            other_information: false, // Affichage des informations supplémentaires des évènements ou non (inactif par défaut)
-            location_information: false, // Affichage des informations de localisation des évènements ou non (inactif par défaut)
-            number_information: false, // Affichage des informations statistiques des évènements ou non (inactif par défaut)  
+            paragraph_main_text: '', // Texte sur les paragraphes (bas droite de l'écran)
+            paragraph_location_text: '', // Texte sur les paragraphes, partie optionnelle localisations (bas droite de l'écran)
+            event_other_information: false, // Affichage des informations supplémentaires des évènements ou non (inactif par défaut)
+            event_location_information: false, // Affichage des informations de localisation des évènements ou non (inactif par défaut)
+            paragraphs_location_information: false, // Affichage des informations de localisation des paragraphes ou non (inactif par défaut)
 
             // Affichage de la fenêtre des séries temporelles
             show_time_series_form: false,
@@ -179,7 +157,7 @@ Vue.createApp({
             this.event_main_text = '<ul>';
             this.event_other_text = '<ul>';
             this.event_location_text = '<ul>';
-            this.event_number_text = '<ul>';
+
             // Les propriétés principales s'affichent tout le temps
             for (let i = 0; i < this.event_main_properties.length; i++) {
                 if (["event_time", "start_time", "end_time"].includes(this.event_main_properties[i])) {
@@ -199,15 +177,10 @@ Vue.createApp({
             for (let i = 0; i < this.event_location_properties.length; i++) {
                 this.event_location_text += '<li>' + this.event_location_properties_title[i] + ': ' + feature.get(this.event_location_properties[i]) + '</li>';
             }
-            // Les propriétés statistiques se chargent, mais elles ne s'affichent que si le bouton Show more statistics est coché
-            // L'utilisateur peut choisir s'il veut afficher les informations statistiques ou non, son choix est conservé
-            for (let i = 0; i < this.event_number_properties.length; i++) {
-                this.event_number_text += '<li>' + this.event_number_properties_title[i] + ': ' + feature.get(this.event_number_properties[i]) + '</li>';
-            }
+
             this.event_main_text += '</ul>';
             this.event_other_text += '</ul>';
             this.event_location_text += '</ul>';
-            this.event_number_text += '</ul>';
 
             // Affichage contours de la zone de texte
             document.getElementById('event_data_zoom_event_scroll_box').style.border = "1px solid #ccc";
@@ -262,7 +235,7 @@ Vue.createApp({
 
             // Requête vers le Geoserver, on récupère seulement les paragraphes de l'évènement
             let cql_filter = `event_id = '${this.event_id}'`;
-            let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
+            let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs`
                 + `&outputFormat=application/json`  + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
             fetch(url)
             .then(result => result.json())
@@ -301,22 +274,35 @@ Vue.createApp({
             this.selected_paragraph = feature;
 
             // Chargement et affichage du texte sur le paragraphe
-            this.paragraph_text = '<ul>';
+            this.paragraph_main_text = '<ul>';
+            this.paragraph_location_text = '<ul>';
+
             // Les propriétés principales s'affichent tout le temps
             for (let i = 0; i < this.paragraph_main_properties.length; i++) {
                 if (["publication_time", "paragraph_time"].includes(this.paragraph_main_properties[i])) {
-                    this.paragraph_text += '<li>' + this.paragraph_main_properties_title[i] + ': ' 
+                    this.paragraph_main_text += '<li>' + this.paragraph_main_properties_title[i] + ': ' 
                     + feature.get(this.paragraph_main_properties[i]).substring(0,10) + '</li>';
                 }
+                if (["domain_url"].includes(this.paragraph_main_properties[i])) {
+                    this.paragraph_main_text += '<li>' + this.paragraph_main_properties_title[i] + ': '        
+                    + '<a href="' + feature.get(this.paragraph_main_properties[i]) + '" target="_blank">' + feature.get(this.paragraph_main_properties[i]) + '</a></li>';
+                }
                 else {
-                    this.paragraph_text += '<li>' + this.paragraph_main_properties_title[i] + ': ' 
+                    this.paragraph_main_text += '<li>' + this.paragraph_main_properties_title[i] + ': ' 
                     + feature.get(this.paragraph_main_properties[i]) + '</li>';
                 } 
             }
-            this.paragraph_text += '</ul>';
+            // Les propriétés sur la localisation se chargent, mais elles ne s'affichent que si le bouton Show location information est coché
+            // L'utilisateur peut choisir s'il veut afficher les informations sur la localisation ou non, son choix est conservé
+            for (let i = 0; i < this.paragraph_location_properties.length; i++) {
+                this.paragraph_location_text += '<li>' + this.paragraph_location_properties_title[i] + ': ' + feature.get(this.paragraph_location_properties[i]) + '</li>';
+            }
+
+            this.paragraph_main_text += '</ul>';
+            this.paragraph_location_text += '</ul>';
 
             // Affichage contours de la zone de texte
-            document.getElementById('paragraph_data_scroll_box').style.border = "1px solid #ccc";
+            this.$nextTick(() => {document.getElementById('paragraph_data_scroll_box').style.border = "1px solid #ccc";});
 
             // Couche du paragraphe sélectionné vidée
             this.selected_paragraph_layer.getSource().clear();
@@ -746,7 +732,7 @@ Vue.createApp({
 
             // Requête vers le Geoserver, on récupère seulement les paragraphes liés à l'évènement
             let cql_filter = `event_id = '${this.event_id}'`;
-            let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
+            let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs`
                 + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
             let result = await fetch(url);
             let json = await result.json();
@@ -1381,7 +1367,7 @@ Vue.createApp({
             else if (paragraph_features.length > 1) {
                 let html_popup = 'Choose the paragraph:<ul>'
                 paragraph_features.forEach((paragraph_feature, index) => {
-                    let line = paragraph_feature.get('article_id');
+                    let line = paragraph_feature.get('paragraph_id');
                     html_popup += `<li><a href="#" id="paragraph_link_${index}">${line}</a></li>`;
                 });
                 html_popup += '</ul>'

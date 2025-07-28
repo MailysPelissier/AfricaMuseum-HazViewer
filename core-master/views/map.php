@@ -739,11 +739,6 @@
                 </div>
                 <div id=event_location_data v-html="event_location_text_hazminer" v-if="location_information_hazminer"></div>
 
-                <div id="number_data_checkbox">
-                    <label>Show more statistics: <input type="checkbox" v-model="number_information_hazminer"></label>
-                </div>
-                <div id=event_number_data v-html="event_number_text_hazminer" v-if="number_information_hazminer"></div>
-
                 <div class="flexrow space_evenly padding">
                     <button id=more_info_button @click="more_infos_page">More information</button>
                 </div>

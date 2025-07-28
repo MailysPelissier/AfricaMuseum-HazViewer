@@ -131,27 +131,28 @@
             <div id=event_data v-html="event_main_text"></div>
 
             <div id="other_data_checkbox">
-                <label>Show other information: <input type="checkbox" v-model="other_information"></label>
+                <label>Show other information: <input type="checkbox" v-model="event_other_information"></label>
             </div>
-            <div id=event_other_data v-html="event_other_text" v-if="other_information"></div>
+            <div id=event_other_data v-html="event_other_text" v-if="event_other_information"></div>
 
             <div id="location_data_checkbox">
-                <label>Show location information: <input type="checkbox" v-model="location_information"></label>
+                <label>Show location information: <input type="checkbox" v-model="event_location_information"></label>
             </div>
-            <div id=event_location_data v-html="event_location_text" v-if="location_information"></div>
-
-            <div id="number_data_checkbox">
-                <label>Show more statistics: <input type="checkbox" v-model="number_information"></label>
-            </div>
-            <div id=event_number_data v-html="event_number_text" v-if="number_information"></div>
+            <div id=event_location_data v-html="event_location_text" v-if="event_location_information"></div>
 
         </div>
 
         <!-- Texte sur les paragraphes (en bas à droite) -->
-        <div id=paragraph_data_scroll_box class="scroll_box margin padding">
+        <div id=paragraph_data_scroll_box class="scroll_box margin padding" v-if="selected_paragraph">
 
-            <div id=paragraph_title  class=title v-if="selected_paragraph">Paragraph:</div>
-            <div id=paragraph_data v-html="paragraph_text" v-if="selected_paragraph"></div>
+            <div id=paragraph_title  class=title>Paragraph:</div>
+
+            <div id=paragraph_data v-html="paragraph_main_text"></div>
+
+            <div id="location_data_checkbox">
+                <label>Show location information: <input type="checkbox" v-model="paragraphs_location_information"></label>
+            </div>
+            <div id=paragraph_location_data v-html="paragraph_location_text" v-if="paragraphs_location_information"></div>
 
         </div>
 

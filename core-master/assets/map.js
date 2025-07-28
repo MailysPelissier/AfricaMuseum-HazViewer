@@ -29,8 +29,8 @@ Vue.createApp({
 
             // Affichage des propriétés des évènements (hazminer)
             // Propriétés principales des évènements
-            event_main_properties_hazminer: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected", 
-                "n_paragraphs", "n_articles"],
+            event_main_properties_hazminer: ["hazard_type", "event_time", "start_time", "end_time", "median_death", "median_injured", "median_affected", "n_paragraphs", 
+                "n_articles"],
             event_main_properties_hazminer_title: ["Hazard type", "Event time", "Start time", "End time", "Median death", "Median injured", "Median affected",
                 "Number of paragraphs", "Number of articles"],
             // Autres propriétés des évènements
@@ -39,46 +39,26 @@ Vue.createApp({
             // Propriétés de localisation des évènements
             event_location_properties_hazminer: ["latitude", "longitude", "min_lat", "max_lat", "min_lon", "max_lon"],
             event_location_properties_hazminer_title: ["Latitude", "Longitude", "Minimum latitude", "Maximum latitude", "Minimum longitude", "Maximum longitude"],
-            // Propriétés statistiques des évènements (souvent null)
-            event_number_properties_hazminer: ["mostfreq_death", "n_mostfreq_death", "time_mostfreq_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", 
-                "time_mostfreq_homeless", "median_homeless", "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "median_injured", "mostfreq_affected", 
-                "n_mostfreq_affected", "time_mostfreq_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "median_missing", 
-                "mostfreq_evacuated", "n_mostfreq_evacuated", "time_mostfreq_evacuated", "median_evacuated"],
-            event_number_properties_hazminer_title: ["Most frequent death", "Number of most frequent death", "Time of most frequent death", "Median death", 
-                "Most frequent homeless", "Number of most frequent homeless", "Time of most frequent homeless", "Median homeless", "Most frequent injured", 
-                "Number of most frequent injured", "Time of most frequent injured", "Median injured", "Most frequent affected", "Number of most frequent affected", 
-                "Time of most frequent affected", "Median affected", "Most frequent missing", "Number of most frequent missing",  "Time of most frequent missing", 
-                "Median missing", "Most frequent evacuated", "Number of most frequent evacuated", "Time of most frequent evacuated", "Median evacuated"],
             // Propriétés des évènements à télécharger
             event_download_properties_hazminer: ["event_id", "n_paragraphs", "n_articles", "hazard_type", "hazard_score", "latitude", "longitude", "min_lat", "max_lat", 
-                "min_lon", "max_lon", "event_time", "start_time", "end_time", "duration", "n_languages", "n_source_countries", "n_domains", "mostfreq_death", 
-                "n_mostfreq_death", "time_mostfreq_death", "median_death", "mostfreq_homeless", "n_mostfreq_homeless", "time_mostfreq_homeless", "median_homeless",
-                "mostfreq_injured", "n_mostfreq_injured", "time_mostfreq_injured", "median_injured", "mostfreq_affected", "n_mostfreq_affected", 
-                "time_mostfreq_affected", "median_affected", "mostfreq_missing", "n_mostfreq_missing", "time_mostfreq_missing", "median_missing", "mostfreq_evacuated", 
-                "n_mostfreq_evacuated", "time_mostfreq_evacuated", "median_evacuated", "country_found"],
+                "min_lon", "max_lon", "event_time", "start_time", "end_time", "duration", "n_languages", "n_source_countries", "n_domains", "median_death", "median_injured", 
+                "median_affected", "country_found"],
             // Propriétés des paragraphes à télécharger
-            paragraph_download_properties: ["article_id", "title", "extracted_text", "paragraph_time", "article_language", "source_country", "domain_url",
-                "paragraph_id", "original_text", "disaster_label", "disaster_score", "hazard_type", "hazard_type_score", "nb_death", "score_death", "answer_death",
-                "nb_homeless", "score_homeless", "answer_homeless", "nb_injured", "score_injured", "answer_injured", "nb_affected", "score_affected", 
-                "answer_affected", "nb_missing", "score_missing", "answer_missing", "nb_evacuated", "score_evacuated", "answer_evacuated", "publication_time",
-                "extracted_location", "ner_score", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "n_locations", "nb_death_min",
-                "nb_death_max", "nb_homeless_min", "nb_homeless_max", "nb_injured_min", "nb_injured_max", "nb_affected_min", "nb_affected_max", "nb_missing_min",
-                "nb_missing_max", "nb_evacuated_min", "nb_evacuated_max", "country", "country_found", "continent", "population_density"],
+            paragraph_download_properties: ["title", "paragraph_time", "article_language", "paragraph_id", "hazard_type", "nb_death", "nb_injured", "nb_affected", 
+                "publication_time", "latitude", "longitude", "std_dev", "min_lat", "max_lat", "min_lon", "max_lon", "source_country", "domain_url", "places_names", 
+                "event_id", "country_found"],
             event_main_text_hazminer: '', // Texte sur les évènements (droite de l'écran)
             event_other_text_hazminer: '', // Texte sur les évènements, partie optionnelle autres (droite de l'écran)
-            event_location_text_hazminer: '', // Texte sur les évènements, partie optionnelle localisations (droite de l'écran)
-            event_number_text_hazminer: '', // Texte sur les évènements, partie optionnelle statistiques (droite de l'écran)        
+            event_location_text_hazminer: '', // Texte sur les évènements, partie optionnelle localisations (droite de l'écran)      
             other_information_hazminer: false, // Affichage des informations supplémentaires des évènements ou non (inactif par défaut)
             location_information_hazminer: false, // Affichage des informations de localisation des évènements ou non (inactif par défaut)
-            number_information_hazminer: false, // Affichage des informations statistiques des évènements ou non (inactif par défaut)
 
             // Affichage des propriétés des évènements (citizen observer)
             // Propriétés principales des évènements
-            event_main_properties_co: ["type_event", "event_date", "pays", "province", "territoire", "nom_collectivite_commune", "nom_groupement_quartier", 
-                "noms_villages", "nb_morts", "nb_blesses", "nb_sansabris", "surprise_population"],
-            event_main_properties_co_title: ["Type d'évènement", "Date", "Pays", "Province", "Territoire", "Nom de la collectivité/commune", 
-                "Nom du groupement/quartier", "Noms des villages affectés", "Nombre de morts", "Nombre de blessés", "Nombre de sans abris", 
-                "Réaction de la population"],
+            event_main_properties_co: ["type_event", "event_date", "pays", "province", "territoire", "nom_collectivite_commune", "nom_groupement_quartier", "noms_villages", 
+                "nb_morts", "nb_blesses", "nb_sansabris", "surprise_population"],
+            event_main_properties_co_title: ["Type d'évènement", "Date", "Pays", "Province", "Territoire", "Nom de la collectivité/commune", "Nom du groupement/quartier", 
+                "Noms des villages affectés", "Nombre de morts", "Nombre de blessés", "Nombre de sans abris", "Réaction de la population"],
             // Propriétés de l'impact des évènements
             event_impact_properties_co: ["impact_betail", "impact_logement", "impact_routes", "impact_ponts", "impact_autres", "impact_coupures_elec", 
                 "impact_eau_consommation", "impact_cultures"],
@@ -206,41 +186,6 @@ Vue.createApp({
                 { label: '10000000 - 99999999', min: 10000000, max: 100000000, size: 11 },
                 { label: '100000000 - 999999999', min: 100000000, max: 1000000000, size: 13 },
                 { label: '≥ 1000000000', min: 1000000000, max: Infinity, size: 15 },
-            ],
-            size_homeless: [
-                { label: 'No value', min: null, max: null, size: 3 },
-                { label: '0 - 9', min: 0, max: 10, size: 4 },
-                { label: '10 - 99', min: 10, max: 100, size: 5 },
-                { label: '100 - 999', min: 100, max: 1000, size: 6 },
-                { label: '1000 - 9999', min: 1000, max: 10000, size: 7 },
-                { label: '10000 - 99999', min: 10000, max: 100000, size: 9 },
-                { label: '100000 - 999999', min: 100000, max: 1000000, size: 11 },
-                { label: '1000000 - 9999999', min: 1000000, max: 10000000, size: 13 },
-                { label: '≥ 10000000', min: 10000000, max: Infinity, size: 15 },
-            ],
-            size_missing: [
-                { label: 'No value', min: null, max: null, size: 3 },
-                { label: '0 - 9', min: 0, max: 10, size: 4 },
-                { label: '10 - 99', min: 10, max: 100, size: 5 },
-                { label: '100 - 999', min: 100, max: 1000, size: 6 },
-                { label: '1000 - 9999', min: 1000, max: 10000, size: 7 },
-                { label: '10000 - 99999', min: 10000, max: 100000, size: 8 },
-                { label: '100000 - 999999', min: 100000, max: 1000000, size: 9 },
-                { label: '1000000 - 9999999', min: 1000000, max: 10000000, size: 11 },
-                { label: '10000000 - 99999999', min: 10000000, max: 100000000, size: 13 },
-                { label: '≥ 100000000', min: 100000000, max: Infinity, size: 15 },
-            ],
-            size_evacuated: [
-                { label: 'No value', min: null, max: null, size: 3 },
-                { label: '0 - 9', min: 0, max: 10, size: 4 },
-                { label: '10 - 99', min: 10, max: 100, size: 5 },
-                { label: '100 - 999', min: 100, max: 1000, size: 6 },
-                { label: '1000 - 9999', min: 1000, max: 10000, size: 7 },
-                { label: '10000 - 99999', min: 10000, max: 100000, size: 8 },
-                { label: '100000 - 999999', min: 100000, max: 1000000, size: 9 },
-                { label: '1000000 - 9999999', min: 1000000, max: 10000000, size: 11 },
-                { label: '10000000 - 99999999', min: 10000000, max: 100000000, size: 13 },
-                { label: '≥ 100000000', min: 100000000, max: Infinity, size: 15 },
             ],
             size_popularity: 'n_articles',
             size_articles: [
@@ -393,9 +338,6 @@ Vue.createApp({
                 { id: 'median_death', label: 'Median death:', checkbox_null: true, min: 1, max: 35000, min_depart: 1, max_depart: 35000 },
                 { id: 'median_injured', label: 'Median injured:', checkbox_null: true, min: 1, max: 900000000, min_depart: 1, max_depart: 900000000 },
                 { id: 'median_affected', label: 'Median affected:', checkbox_null: true, min: 1, max: 1600000000, min_depart: 1, max_depart: 1600000000 },
-                { id: 'median_homeless', label: 'Median homeless:', checkbox_null: true, min: 1, max: 23000000, min_depart: 1, max_depart: 23000000 },
-                { id: 'median_missing', label: 'Median missing:', checkbox_null: true, min: 1, max: 140000000, min_depart: 1, max_depart: 140000000 },
-                { id: 'median_evacuated', label: 'Median evacuated:', checkbox_null: true, min: 1, max: 185000000, min_depart: 1, max_depart: 185000000 },
             ],
             // Filtre selon la popularité
             popularity_filter: [
@@ -473,9 +415,6 @@ Vue.createApp({
                 { id: 'median_death', label: 'Median death', table: this.size_death },
                 { id: 'median_injured', label: 'Median injured', table: this.size_injured },
                 { id: 'median_affected', label: 'Median affected', table: this.size_affected },
-                { id: 'median_homeless', label: 'Median homeless', table: this.size_homeless },
-                { id: 'median_missing', label: 'Median missing', table: this.size_missing },
-                { id: 'median_evacuated', label: 'Median evacuated', table: this.size_evacuated },
             ];
         },
 
@@ -632,7 +571,6 @@ Vue.createApp({
                 this.event_main_text_hazminer = '<ul>';
                 this.event_other_text_hazminer = '<ul>';
                 this.event_location_text_hazminer = '<ul>';
-                this.event_number_text_hazminer = '<ul>';
 
                 // Les propriétés principales s'affichent tout le temps
                 for (let i = 0; i < this.event_main_properties_hazminer.length; i++) {
@@ -657,17 +595,10 @@ Vue.createApp({
                     this.event_location_text_hazminer += '<li>' + this.event_location_properties_hazminer_title[i] + ': ' 
                     + feature.get(this.event_location_properties_hazminer[i]) + '</li>';
                 }
-                // Les propriétés statistiques se chargent, mais elles ne s'affichent que si le bouton Show more statistics est coché
-                // L'utilisateur peut choisir s'il veut afficher les informations statistiques ou non, son choix est conservé
-                for (let i = 0; i < this.event_number_properties_hazminer.length; i++) {
-                    this.event_number_text_hazminer += '<li>' + this.event_number_properties_hazminer_title[i] + ': ' 
-                    + feature.get(this.event_number_properties_hazminer[i]) + '</li>';
-                }
 
                 this.event_main_text_hazminer += '</ul>';
                 this.event_other_text_hazminer += '</ul>';
                 this.event_location_text_hazminer += '</ul>';
-                this.event_number_text_hazminer += '</ul>';
 
             }
 
@@ -2059,7 +1990,7 @@ Vue.createApp({
 
             // Requête vers le Geoserver, on récupère seulement les paragraphes liés à l'évènement
             let cql_filter = `event_id = '${event_id}'`
-            let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:vue_paragraphs_pg`
+            let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs`
                 + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter);
             let result = await fetch(url);
             let json = await result.json();
