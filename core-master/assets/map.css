@@ -10,7 +10,7 @@ html, body {
     height: 100%;
     display: grid;
     grid-template-columns: 3fr 1fr;
-    grid-template-rows: 10em 1fr 1fr 3em;
+    grid-template-rows: auto 1fr 1fr auto;
 }
 
 #map { 
@@ -24,9 +24,8 @@ html, body {
     grid-row: 1;
 }
 
-#hazviewer_logo {
-    max-width: 100%;
-    max-height: 100%;
+.logo img{
+    max-width: 90%;
 }
 
 #hazviewer_info {
@@ -224,6 +223,14 @@ ul {
 
 .title {
     font-weight: bold;
+}
+
+.underline {
+    text-decoration: underline;
+}
+
+.font_size_small {
+    font-size: small;
 }
 
 .margin {
