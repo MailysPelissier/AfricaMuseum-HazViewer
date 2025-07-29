@@ -283,7 +283,7 @@ Vue.createApp({
                     this.paragraph_main_text += '<li>' + this.paragraph_main_properties_title[i] + ': ' 
                     + feature.get(this.paragraph_main_properties[i]).substring(0,10) + '</li>';
                 }
-                if (["domain_url"].includes(this.paragraph_main_properties[i])) {
+                else if (["domain_url"].includes(this.paragraph_main_properties[i])) {
                     this.paragraph_main_text += '<li>' + this.paragraph_main_properties_title[i] + ': '        
                     + '<a href="' + feature.get(this.paragraph_main_properties[i]) + '" target="_blank">' + feature.get(this.paragraph_main_properties[i]) + '</a></li>';
                 }
@@ -1367,7 +1367,7 @@ Vue.createApp({
             else if (paragraph_features.length > 1) {
                 let html_popup = 'Choose the paragraph:<ul>'
                 paragraph_features.forEach((paragraph_feature, index) => {
-                    let line = paragraph_feature.get('paragraph_id');
+                    let line = paragraph_feature.get('publication_time').substring(0,10) + ' - ' + paragraph_feature.get('title');
                     html_popup += `<li><a href="#" id="paragraph_link_${index}">${line}</a></li>`;
                 });
                 html_popup += '</ul>'
