@@ -428,7 +428,7 @@
 
                     <div id="size_standard" class="flexrow padding" v-if="size_style ==='Standard'">
                         <div class="vertical_center">All events:</div>
-                        <input type="range" min="0" max="15" class="slider margin_left" v-model="size_standard">
+                        <input type="range" min="0" max="20" class="slider margin_left" v-model="size_standard">
                         <span class="margin_left">{{size_standard}}</span>
                     </div>
 
@@ -436,7 +436,7 @@
                         <div>
                             <div class="flexrow margin" v-for="step in size_duration">
                                 <div class="vertical_center">{{step.label}}:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <input type="range" min="0" max="20" class="slider margin_left" v-model="step.size">
                                 <span class="margin_left">{{step.size}}</span>
                             </div>
                         </div>
@@ -454,7 +454,7 @@
                         <div v-if="size_casualties === casualty.id">
                             <div class="flexrow margin" v-for="step in casualty.table">
                                 <div class="vertical_center">{{step.label}}:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <input type="range" min="0" max="20" class="slider margin_left" v-model="step.size">
                                 <span class="margin_left">{{step.size}}</span>
                             </div>
                         </div>
@@ -472,7 +472,7 @@
                         <div v-if="size_popularity === pop.id">
                             <div class="flexrow margin" v-for="step in pop.table">
                                 <div class="vertical_center">{{step.label}}:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <input type="range" min="0" max="20" class="slider margin_left" v-model="step.size">
                                 <span class="margin_left">{{step.size}}</span>
                             </div>
                         </div>
@@ -563,7 +563,7 @@
 
                     <div id="taille_standard" class="flexrow padding" v-if="style_taille ==='Standard'">
                         <div class="vertical_center">Tous les évènements:</div>
-                        <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_standard">
+                        <input type="range" min="0" max="20" class="slider margin_left" v-model="taille_standard">
                         <span class="margin_left">{{taille_standard}}</span>
                     </div>
 
@@ -579,7 +579,7 @@
                         <div v-if="taille_impact_humain === impact.id">
                             <div class="flexrow margin" v-for="step in impact.table">
                                 <div class="vertical_center">{{step.label}}:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="step.size">
+                                <input type="range" min="0" max="20" class="slider margin_left" v-model="step.size">
                                 <span class="margin_left">{{step.size}}</span>
                             </div>
                         </div>
@@ -597,12 +597,12 @@
                         <div v-if="taille_autres_impacts === impact.id">
                             <div class="flexrow margin">
                                 <div class="vertical_center">Oui:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_oui">
+                                <input type="range" min="0" max="20" class="slider margin_left" v-model="taille_oui">
                                 <span class="margin_left">{{taille_oui}}</span>
                             </div>
                             <div class="flexrow margin">
                                 <div class="vertical_center">Non:</div>
-                                <input type="range" min="0" max="15" class="slider margin_left" v-model="taille_non">
+                                <input type="range" min="0" max="20" class="slider margin_left" v-model="taille_non">
                                 <span class="margin_left">{{taille_non}}</span>
                             </div>
                         </div>
