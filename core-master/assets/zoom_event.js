@@ -636,7 +636,6 @@ Vue.createApp({
                     toImageButtonOptions: { filename: filename },
                     displayModeBar: true,
                     modeBarButtonsToRemove: ['select2d', 'lasso2d', 'resetScale2d'],
-                    displaylogo: false,
                     responsive: true,
                 };
 

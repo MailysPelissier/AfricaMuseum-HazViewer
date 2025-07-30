@@ -69,7 +69,7 @@ Vue.createApp({
             event_location_properties_co_title: ["Latitude", "Longitude", "Données géoréférencées"],
             // Propriétés spécifiques des évènements, liés à certain types d'évènements
             event_landslide_properties_co: ["landslide_new_or_old", "landslide_react_signes", "landslide_apres", "landslide_cause_habitants"],
-            event_landslide_properties_co_title: ["Glissement de terrain", "Signes indiquant que la réactivitation pouvait se produire", 
+            event_landslide_properties_co_title: ["Glissement de terrain", "Signes indiquant que la réactivation pouvait se produire", 
                 "Le récent glissement de terrain s'est produit pendant ou juste après", "Cause selon les habitants"],
             event_inondation_properties_co: ["inondation_duree_jours", "inondation_apres"],
             event_inondation_properties_co_title: ["Durée (en jours)", "L'inondation est survenue pendant ou juste après"],

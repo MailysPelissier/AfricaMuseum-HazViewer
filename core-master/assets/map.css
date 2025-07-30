@@ -77,7 +77,6 @@ html, body {
     position: absolute; 
     background: white; 
     box-shadow: 0px 0px 10px rgba(0,0,0,0.3); 
-    max-width: 300px;
     white-space: nowrap;
 }
 
@@ -86,6 +85,7 @@ html, body {
     padding: 5px; 
     border-radius: 5px;
     max-height: 10em;
+    max-width: 300px;
 }
 
 .form {
