@@ -57,10 +57,9 @@ Autres outils analyse
 
 
 A faire :
-
-guide utilisateur : partie couches, reprendre à changer style 
-
+user guide partie 3
 bon user guide pdf
+
 Page hazminer information
 licence, avertissements, logos partenaires, copyright, citations (robots.txt)
 metadata : date maj data, infos générales, guides
