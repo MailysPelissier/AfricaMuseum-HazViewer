@@ -1650,7 +1650,7 @@ Vue.createApp({
                 // Message d'erreur si on veut télécharger des paragraphes et que trop d'évènements correspondent aux critères (>10000)
                 if (this.download_filter_p_hazminer || this.download_filter_e_p_hazminer) {
                     if (nb_visible_events > 10000) {
-                        alert("To many events, use more filters!");
+                        alert("To many events, use more filters!\nThe number of events is limited to 10000 to avoid the paragraphs.csv file being too large.");
                         return;
                     }
                 }
