@@ -12,6 +12,9 @@ Adaptation données co
 Adaptation au site du musée (PROCHE)
 edit.africamuseum.be/geoserver
 
+geoserver 2.27.1
+PostgreSQL 17.4.1
+
 
 
 Data hazminer:
@@ -39,7 +42,7 @@ flatpickr (calendriers)
 layerswitcher
 dayjs (dates ne dépendent pas du navigateur)
 plotly (graphes séries temporelles)
-
+marked (lire .md)
 
 
 Ouverture / prolongement :
@@ -57,12 +60,8 @@ Autres outils analyse
 
 
 A faire :
-user guide partie 3
-bon user guide pdf
-
-Page hazminer information
-licence, avertissements, logos partenaires, copyright, citations (robots.txt)
-metadata : date maj data, infos générales, guides
 
 GitHub georiska
 ICT
+
+data: raccourci sur le bureau (C:\Mailys\data)
