@@ -9,6 +9,12 @@
 </head>
 
 <body>
-    <p>Text</p>
+
+    <!-- Affichage du contenu du fichier HazViewer_Information_Notice.md -->
+    <div id="markdown-container" class="container mt-5"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="assets/hazviewer_info.js"></script>
+    
 </body>
 </html>

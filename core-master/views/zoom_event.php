@@ -104,7 +104,7 @@
             <div id="landslide_susceptibility_legend" class="popup landslide_susceptibility_legend" v-if="landslide_susceptibility_legend">
                 <p>Landslide susceptibility</p>
                 <div class=flexrow>
-                    <img id="legend" src="assets/legend_landslide_susceptibility.png" />
+                    <img id="legend" src="assets/images/legend_landslide_susceptibility.png" />
                     <div class="flexcolumn space_evenly margin_left">    
                         <div>Very high</div>
                         <div>High</div>
@@ -119,8 +119,11 @@
         </div>
 
         <!-- Logo hazviewer -->
-        <div id=hazviewer_title class="logo flexrow space_evenly margin">
-            <img id="hazviewer_logo" src="assets/logo_hazviewer.png">
+        <div id=hazviewer_title class="margin">
+            <div class="logo flexrow space_evenly">
+                <img id="hazviewer_logo" src="assets/images/logo_hazviewer.png">
+            </div>
+            <div class="font_size_small text_center">WebGIS tool to interactively explore databases of impactful natural hazards</div>
         </div>
 
         <!-- Texte sur les évènements (en haut à droite) -->
@@ -171,7 +174,7 @@
                 HazViewer is a joint creation of the Royal Museum for Central Africa and the Vrije Universiteit Brussel (Belgium).<br>
                 Before using HazViewer, please read carefully the information provided on <a href="/hazviewer_info" target="_blank">this page</a>. 
                 It contains the key descriptions of the tool and the associated databases, including the legal aspects and the references needed for a proper citation.<br>
-                The user guide of HazViewer is <a href="assets/user_guide.pdf" target="_blank">available here</a>.<br><br>
+                The user guide of HazViewer is <a href="assets/doc/user_guide.pdf" target="_blank">available here</a>.<br><br>
                 © <a href="https://georiska.africamuseum.be/" target="_blank">Royal Museum for Central Africa</a> / 
                 <a href="https://cgis.research.vub.be/" target="_blank">Vrije Universiteit Brussel</a>, 2025
             </div>
