@@ -1,24 +1,29 @@
+Paramètres de PostgreSQL (par défaut) :
 PostgreSQL path : C:\Program Files\PostgreSQL\17
 password : password
 port : 5432
 
+
+Créer l'extension PostGIS :
+Dans pgadmin, copier la ligne :
 create extension POSTGIS;
 
-Ajouter couche pays : ne_10m_admin_0_countries.shp (Natural Earth)
 
-Ajouter dans pg Admin :
-dans l'invite de commande : 
+Ajouter la couche countries (ne_10m_admin_0_countries.shp (Natural Earth)) :
+Dans l'invite de commande, copier les deux lignes : 
 cd C:\Program Files\PostgreSQL\17\bin
 shp2pgsql -s 4326 -c -D -i -I C:\Mailys\data\countries\ne_10m_admin_0_countries.shp countries | psql -h localhost -U postgres -d webGIS
+avec C:\Program Files\PostgreSQL\17\bin le chemin vers le fichier bin de PostgreSQL, C:\Mailys\data\countries\ne_10m_admin_0_countries.shp le chemin vers le fichier shapefile des pays, webGIS le nom de la database
 
 
-
-Tables :
+Il y a 4 tables créées lors du processus (hors spatial ref sys (PostGIS) et countries) :
 - Table events
 - Table paragraphs
-- Table citizen_observer coord territoires
+- Table citizen_observer_coord_territoires
 - Table citizen_observer
-
+Pour créer les tables, il suffit de copier coller les lignes ci dessous dans pgadmin, en adaptant le chemin d'accès aux données (pour l'instant C:/Mailys/data/...)
+Dans les étapes suivantes, seules les tables events, paragraphs et citizen_observer seront utilisées.
+La table citizen_observer_coord_territoires est une table intermédiaire.
 
 
 -- Table: public.events

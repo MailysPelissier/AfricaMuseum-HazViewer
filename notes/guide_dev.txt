@@ -1,0 +1,17 @@
+Données :
+Les données sont en format csv de base, puis sous forme de tables sql, qui sont appelées par geoserver.
+csv -> créer tables (voir pgadmin.txt)
+tables -> geoserver (soit repartir de l'étape précédente, soit des tables .sql (events.sql, paragraphs.sql, citizen_observer.sql)
+
+Code :
+fonctionnement des fonctions en gros
+chemins geoserver
+frameworks
+
+requirement
+Geoserver v2.27.1
+
+overleaf : guide utilisateur
+
+où modifier la notice / guide utilisateur (où les remettre)
+
