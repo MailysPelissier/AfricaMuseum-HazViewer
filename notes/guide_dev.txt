@@ -1,17 +1,158 @@
+Read me (coté développement)
+Sommaire : données, code, guide utilisateur
+
 Données :
 Les données sont en format csv de base, puis sous forme de tables sql, qui sont appelées par geoserver.
+1re étape :
 csv -> créer tables (voir pgadmin.txt)
-tables -> geoserver (soit repartir de l'étape précédente, soit des tables .sql (events.sql, paragraphs.sql, citizen_observer.sql)
+2e étape :
+tables -> geoserver (soit repartir de l'étape précédente, soit des fichiers des tables .sql (events.sql, paragraphs.sql, citizen_observer.sql) (voir config_geoserver.txt)
+
 
 Code :
-fonctionnement des fonctions en gros
-chemins geoserver
-frameworks
 
-requirement
-Geoserver v2.27.1
+Le code de HazViewer est contenu dans le dossier core-master, dans 8 fichiers (le reste des fichiers est lié à l'utilisation du Framework Flight) :
+- index.php
+- views/map.php
+- views/zoom_event.php
+- views/hazviewer_info.php
+- assets/map.js
+- assets/zoom_event.js
+- assets/hazviewer_info.js
+- assets/map.css
+La couche des pays utilisée est stockée en local :
+- assets/layers/countries50m.json
+Les images s'affichant sur la page (logo, légende) sont stockées en local :
+- assets/images/legend_landslide_susceptibility.png
+- assets/images/logo_hazviewer.png
+Les pages donnant des informations supplémentaires sur HazViewer (texte markdown, guide utilisateur) sont également stockées en local :
+- assets/doc/HazViewer_Information_Notice.md
+- assets/doc/user_guide.pdf
 
-overleaf : guide utilisateur
+Fonctionnement :
 
-où modifier la notice / guide utilisateur (où les remettre)
+Voir le guide utilisateur pour comprendre les différentes pages et fonctions principales de HazViewer
+Voir la documentation du code pour comprendre le fonctionnement du code
+
+Frameworks utilisés :
+Flight (navigation entre les pages, index simplifié)
+vue.js (lien entre php et js)
+openlayers (gestion de la carte)
+bootstrap (style)
+flatpickr (calendriers)
+layerswitcher (gestionnaire de couches)
+dayjs (dates ne dépendent pas du navigateur)
+plotly (création de graphes)
+marked (lire fichier markdown)
+Les frameworks nécessaires à chaque page sont appelés dans les fichiers php.
+
+index.php permet d'accéder aux 3 pages selon l'url (à l'aide de Flight) :
+/ permet d'accéder à la carte globale (page principale)
+/event?event_id=20220904E27401CT20250704172929 (par exemple) permet d'accéder à la page dédiée à un évènement selon son identifiant
+/hazviewer_info permet d'accéder à la page donnant plus d'informations sur HazViewer
+
+map.php : page principale, utilise map.js et map.css
+liens en local :
+- image de la légende de la couche de susceptibilité des tremblements de terre : <img id="legend" src="assets/images/legend_landslide_susceptibility.png" /> (ligne 702)
+- image du logo HazViewer : <img id="hazviewer_logo" src="assets/images/logo_hazviewer.png"> (ligne 719)
+- guide utilisateur (pdf) : <a href="assets/doc/user_guide.pdf" target="_blank"> (ligne 783)
+aucun lien geoserver
+
+zoom_event.php : page dédiée à un évènement, utilise zoom_event.js et map.css
+liens en local :
+- image de la légende de la couche de susceptibilité des tremblements de terre : <img id="legend" src="assets/images/legend_landslide_susceptibility.png" /> (ligne 107)
+- image du logo HazViewer : <img id="hazviewer_logo" src="assets/images/logo_hazviewer.png"> (ligne 124)
+- guide utilisateur (pdf) : <a href="assets/doc/user_guide.pdf" target="_blank"> (ligne 177)
+aucun lien geoserver
+
+hazviewer_info.php : page donnant plus d'informations sur HazViewer, utilise hazviewer_info.js map.css
+aucun lien en local
+aucun lien geoserver
+
+map.js
+lien en local :
+- couche des pays : url: '../assets/layers/countries50m.json', (ligne 2356)
+liens geoserver :
+- // Permet de compter le nombre d'évènements par pays
+        // Pas utilisée
+        async count_nb_event_country() let url_n_events = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` + `&outputFormat=application/json` + `&resultType=hits` + `&CQL_FILTER=` + encodeURIComponent(cql_filter); (lignes 524, 525)
+-- // Téléchargement des données hazminer
+        async download_hazminer()
+url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
+                        + `&outputFormat=application/json`; 1563 1564
+url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
+                        + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter); 1567 1568
+-- // Download des données citizen observer
+        // Pas utilisée
+        // async download_co()
+url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer`
+        //             + `&outputFormat=application/json`; 1743 1744
+url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer`
+        //             + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter); 1747 1748
+-// Création du texte de téléchargement des paragraphes liés à un évènement (hazminer)
+        async create_paragraph_download_text(feature, paragraph_content_lines, seen_paragraph_id, source) {
+let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs`
+                + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter);1972 1973
+- source: new ol.source.TileWMS({
+                                url: 'http://localhost:8080/geoserver/webGIS/wms',
+                                params: {
+                                    'LAYERS': 'webGIS:landslide_susceptibility',
+                                    'TILED': true,
+                                    'VERSION': '1.1.1',
+                                    'FORMAT': 'image/png',
+                                    'CRS': 'EPSG:3857'
+                                },
+                                crossOrigin: 'anonymous',
+                                serverType: 'geoserver',
+                                transition: 0, 2316 2327
+- source: new ol.source.TileWMS({
+                                url: 'http://localhost:8080/geoserver/webGIS/wms',
+                                params: {
+                                    'LAYERS': 'webGIS:HydroRIVERS_flow5max',
+                                    'TILED': true,
+                                    'VERSION': '1.1.1',
+                                    'FORMAT': 'image/png',
+                                    'CRS': 'EPSG:3857'
+                                },
+                                crossOrigin: 'anonymous',
+                                serverType: 'geoserver',
+                                transition: 0, 2335 2346
+- url: function(extent) {
+                                    return `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events`
+                                        + `&outputFormat=application/json` + `&bbox=` + extent.join(',') + `,EPSG:3857`;
+                                }, 2403 2406
+- url: function(extent) {
+                                    return `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer`
+                                        + `&outputFormat=application/json` + `&bbox=` + extent.join(',') + `,EPSG:3857`;
+                                } 2416 2419
+
+
+zoom_event.js
+lien en local :
+- couche des pays : url: '../assets/layers/countries50m.json', (ligne 1129)
+
+
+hazviewer_info.js
+lien en local :
+- page d'information sur HazViewer : fetch('assets/doc/HazViewer_Information_Notice.md') (ligne 1)
+aucun lien geoserver
+
+map.css : feuille de style, utilisée pour les 3 pages
+
+Modifier le guide utilisateur
+Le guide utilisateur en format latex (créé avec Overleaf) est disponible (guide_utilisateur/guide_utilisateur_latex.txt).
+Les images se trouvent dans les dossiers guide_utilisateur/captures et guide_utilisateur/logos.
+Après modification, le guide utilisateur doit être renommé user_guide.pdf, et mis dans le dossier doc de cette manière : core-master/assets/doc/user_guide.pdf.
+
+
+Modifier la page d'information sur HazViewer
+La page d'information est créée à partir du fichier HazViewer_Information_Notice.md, disponible dans le dossier hazviewer_information_page.
+Après modification, la page d'information doit être renommée HazViewer_Information_Notice.md, et mise dans le dossier doc : core-master/assets/doc/HazViewer_Information_Notice.md.
+
+mail si questions
+
+GitHub georiska
+ICT
+
+data: raccourci sur le bureau (C:\Mailys\data)
 
