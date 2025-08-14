@@ -1,0 +1,113 @@
+map.php : page principale, utilise map.js et map.css
+liens en local :
+- image de la légende de la couche de susceptibilité des tremblements de terre : <img id="legend" src="assets/images/legend_landslide_susceptibility.png" /> (ligne 702)
+- image du logo HazViewer : <img id="hazviewer_logo" src="assets/images/logo_hazviewer.png"> (ligne 719)
+- guide utilisateur (pdf) : <a href="assets/doc/user_guide.pdf" target="_blank"> (ligne 783)
+aucun lien geoserver
+
+zoom_event.php : page dédiée à un évènement, utilise zoom_event.js et map.css
+liens en local :
+- image de la légende de la couche de susceptibilité des tremblements de terre : <img id="legend" src="assets/images/legend_landslide_susceptibility.png" /> (ligne 107)
+- image du logo HazViewer : <img id="hazviewer_logo" src="assets/images/logo_hazviewer.png"> (ligne 124)
+- guide utilisateur (pdf) : <a href="assets/doc/user_guide.pdf" target="_blank"> (ligne 177)
+aucun lien geoserver
+
+hazviewer_info.php : page donnant plus d'informations sur HazViewer, utilise hazviewer_info.js map.css
+aucun lien en local
+aucun lien geoserver
+
+map.js : script js de la page principale
+lien en local :
+- couche des pays : url: '../assets/layers/countries50m.json', (ligne 2356)
+liens geoserver :
+- fonction count_nb_event_country qui permet de compter le nombre d'évènements par pays (pas utilisée) :
+	- let url_n_events = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` + `&outputFormat=application/json` + `&resultType=hits` + `&CQL_FILTER=` + encodeURIComponent(cql_filter); (lignes 524 et 525)
+- fonction download_hazminer qui permet le téléchargement des données hazminer :
+	- url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` + `&outputFormat=application/json`; (lignes 1563 et 1564)
+	- url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter); (lignes 1567 et 1568)
+- fonction download_co qui permet le téléchargement des données citizen observer (pas utilisée) :
+	- url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer` + `&outputFormat=application/json`; (lignes 1743 et 1744)
+	- url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer` + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter); (lignes 1747 et 1748)
+- fonction create_paragraph_download_text qui crée le texte de téléchargement des paragraphes liés à un évènement (hazminer) :
+	- let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs` + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter); (lignes 1972 et 1973)
+- couche de susceptibilité des tremblements de terre : 
+	- source: new ol.source.TileWMS({
+	url: 'http://localhost:8080/geoserver/webGIS/wms',
+	params: {
+	    'LAYERS': 'webGIS:landslide_susceptibility',
+	    'TILED': true,
+	    'VERSION': '1.1.1',
+	    'FORMAT': 'image/png',
+	    'CRS': 'EPSG:3857'
+	},
+	crossOrigin: 'anonymous',
+	serverType: 'geoserver',
+	transition: 0,
+	}), (lignes 2316 à 2328)
+- couche des rivières :
+	- source: new ol.source.TileWMS({
+	url: 'http://localhost:8080/geoserver/webGIS/wms',
+	params: {
+	    'LAYERS': 'webGIS:HydroRIVERS_flow5max',
+	    'TILED': true,
+	    'VERSION': '1.1.1',
+	    'FORMAT': 'image/png',
+	    'CRS': 'EPSG:3857'
+	},
+	crossOrigin: 'anonymous',
+	serverType: 'geoserver',
+	transition: 0,
+	}), (lignes 2335 à 2347)
+- couche évènements hazminer (se remplit selon l'emprise de l'écran) :
+	- url: function(extent) {
+	    return `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` + `&outputFormat=application/json` + `&bbox=` + extent.join(',') + `,EPSG:3857`;
+	}, (lignes 2403 à 2406)
+- couche évènements citizen observer (se remplit selon l'emprise de l'écran) :
+	- url: function(extent) {
+	    return `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:citizen_observer` + `&outputFormat=application/json` + `&bbox=` + extent.join(',') + `,EPSG:3857`;
+	} (lignes 2416 à 2419)
+
+
+zoom_event.js : script js de la page dédiée à un évènement
+lien en local :
+- couche des pays : url: '../assets/layers/countries50m.json', (ligne 1129)
+liens geoserver :
+- fonction get_event qui permet de récupérer et afficher l'évènement à partir de son identifiant :
+	- let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:events` + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter); (lignes 119 et 120)
+- fonction get_paragraphs qui permet de récupérer et afficher les paragraphes correspondant à l'évènement :
+	- let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs` + `&outputFormat=application/json`  + `&CQL_FILTER=` + encodeURIComponent(cql_filter); (lignes 238 et 239)
+- fonction create_paragraph_download_text qui permet de créer le texte de téléchargement des paragraphes liés à un évènement :
+	- let url = `http://localhost:8080/geoserver/webGIS/ows?service=WFS&version=1.1.0&request=GetFeature&typeName=webGIS:paragraphs` + `&outputFormat=application/json` + `&CQL_FILTER=` + encodeURIComponent(cql_filter); (lignes 734 et 735)
+- couche de susceptibilité des tremblements de terre : 
+	- source: new ol.source.TileWMS({
+	url: 'http://localhost:8080/geoserver/webGIS/wms',
+	params: {
+	    'LAYERS': 'webGIS:landslide_susceptibility',
+	    'TILED': true,
+	    'VERSION': '1.1.1',
+	    'FORMAT': 'image/png',
+	    'CRS': 'EPSG:3857'
+	},
+	crossOrigin: 'anonymous',
+	serverType: 'geoserver',
+	transition: 0,
+	}), (lignes 1089 à 1101)
+- couche des rivières :
+	- source: new ol.source.TileWMS({
+	url: 'http://localhost:8080/geoserver/webGIS/wms',
+	params: {
+	    'LAYERS': 'webGIS:HydroRIVERS_flow5max',
+	    'TILED': true,
+	    'VERSION': '1.1.1',
+	    'FORMAT': 'image/png',
+	    'CRS': 'EPSG:3857'
+	},
+	crossOrigin: 'anonymous',
+	serverType: 'geoserver',
+	transition: 0,
+	}), (lignes 1108 à 1120)
+
+hazviewer_info.js : script js de la page donnant plus d'informations sur HazViewer
+lien en local :
+- page d'information sur HazViewer : fetch('assets/doc/HazViewer_Information_Notice.md') (ligne 1)
+aucun lien geoserver
