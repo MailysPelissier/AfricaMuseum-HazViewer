@@ -1,67 +1,20 @@
-Idées parties :
-- comment afficher paragraphs : comparatif vues
-- postgres (pg connect) vs geoserver
-- promesses vs appel global
-- format des données (wfs, wms, raster, vecteur)
+rapports/rapport_pluri + latex
+notes/idees_rapport
 
+Rapport :
 
-Parler de :
-pg admin, geoserver
-gestion des bdd
-Adaptation données co
-Adaptation au site du musée (PROCHE)
-edit.africamuseum.be/geoserver
+nombre de pages jury 
+hazminer HazMiner
+co pareil
 
-geoserver 2.27.1
-PostgreSQL 17.4.1
+remerciements
+résumé
+abstract
+RSE
+conclusion
 
+glossaire
+Chaque illustration (logo, tableau, schéma, figure, équation, image ou autre) doit avoir une LEGENDE, une SOURCE, de son auteur d’en disposer.
 
-
-Data hazminer:
-csv (2017/2023)
-articles en 58 langues
-LLM avec plusieurs filtres: expressions, types d'évènements
-Un article : un ou plusieurs pargraphes
-Events : paragraphs clusterisés par catastrophe, date, localisation extraite de l'article
-Paragraphes répétés pour plusieurs évènements de type différents (flood + landslide)
-Nombreuses données : donner chiffres
-les paragraphs sans lon/lat non utilisés -> pas reliés à un event
-un paragraph est maintenant relié à un seul évènement: plus besoin de table de jointure, de vue
-
-Données citizen observer:
-csv : réponses à un questionnaire : beaucoup de traitements (250 colonnes)
-
-Doc récapitulatif données (uml) ?
-
-Utilisation de :
-Flight
-vue.js
-openlayers
-bootstrap
-flatpickr (calendriers)
-layerswitcher
-dayjs (dates ne dépendent pas du navigateur)
-plotly (graphes séries temporelles)
-marked (lire .md)
-
-
-Ouverture / prolongement :
-Automatiser processus maj data (QGIS?)
-Ajout nouveau type data
-Autre moyens de stocker les données (elastic search, solr) 
-Couches supplémentaires (nominatim, précipitations, images satellites avant / après)
-Barre de recherche (par ville, pays)
-Légende dynamique
-Faire deux versions (version pro / classique)
-Généraliser time series sur la page principale (par pays / polygone / emprise) (events et paragraphs liés)
-Petites améliorations: (popup explication ?..., gros rond si plusieurs paragraphs, layout propriétés)
-Autres outils analyse
-
-
-
-A faire :
-
-GitHub georiska
-ICT
-
-data: raccourci sur le bureau (C:\Mailys\data)
+Annexes :
+modifier README
